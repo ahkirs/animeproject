@@ -1,4 +1,4 @@
-import type { EnCurso, Emision, Serie, Temporada } from './types'
+import type { DiaSemana, EnCurso, Programacion, Serie, Temporada } from './types'
 
 /* ============================================================
    CATÁLOGO SINTÉTICO
@@ -190,7 +190,7 @@ export const SERIES: Serie[] = [
       direccion: 'Gen Murakami',
       guion: 'Hana Oda',
       musica: 'Rei Katsuragi',
-      emision: 'Temporada completa',
+      emision: 'Viernes 19:00',
       origen: 'Original',
       audio: 'Japonés, español',
       subtitulos: '5 idiomas',
@@ -198,7 +198,8 @@ export const SERIES: Serie[] = [
     temporadas: [
       {
         numero: 1,
-        etiqueta: 'Temporada 1 · completa',
+        etiqueta: 'Temporada 1 · en emisión',
+        enEmision: true,
         episodios: [
           {
             numero: 1,
@@ -264,7 +265,7 @@ export const SERIES: Serie[] = [
       direccion: 'Sora Nishikawa',
       guion: 'Sora Nishikawa',
       musica: 'Yuu Hasegawa',
-      emision: 'Temporada completa',
+      emision: 'Sábados 00:30',
       origen: 'Manga (2019)',
       audio: 'Japonés, español',
       subtitulos: '5 idiomas',
@@ -272,7 +273,8 @@ export const SERIES: Serie[] = [
     temporadas: [
       {
         numero: 2,
-        etiqueta: 'Temporada 2 · completa',
+        etiqueta: 'Temporada 2 · en emisión',
+        enEmision: true,
         episodios: [
           {
             numero: 10,
@@ -469,7 +471,7 @@ export const SERIES: Serie[] = [
       direccion: 'Gen Murakami',
       guion: 'Aoi Terada',
       musica: 'Rei Katsuragi',
-      emision: 'Temporada completa',
+      emision: 'Jueves 21:30',
       origen: 'Novela (2016)',
       audio: 'Japonés',
       subtitulos: '5 idiomas',
@@ -477,7 +479,8 @@ export const SERIES: Serie[] = [
     temporadas: [
       {
         numero: 1,
-        etiqueta: 'Temporada 1 · completa',
+        etiqueta: 'Temporada 1 · en emisión',
+        enEmision: true,
         episodios: [
           {
             numero: 1,
@@ -533,7 +536,7 @@ export const SERIES: Serie[] = [
       direccion: 'Sora Nishikawa',
       guion: 'Hana Oda',
       musica: 'Yuu Hasegawa',
-      emision: 'Temporada completa',
+      emision: 'Martes 22:00',
       origen: 'Original',
       audio: 'Japonés, español',
       subtitulos: '5 idiomas',
@@ -541,7 +544,8 @@ export const SERIES: Serie[] = [
     temporadas: [
       {
         numero: 1,
-        etiqueta: 'Temporada 1 · completa',
+        etiqueta: 'Temporada 1 · en emisión',
+        enEmision: true,
         episodios: [
           {
             numero: 1,
@@ -678,55 +682,122 @@ export function rutaReproductor(serieId: string): string | undefined {
   return `/ver/${serie.id}/${entrada.temporada.numero}/${entrada.episodio.numero}`
 }
 
-/** Parrilla de emisión de la semana en curso. */
-export const EMISIONES: Emision[] = [
-  {
-    serieId: 'cielo-de-hierro',
-    serieTitulo: 'Cielo de Hierro',
-    diaCorto: 'Hoy',
-    diaNumero: '07',
-    hoy: true,
-    episodio: 'T2 E07',
-    tituloEpisodio: 'Lo que pesa el aire',
-    hora: '21:00',
-  },
-  {
-    serieId: 'cafe-yurei',
-    serieTitulo: 'Café Yūrei',
-    diaCorto: 'Sáb',
-    diaNumero: '08',
-    episodio: 'T1 E11',
-    tituloEpisodio: 'La cuenta de la casa',
-    hora: '18:30',
-  },
+/* ------------------------------------------------------------
+   PARRILLA DE EMISIÓN
+   Fuente única del calendario: la portada y la página /emision
+   leen de aquí. La semana de referencia de la maqueta es la del
+   viernes 7 de agosto de 2026.
+   ------------------------------------------------------------ */
+
+export const HOY: DiaSemana = 5 // viernes
+
+export const DIAS: { n: DiaSemana; nombre: string; corto: string }[] = [
+  { n: 0, nombre: 'Domingo', corto: 'Dom' },
+  { n: 1, nombre: 'Lunes', corto: 'Lun' },
+  { n: 2, nombre: 'Martes', corto: 'Mar' },
+  { n: 3, nombre: 'Miércoles', corto: 'Mié' },
+  { n: 4, nombre: 'Jueves', corto: 'Jue' },
+  { n: 5, nombre: 'Viernes', corto: 'Vie' },
+  { n: 6, nombre: 'Sábado', corto: 'Sáb' },
+]
+
+export const PARRILLA: Programacion[] = [
   {
     serieId: 'perros-de-neon',
-    serieTitulo: 'Los Perros de Neón',
-    diaCorto: 'Dom',
-    diaNumero: '09',
-    episodio: 'T3 E02',
-    tituloEpisodio: 'Nadie llama dos veces',
+    dia: 0,
+    fecha: '09',
     hora: '23:15',
+    proximoEpisodio: 2,
+    cuentaAtras: '2D 01H',
   },
   {
     serieId: 'jardin-de-las-cenizas',
-    serieTitulo: 'El Jardín de las Cenizas',
-    diaCorto: 'Lun',
-    diaNumero: '10',
-    episodio: 'T1 E04',
-    tituloEpisodio: 'Raíz amarga',
+    dia: 1,
+    fecha: '10',
     hora: '20:00',
+    proximoEpisodio: 4,
+    cuentaAtras: '2D 22H',
+  },
+  {
+    serieId: 'ciudad-vertical',
+    dia: 2,
+    fecha: '11',
+    hora: '22:00',
+    proximoEpisodio: 1,
+    cuentaAtras: '4D 00H',
   },
   {
     serieId: 'tren-de-medianoche',
-    serieTitulo: 'Tren de Medianoche a Sapporo',
-    diaCorto: 'Mié',
-    diaNumero: '12',
-    episodio: 'T1 E09',
-    tituloEpisodio: 'Andén cuatro',
+    dia: 3,
+    fecha: '12',
     hora: '22:45',
+    proximoEpisodio: 9,
+    cuentaAtras: '5D 00H',
+  },
+  {
+    serieId: 'la-espada-y-el-rio',
+    dia: 4,
+    fecha: '13',
+    hora: '21:30',
+    proximoEpisodio: 3,
+    cuentaAtras: '5D 23H',
+  },
+  {
+    serieId: 'kaiju-blues',
+    dia: 5,
+    fecha: '07',
+    hora: '19:00',
+    proximoEpisodio: 4,
+    cuentaAtras: '0D 00H',
+  },
+  {
+    serieId: 'cielo-de-hierro',
+    dia: 5,
+    fecha: '07',
+    hora: '21:00',
+    proximoEpisodio: 8,
+    cuentaAtras: '0D 02H',
+  },
+  {
+    serieId: 'cafe-yurei',
+    dia: 6,
+    fecha: '08',
+    hora: '18:30',
+    proximoEpisodio: 11,
+    cuentaAtras: '0D 23H',
+  },
+  {
+    serieId: 'noctambula',
+    dia: 6,
+    fecha: '08',
+    hora: '00:30',
+    proximoEpisodio: 13,
+    cuentaAtras: '1D 05H',
   },
 ]
+
+/** Emisiones de un día, ordenadas por hora. */
+export function parrillaDe(dia: DiaSemana): Programacion[] {
+  return PARRILLA.filter((p) => p.dia === dia).sort((a, b) =>
+    a.hora.localeCompare(b.hora),
+  )
+}
+
+/** Datos ya resueltos de una emisión: la serie y el título del episodio. */
+export function resolverEmision(p: Programacion) {
+  const serie = obtenerSerie(p.serieId)
+  const temporada = serie ? obtenerTemporada(serie) : undefined
+  const episodio = temporada?.episodios.find((e) => e.numero === p.proximoEpisodio)
+  return { serie, temporada, episodio }
+}
+
+/** Las próximas n emisiones a partir de hoy, para la tira de la portada. */
+export function proximasEmisiones(n = 5): Programacion[] {
+  const orden = (p: Programacion) => (p.dia - HOY + 7) % 7
+  return [...PARRILLA]
+    .sort((a, b) => orden(a) - orden(b) || a.hora.localeCompare(b.hora))
+    .slice(0, n)
+}
 
 /** Lo que el usuario dejó a medias. */
 export const EN_CURSO: EnCurso[] = [

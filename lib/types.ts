@@ -62,6 +62,24 @@ export interface FichaTecnica {
   subtitulos: string
 }
 
+/** 0 es domingo, como en Date.getDay(). */
+export type DiaSemana = 0 | 1 | 2 | 3 | 4 | 5 | 6
+
+/** Una emisión programada. La parrilla es una lista de estas. */
+export interface Programacion {
+  serieId: string
+  dia: DiaSemana
+  /** Día del mes, para la tira de la portada. */
+  fecha: string
+  /** Hora local de emisión, formato 24h. */
+  hora: string
+  /** Número del episodio que se emite a continuación. */
+  proximoEpisodio: number
+  /** Cuenta atrás hasta la emisión, p. ej. «6D 10H».
+   *  En la maqueta es texto fijo; con la API pasa a calcularse. */
+  cuentaAtras: string
+}
+
 export interface Serie {
   id: string
   titulo: string
@@ -83,18 +101,6 @@ export interface Serie {
   ficha?: FichaTecnica
   reparto?: Persona[]
   temporadas?: Temporada[]
-}
-
-/** Una fila de la parrilla semanal de emisión. */
-export interface Emision {
-  serieId: string
-  serieTitulo: string
-  diaCorto: string
-  diaNumero: string
-  hoy?: boolean
-  episodio: string
-  tituloEpisodio: string
-  hora: string
 }
 
 /** Una entrada de «Seguir viendo». */

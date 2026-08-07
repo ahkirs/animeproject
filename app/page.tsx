@@ -8,22 +8,27 @@ import FichaSerie, { Cartel } from '@/components/FichaSerie'
 import Datos, { Clasificacion, Nota } from '@/components/Datos'
 import { BotonEnlace, BotonIcono } from '@/components/Boton'
 import {
-  EMISIONES,
+  DIAS,
   EN_CURSO,
   GENEROS,
+  HOY,
   SERIES,
   SERIE_DESTACADA,
   episodioDeEntrada,
+  proximasEmisiones,
+  resolverEmision,
   rutaReproductor,
 } from '@/lib/catalogo'
 
 function CabezaSeccion({
   titulo,
   enlace,
+  href = '#',
   id,
 }: {
   titulo: string
   enlace?: string
+  href?: string
   id: string
 }) {
   return (
@@ -33,7 +38,7 @@ function CabezaSeccion({
       </h2>
       {enlace && (
         <Link
-          href="#"
+          href={href}
           className="group inline-flex shrink-0 items-center gap-[0.3rem] text-paso-1 font-semibold text-hueso-70 no-underline hover:text-ambar"
         >
           {enlace}
@@ -119,41 +124,52 @@ export default function Inicio() {
               id="t-semana"
               titulo="Se emite esta semana"
               enlace="Calendario completo"
+              href="/emision"
             />
             <div className="border-t border-borde">
-              {EMISIONES.map((e) => (
-                <Link
-                  key={e.diaNumero}
-                  href={rutaReproductor(e.serieId) ?? `/serie/${e.serieId}`}
-                  className="grid grid-cols-[7.5rem_1fr_auto] items-center gap-e3 border-b border-borde py-e3 no-underline transition-all duration-150 ease-sal hover:bg-sala-800 hover:pl-e2 max-[900px]:grid-cols-[4.5rem_1fr]"
-                >
-                  <span
-                    className={`text-paso-0 font-bold tracking-[0.1em] uppercase tabular-nums ${
-                      e.hoy ? 'text-ambar' : 'text-hueso-45'
-                    }`}
+              {proximasEmisiones().map((p) => {
+                const { serie, temporada, episodio } = resolverEmision(p)
+                if (!serie) return null
+                const esHoy = p.dia === HOY
+                const dia = DIAS.find((d) => d.n === p.dia)
+
+                return (
+                  <Link
+                    key={`${p.serieId}-${p.dia}`}
+                    href={rutaReproductor(p.serieId) ?? `/serie/${p.serieId}`}
+                    className="grid grid-cols-[7.5rem_1fr_auto] items-center gap-e3 border-b border-borde py-e3 no-underline transition-all duration-150 ease-sal hover:bg-sala-800 hover:pl-e2 max-[900px]:grid-cols-[4.5rem_1fr]"
                   >
-                    {e.diaCorto}
-                    <strong
-                      className={`mt-[0.2rem] block font-display text-paso-4 leading-none tracking-[-0.02em] max-[900px]:text-paso-3 ${
-                        e.hoy ? 'text-ambar' : 'text-hueso'
+                    <span
+                      className={`text-paso-0 font-bold tracking-[0.1em] uppercase tabular-nums ${
+                        esHoy ? 'text-ambar' : 'text-hueso-45'
                       }`}
                     >
-                      {e.diaNumero}
-                    </strong>
-                  </span>
+                      {esHoy ? 'Hoy' : dia?.corto}
+                      <strong
+                        className={`mt-[0.2rem] block font-display text-paso-4 leading-none tracking-[-0.02em] max-[900px]:text-paso-3 ${
+                          esHoy ? 'text-ambar' : 'text-hueso'
+                        }`}
+                      >
+                        {p.fecha}
+                      </strong>
+                    </span>
 
-                  <span>
-                    <h3 className="mb-[0.2rem] text-paso-3 font-semibold tracking-[-0.015em]">
-                      {e.serieTitulo} — {e.episodio}
-                    </h3>
-                    <p className="text-paso-1 text-hueso-45">«{e.tituloEpisodio}»</p>
-                  </span>
+                    <span>
+                      <h3 className="mb-[0.2rem] text-paso-3 font-semibold tracking-[-0.015em]">
+                        {serie.titulo} — T{temporada?.numero} E
+                        {String(p.proximoEpisodio).padStart(2, '0')}
+                      </h3>
+                      {episodio && (
+                        <p className="text-paso-1 text-hueso-45">«{episodio.titulo}»</p>
+                      )}
+                    </span>
 
-                  <span className="flex items-center gap-2 text-paso-1 font-semibold text-hueso-70 tabular-nums max-[900px]:col-start-2 max-[900px]:text-paso-0">
-                    {e.hora}
-                  </span>
-                </Link>
-              ))}
+                    <span className="flex items-center gap-2 text-paso-1 font-semibold text-hueso-70 tabular-nums max-[900px]:col-start-2 max-[900px]:text-paso-0">
+                      {p.hora}
+                    </span>
+                  </Link>
+                )
+              })}
             </div>
           </section>
 

@@ -7,7 +7,7 @@ const ENLACES: { id: Seccion; texto: string; href: string }[] = [
   { id: 'inicio', texto: 'Inicio', href: '/' },
   { id: 'series', texto: 'Series', href: '/serie/cielo-de-hierro' },
   { id: 'estrenos', texto: 'Estrenos', href: '/#estrenos' },
-  { id: 'emision', texto: 'Emisión', href: '/#semana' },
+  { id: 'emision', texto: 'Emisión', href: '/emision' },
   { id: 'generos', texto: 'Géneros', href: '/#generos' },
 ]
 

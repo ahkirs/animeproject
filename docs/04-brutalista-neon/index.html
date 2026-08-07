@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZONA 9 — Catálogo</title>
+<link rel="stylesheet" href="theme.css">
+<style>
+  /* ---------------- Portada ---------------- */
+
+  .portada {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    border: var(--borde);
+    box-shadow: var(--dura);
+    margin-block: var(--e4) var(--e6);
+    background: var(--hormigon-alto);
+  }
+
+  .portada-texto {
+    padding: var(--e4);
+    border-right: var(--borde);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--e4);
+    background: var(--lima);
+  }
+  .portada h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: var(--paso-6);
+    line-height: 0.86;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+  }
+  .portada .chapas { display: flex; flex-wrap: wrap; gap: var(--e1); margin-bottom: var(--e3); }
+  .portada .sinopsis {
+    font-size: var(--paso-3);
+    line-height: 1.45;
+    max-width: 36ch;
+    margin-top: var(--e3);
+  }
+  .portada-acciones { display: flex; flex-wrap: wrap; gap: var(--e2); align-items: center; }
+
+  .portada-arte { position: relative; overflow: hidden; min-height: 26rem; }
+  .portada-arte > svg { width: 100%; height: 100%; }
+
+  .placa-datos {
+    position: absolute;
+    left: 0; bottom: 0;
+    background: var(--negro);
+    color: var(--hormigon-alto);
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: var(--paso-0);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: var(--e2) var(--e3);
+    border-top: var(--borde);
+    border-right: var(--borde);
+    display: flex;
+    gap: var(--e3);
+    flex-wrap: wrap;
+  }
+  .placa-datos .lima { color: var(--lima); }
+
+  /* ---------------- Rejilla de bloques ---------------- */
+
+  .rejilla {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--e3);
+  }
+
+  .obra { text-decoration: none; display: block; transition: transform 0.14s var(--sal), box-shadow 0.14s var(--sal); }
+  .obra:hover, .obra:focus-visible { transform: translate(-3px, -3px); box-shadow: 9px 9px 0 var(--negro); }
+  .obra-pie { padding: var(--e2) var(--e3) var(--e3); }
+  .obra h3 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: var(--paso-3);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+  }
+  .obra .meta {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: var(--paso-0);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--negro-70);
+    margin-top: 0.3rem;
+    display: flex;
+    justify-content: space-between;
+    gap: var(--e2);
+  }
+
+  .g6 { grid-column: span 6; }
+  .g4 { grid-column: span 4; }
+  .g3 { grid-column: span 3; }
+  .g6 .lamina-b { aspect-ratio: 2 / 1; }
+  .g6 h3 { font-size: var(--paso-4); }
+
+  /* ---------------- Seguir viendo ---------------- */
+
+  .curso-rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--e3);
+  }
+  .curso {
+    display: grid;
+    grid-template-columns: 128px 1fr;
+    border: var(--borde);
+    background: var(--hormigon-alto);
+    box-shadow: var(--dura-corta);
+    text-decoration: none;
+    transition: transform 0.14s var(--sal), box-shadow 0.14s var(--sal);
+  }
+  .curso:hover { transform: translate(-3px, -3px); box-shadow: var(--dura); }
+  .curso-mini { border-right: var(--borde); overflow: hidden; }
+  .curso-mini svg { width: 100%; height: 100%; }
+  .curso-cuerpo { padding: var(--e2) var(--e3); display: flex; flex-direction: column; justify-content: center; }
+  .curso-cuerpo b {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: var(--paso-3);
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    display: block;
+  }
+  .curso-cuerpo .resto {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: var(--paso-0);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+  .medidor-b {
+    height: 10px;
+    border: var(--borde-fino);
+    background: var(--hormigon-hundido);
+    margin-top: var(--e2);
+  }
+  .medidor-b span { display: block; height: 100%; background: var(--naranja); }
+
+  /* ---------------- Parrilla ---------------- */
+
+  .parrilla-b {
+    width: 100%;
+    border-collapse: collapse;
+    border: var(--borde);
+    background: var(--hormigon-alto);
+    box-shadow: var(--dura);
+  }
+  .parrilla-b th {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: var(--paso-0);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    background: var(--negro);
+    color: var(--hormigon-alto);
+    padding: var(--e2) var(--e3);
+  }
+  .parrilla-b td { padding: var(--e3); border-top: var(--borde-fino); vertical-align: middle; }
+  .parrilla-b tr:hover td { background: var(--lima); }
+  .parrilla-b tr[data-hoy] td { background: var(--naranja); }
+  .parrilla-b tr[data-hoy]:hover td { background: var(--lima); }
+
+  .col-d { width: 8rem; }
+  .col-h { width: 6rem; text-align: right; }
+  .dia-b {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: var(--paso-4);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+  }
+  .dia-b small {
+    display: block;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: var(--paso-0);
+    letter-spacing: 0.08em;
+  }
+  .parrilla-b a.tit-b {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: var(--paso-3);
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+    text-decoration: none;
+    line-height: 1.1;
+    display: block;
+  }
+  .parrilla-b .sub-b { font-family: var(--mono); font-weight: 500; font-size: var(--paso-0); letter-spacing: 0.05em; margin-top: 0.2rem; }
+  .parrilla-b .hora-b { font-family: var(--display); font-weight: 800; font-size: var(--paso-4); letter-spacing: -0.04em; }
+
+  /* ---------------- Géneros ---------------- */
+
+  .zonas { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--e2); }
+  .zonas a {
+    border: var(--borde);
+    background: var(--hormigon-alto);
+    box-shadow: var(--dura-corta);
+    padding: var(--e3);
+    text-decoration: none;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: var(--paso-3);
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    line-height: 1.05;
+    transition: transform 0.12s var(--sal), box-shadow 0.12s var(--sal), background 0.12s var(--sal);
+  }
+  .zonas a:nth-child(3n+1):hover { background: var(--lima); }
+  .zonas a:nth-child(3n+2):hover { background: var(--naranja); }
+  .zonas a:nth-child(3n):hover { background: var(--azul); color: var(--hormigon-alto); }
+  .zonas a:hover { transform: translate(-3px, -3px); box-shadow: var(--dura); }
+  .zonas a span {
+    display: block;
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: var(--paso-0);
+    letter-spacing: 0.06em;
+    margin-top: 0.35rem;
+  }
+
+  @media (max-width: 1000px) {
+    .portada { grid-template-columns: 1fr; }
+    .portada-texto { border-right: 0; border-bottom: var(--borde); }
+    .portada-arte { min-height: 18rem; }
+    .g6 { grid-column: span 12; }
+    .g4 { grid-column: span 6; }
+    .g3 { grid-column: span 6; }
+  }
+  @media (max-width: 860px) {
+    .menu { display: none; }
+    .col-d { width: 5rem; }
+    .col-h { width: 4.5rem; }
+  }
+  @media (max-width: 560px) {
+    .buscador input { display: none; }
+    .buscador { padding: 0 var(--e2); }
+    .portada h1 { font-size: clamp(3rem, 15vw, 4.5rem); }
+    .g4, .g3 { grid-column: span 12; }
+    .portada-acciones .btn { flex: 1 1 auto; }
+    .parrilla-b td { padding: var(--e2); }
+  }
+</style>
+</head>
+<body>
+<!--
+THESIS: El catálogo es señalética de un recinto: bloques rotulados, filetes de 3px y campos de color que ocupan regiones enteras. Rechaza la cuadrícula flotante de carátulas con sombra suave.
+OWN-WORLD: Hormigón claro #e9e9e1, negro #0a0a0a en filetes de 3px, y tres campos saturados (azul #2b2bf0, lima #ccff00, naranja #ff3d17) usados a escala de página. Bricolage Grotesque en rótulos, Martian Mono en placas, sombra dura desplazada 6px.
+STORY: El visitante ve qué está puesto, qué dejó a medias y a qué hora se emite lo demás.
+FIRST VIEWPORT: Portada partida en dos bloques con filete de 3px: a la izquierda campo lima con el título a 8rem y las acciones, a la derecha la lámina con su placa de datos en negro.
+FORM: Rejilla de doce columnas con bloques de tamaño desigual, primera de la lista ordenada; dirección fijada por el usuario.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="saltar" href="#principal">Saltar al contenido</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-buscar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></symbol>
+    <symbol id="i-mas" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+
+    <symbol id="b-cielo" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="800" height="600" fill="#2b2bf0"/>
+      <circle cx="580" cy="180" r="130" fill="#ccff00"/>
+      <path d="M0 600V400l100-70 92 56 96-104 108 72 88-50 86 62 130-40h100v274z" fill="#0a0a0a"/>
+      <g fill="#0a0a0a">
+        <path d="M266 400V226l58-44 58 44v174z"/>
+        <rect x="296" y="264" width="56" height="34" fill="#ff3d17"/>
+        <path d="M324 400v92M266 442l58-36 58 36" stroke="#0a0a0a" stroke-width="18" fill="none"/>
+      </g>
+      <g stroke="#0a0a0a" stroke-width="4"><path d="M0 80h800M0 130h800"/></g>
+    </symbol>
+
+    <symbol id="b-jardin" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="800" height="600" fill="#ccff00"/>
+      <circle cx="620" cy="160" r="110" fill="#ff3d17"/>
+      <path d="M0 600V380c110-52 180 34 280-22s160-92 260-52 136 18 260-32v326z" fill="#0a0a0a"/>
+      <path d="M190 600V300" stroke="#0a0a0a" stroke-width="22"/>
+      <path d="M190 370c-66-16-90-64-82-118 56 10 88 56 82 118zM190 436c66-20 88-74 78-128-56 16-84 68-78 128z" fill="#2b2bf0"/>
+    </symbol>
+
+    <symbol id="b-kaiju" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="800" height="600" fill="#0a0a0a"/>
+      <path d="M0 600V320h76v-70h70v70h90V230h80v90h106v-60h76v60h80v100h122v180z" fill="#2b2bf0"/>
+      <g fill="#ccff00"><rect x="24" y="350" width="14" height="20"/><rect x="112" y="280" width="14" height="20"/><rect x="266" y="262" width="14" height="20"/><rect x="420" y="298" width="14" height="20"/><rect x="566" y="360" width="14" height="20"/></g>
+      <path d="M520 600c-20-108 12-198 60-266 28-40 22-80-10-116 78 24 120 98 110 190-8 70-40 132-86 192z" fill="#ff3d17"/>
+      <circle cx="602" cy="296" r="16" fill="#0a0a0a"/>
+    </symbol>
+
+    <symbol id="b-noche" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="800" height="600" fill="#0a0a0a"/>
+      <g stroke="#2b2bf0" stroke-width="5"><path d="M80 0l-50 600M220 0l-50 600M360 0l-50 600M500 0l-50 600M640 0l-50 600M780 0l-50 600"/></g>
+      <circle cx="620" cy="130" r="72" fill="#ccff00"/>
+      <circle cx="586" cy="112" r="64" fill="#0a0a0a"/>
+      <path d="M0 600V470h800v130z" fill="#2b2bf0"/>
+      <path d="M250 470V352" stroke="#e9e9e1" stroke-width="8"/>
+      <path d="M180 356a70 38 0 01140 0z" fill="#ff3d17"/>
+      <path d="M250 470l-18 90M250 470l22 90" stroke="#e9e9e1" stroke-width="12" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="b-tren" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="800" height="600" fill="#ff3d17"/>
+      <circle cx="160" cy="150" r="96" fill="#e9e9e1"/>
+      <rect x="-20" y="300" width="860" height="130" fill="#0a0a0a"/>
+      <g fill="#ccff00"><rect x="10" y="330" width="56" height="42"/><rect x="90" y="330" width="56" height="42"/><rect x="170" y="330" width="56" height="42"/><rect x="250" y="330" width="56" height="42"/><rect x="330" y="330" width="56" height="42"/><rect x="410" y="330" width="56" height="42"/><rect x="490" y="330" width="56" height="42"/><rect x="570" y="330" width="56" height="42"/><rect x="650" y="330" width="56" height="42"/><rect x="730" y="330" width="56" height="42"/></g>
+      <g fill="#0a0a0a"><circle cx="90" cy="450" r="26"/><circle cx="240" cy="450" r="26"/><circle cx="440" cy="450" r="26"/><circle cx="640" cy="450" r="26"/></g>
+      <rect x="0" y="490" width="800" height="10" fill="#0a0a0a"/>
+    </symbol>
+
+    <symbol id="b-espada" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="800" height="600" fill="#e9e9e1"/>
+      <circle cx="400" cy="210" r="160" fill="#ff3d17"/>
+      <path d="M0 600V430c140 34 240-40 400-40s260 74 400 40v170z" fill="#0a0a0a"/>
+      <path d="M0 470c148 30 244-32 400-32s252 62 400 32" stroke="#2b2bf0" stroke-width="10" fill="none"/>
+      <path d="M418 90v344" stroke="#0a0a0a" stroke-width="12"/>
+      <path d="M386 290h64" stroke="#0a0a0a" stroke-width="16"/>
+      <path d="M366 434c0-70 16-116 44-138 28 22 44 68 44 138z" fill="#0a0a0a"/>
+    </symbol>
+
+    <symbol id="b-cafe" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="800" height="600" fill="#2b2bf0"/>
+      <rect x="90" y="80" width="620" height="270" fill="#0a0a0a"/>
+      <rect x="130" y="120" width="250" height="110" fill="#ccff00"/>
+      <rect x="420" y="120" width="250" height="110" fill="#ff3d17"/>
+      <rect x="130" y="266" width="540" height="46" fill="#e9e9e1"/>
+      <path d="M260 600V420h280v180z" fill="#0a0a0a"/>
+      <path d="M310 420v-46h180v46z" fill="#ccff00"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="marquesina">
+  <div>
+    <span>ZONA 9 · CATÁLOGO</span>
+    <span class="vivo">3 EN EMISIÓN HOY</span>
+    <span>412 TÍTULOS</span>
+    <span style="margin-left:auto">VIE 07 AGO 2026</span>
+  </div>
+</div>
+
+<header class="tapa">
+  <div class="tapa-fila">
+    <a class="sello-marca" href="index.html">ZONA 9</a>
+    <nav class="menu" aria-label="Principal">
+      <a href="index.html" aria-current="page">Catálogo</a>
+      <a href="#parrilla">Parrilla</a>
+      <a href="serie.html">Fichas</a>
+      <a href="#zonas">Géneros</a>
+    </nav>
+    <div class="tapa-fin">
+      <label class="buscador">
+        <svg width="16" height="16" aria-hidden="true"><use href="#i-buscar"/></svg>
+        <span class="solo-lectores">Buscar en el catálogo</span>
+        <input type="search" placeholder="BUSCAR">
+      </label>
+      <button class="perfil" type="button">AR ▸</button>
+    </div>
+  </div>
+</header>
+
+<main id="principal">
+  <div class="envoltorio">
+
+    <section class="portada" aria-labelledby="t-portada">
+      <div class="portada-texto">
+        <div>
+          <div class="chapas">
+            <span class="chapa">Episodio nuevo hoy 21:00</span>
+            <span class="chapa chapa-azul">T2</span>
+          </div>
+          <h1 id="t-portada">Cielo de Hierro</h1>
+          <p class="sinopsis">
+            Cuando los dirigibles dejaron de volar, la ciudad aprendió a mirar hacia abajo.
+          </p>
+        </div>
+        <div class="portada-acciones">
+          <a class="btn btn-naranja" href="ver.html">
+            <svg width="17" height="17" aria-hidden="true"><use href="#i-play"/></svg>
+            Ver E07
+          </a>
+          <a class="btn" href="serie.html">Ficha</a>
+          <button class="btn-cuadro" type="button" aria-label="Añadir a tu lista">
+            <svg width="19" height="19"><use href="#i-mas"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="portada-arte">
+        <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#b-cielo"/></svg>
+        <p class="placa-datos tabular">
+          <span class="lima">8,7</span><span>2026</span><span>24 EP</span><span>24 MIN</span><span>+16</span>
+        </p>
+      </div>
+    </section>
+
+    <section class="seccion" aria-labelledby="t-curso">
+      <div class="rotulo-seccion">
+        <h2 id="t-curso">A medias</h2>
+        <span class="cuenta tabular">04</span>
+        <a href="#">Historial</a>
+      </div>
+      <div class="curso-rejilla">
+        <a class="curso" href="ver.html">
+          <span class="curso-mini"><svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><use href="#b-kaiju"/></svg></span>
+          <span class="curso-cuerpo">
+            <b>Kaijū Blues</b>
+            <span class="resto tabular">E03 · quedan 9 min</span>
+            <span class="medidor-b"><span style="width:68%"></span></span>
+          </span>
+        </a>
+        <a class="curso" href="ver.html">
+          <span class="curso-mini"><svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><use href="#b-noche"/></svg></span>
+          <span class="curso-cuerpo">
+            <b>Noctámbula</b>
+            <span class="resto tabular">E12 · quedan 18 min</span>
+            <span class="medidor-b"><span style="width:23%"></span></span>
+          </span>
+        </a>
+        <a class="curso" href="ver.html">
+          <span class="curso-mini"><svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><use href="#b-tren"/></svg></span>
+          <span class="curso-cuerpo">
+            <b>Tren de Medianoche</b>
+            <span class="resto tabular">E08 · quedan 2 min</span>
+            <span class="medidor-b"><span style="width:91%"></span></span>
+          </span>
+        </a>
+        <a class="curso" href="ver.html">
+          <span class="curso-mini"><svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><use href="#b-espada"/></svg></span>
+          <span class="curso-cuerpo">
+            <b>La Espada y el Río</b>
+            <span class="resto tabular">E02 · quedan 14 min</span>
+            <span class="medidor-b"><span style="width:44%"></span></span>
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <section class="seccion" id="parrilla" aria-labelledby="t-parrilla">
+      <div class="rotulo-seccion">
+        <h2 id="t-parrilla">Se emite esta semana</h2>
+        <span class="cuenta tabular">05</span>
+        <a href="#">Mes completo</a>
+      </div>
+      <table class="parrilla-b">
+        <caption class="solo-lectores">Emisiones previstas del 7 al 12 de agosto de 2026</caption>
+        <thead>
+          <tr>
+            <th scope="col" class="col-d">Día</th>
+            <th scope="col">Título</th>
+            <th scope="col" class="col-h">Hora</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-hoy>
+            <td class="col-d"><span class="dia-b tabular">07<small>VIE · HOY</small></span></td>
+            <td>
+              <a class="tit-b" href="serie.html">Cielo de Hierro</a>
+              <p class="sub-b tabular">T2 E07 · «Lo que pesa el aire»</p>
+            </td>
+            <td class="col-h"><span class="hora-b tabular">21:00</span></td>
+          </tr>
+          <tr>
+            <td class="col-d"><span class="dia-b tabular">08<small>SÁB</small></span></td>
+            <td>
+              <a class="tit-b" href="serie.html">Café Yūrei</a>
+              <p class="sub-b tabular">T1 E11 · «La cuenta de la casa»</p>
+            </td>
+            <td class="col-h"><span class="hora-b tabular">18:30</span></td>
+          </tr>
+          <tr>
+            <td class="col-d"><span class="dia-b tabular">09<small>DOM</small></span></td>
+            <td>
+              <a class="tit-b" href="serie.html">Los Perros de Neón</a>
+              <p class="sub-b tabular">T3 E02 · «Nadie llama dos veces»</p>
+            </td>
+            <td class="col-h"><span class="hora-b tabular">23:15</span></td>
+          </tr>
+          <tr>
+            <td class="col-d"><span class="dia-b tabular">10<small>LUN</small></span></td>
+            <td>
+              <a class="tit-b" href="serie.html">El Jardín de las Cenizas</a>
+              <p class="sub-b tabular">T1 E04 · «Raíz amarga»</p>
+            </td>
+            <td class="col-h"><span class="hora-b tabular">20:00</span></td>
+          </tr>
+          <tr>
+            <td class="col-d"><span class="dia-b tabular">12<small>MIÉ</small></span></td>
+            <td>
+              <a class="tit-b" href="serie.html">Tren de Medianoche a Sapporo</a>
+              <p class="sub-b tabular">T1 E09 · «Andén cuatro» · final</p>
+            </td>
+            <td class="col-h"><span class="hora-b tabular">22:45</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="seccion" aria-labelledby="t-estrenos">
+      <div class="rotulo-seccion">
+        <h2 id="t-estrenos">Estrenos de temporada</h2>
+        <span class="cuenta tabular">42</span>
+        <a href="#">Ver todos</a>
+      </div>
+      <div class="rejilla">
+        <a class="obra bloque g6" href="serie.html">
+          <span class="lamina-b"><svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><use href="#b-jardin"/></svg></span>
+          <span class="obra-pie">
+            <h3>El Jardín de las Cenizas</h3>
+            <span class="meta tabular"><span>Fantasía · T1</span><span>4 EP</span></span>
+          </span>
+        </a>
+        <a class="obra bloque g6" href="serie.html">
+          <span class="lamina-b"><svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><use href="#b-kaiju"/></svg></span>
+          <span class="obra-pie">
+            <h3>Kaijū Blues</h3>
+            <span class="meta tabular"><span>Acción · T1</span><span>9 EP</span></span>
+          </span>
+        </a>
+        <a class="obra bloque g4" href="serie.html">
+          <span class="lamina-b"><svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><use href="#b-noche"/></svg></span>
+          <span class="obra-pie">
+            <h3>Noctámbula</h3>
+            <span class="meta tabular"><span>Misterio · T2</span><span>25 EP</span></span>
+          </span>
+        </a>
+        <a class="obra bloque g4" href="serie.html">
+          <span class="lamina-b"><svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><use href="#b-tren"/></svg></span>
+          <span class="obra-pie">
+            <h3>Tren de Medianoche</h3>
+            <span class="meta tabular"><span>Drama · T1</span><span>9 EP</span></span>
+          </span>
+        </a>
+        <a class="obra bloque g4" href="serie.html">
+          <span class="lamina-b"><svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><use href="#b-espada"/></svg></span>
+          <span class="obra-pie">
+            <h3>La Espada y el Río</h3>
+            <span class="meta tabular"><span>Histórico · T1</span><span>10 EP</span></span>
+          </span>
+        </a>
+        <a class="obra bloque g3" href="serie.html">
+          <span class="lamina-b"><svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><use href="#b-cafe"/></svg></span>
+          <span class="obra-pie">
+            <h3>Café Yūrei</h3>
+            <span class="meta tabular"><span>Slice of life</span><span>11 EP</span></span>
+          </span>
+        </a>
+        <a class="obra bloque g3" href="serie.html">
+          <span class="lamina-b"><svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><use href="#b-cielo"/></svg></span>
+          <span class="obra-pie">
+            <h3>Ciudad Vertical</h3>
+            <span class="meta tabular"><span>Ciencia ficción</span><span>13 EP</span></span>
+          </span>
+        </a>
+        <a class="obra bloque g3" href="serie.html">
+          <span class="lamina-b"><svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><use href="#b-jardin"/></svg></span>
+          <span class="obra-pie">
+            <h3>Marea Alta</h3>
+            <span class="meta tabular"><span>Drama · T2</span><span>22 EP</span></span>
+          </span>
+        </a>
+        <a class="obra bloque g3" href="serie.html">
+          <span class="lamina-b"><svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><use href="#b-noche"/></svg></span>
+          <span class="obra-pie">
+            <h3>Ruido Blanco</h3>
+            <span class="meta tabular"><span>Terror · T1</span><span>6 EP</span></span>
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <section class="seccion" id="zonas" aria-labelledby="t-zonas">
+      <div class="rotulo-seccion">
+        <h2 id="t-zonas">Zonas</h2>
+        <span class="cuenta tabular">10</span>
+      </div>
+      <nav class="zonas" aria-label="Géneros">
+        <a href="#">Mecha <span class="tabular">38 títulos</span></a>
+        <a href="#">Slice of life <span class="tabular">61 títulos</span></a>
+        <a href="#">Misterio <span class="tabular">44 títulos</span></a>
+        <a href="#">Histórico <span class="tabular">27 títulos</span></a>
+        <a href="#">Deportes <span class="tabular">33 títulos</span></a>
+        <a href="#">Fantasía <span class="tabular">72 títulos</span></a>
+        <a href="#">Terror <span class="tabular">19 títulos</span></a>
+        <a href="#">Comedia <span class="tabular">58 títulos</span></a>
+        <a href="#">Romance <span class="tabular">40 títulos</span></a>
+        <a href="#">Ciencia ficción <span class="tabular">20 títulos</span></a>
+      </nav>
+    </section>
+
+  </div>
+</main>
+
+<footer class="zocalo">
+  <div class="zocalo-fila">
+    <div>
+      <a class="sello-marca" href="index.html">ZONA 9</a>
+      <p style="margin-top:1rem;max-width:32ch;font-size:var(--paso-1)">
+        Catálogo de anime con emisión simultánea y subtítulos en cinco idiomas.
+      </p>
+    </div>
+    <div>
+      <h3>Catálogo</h3>
+      <ul><li><a href="#">Novedades</a></li><li><a href="#parrilla">Parrilla</a></li><li><a href="#">Películas</a></li><li><a href="#">Doblaje</a></li></ul>
+    </div>
+    <div>
+      <h3>Cuenta</h3>
+      <ul><li><a href="#">Tu lista</a></li><li><a href="#">Suscripción</a></li><li><a href="#">Dispositivos</a></li><li><a href="#">Descargas</a></li></ul>
+    </div>
+    <div>
+      <h3>Ayuda</h3>
+      <ul><li><a href="#">Soporte</a></li><li><a href="#">Accesibilidad</a></li><li><a href="#">Aviso legal</a></li><li><a href="#">Privacidad</a></li></ul>
+    </div>
+  </div>
+  <p class="legal-z">
+    Maqueta de diseño. Todos los títulos, sinopsis, fechas, valoraciones y láminas son material
+    sintético creado para esta demostración: ninguna obra, marca ni ilustración real aparece en la
+    página. Sustituye este contenido por el catálogo real antes de publicar.
+  </p>
+</footer>
+
+</body>
+</html>

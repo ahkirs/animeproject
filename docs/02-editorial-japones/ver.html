@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cielo de Hierro T2 E07 — HANRO 版路</title>
+<link rel="stylesheet" href="theme.css">
+<style>
+  /* --- Barra de vuelta --- */
+  .regreso {
+    border-bottom: 1px solid var(--regla);
+    background: var(--papel-alto);
+  }
+  .regreso div {
+    max-width: 1420px;
+    margin-inline: auto;
+    padding: 0.5rem var(--margen);
+    display: flex;
+    align-items: center;
+    gap: var(--e3);
+    font-size: var(--paso-0);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--tinta-70);
+  }
+  .regreso a { text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; }
+  .regreso a:hover { color: var(--shu); }
+
+  /* --- Escenario --- */
+  .escenario {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 330px;
+    gap: var(--e5);
+    padding-block: var(--e4) 0;
+    align-items: start;
+  }
+
+  /* La plancha: el fotograma es una lámina impresa, no una caja flotante */
+  .plancha { border: 2px solid var(--regla-fuerte); background: var(--tinta); }
+  .plancha-visor { position: relative; aspect-ratio: 16/9; overflow: hidden; }
+  .plancha-visor > svg { width: 100%; height: 100%; }
+
+  .rotulo-sub {
+    position: absolute;
+    left: 50%;
+    bottom: 8%;
+    transform: translateX(-50%);
+    max-width: 78%;
+    text-align: center;
+    font-family: var(--mincho);
+    font-weight: 600;
+    font-size: clamp(1rem, 1.9vw, 1.55rem);
+    line-height: 1.4;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.85);
+    pointer-events: none;
+  }
+
+  .saltar-cabecera {
+    position: absolute;
+    right: var(--e3);
+    top: var(--e3);
+    background: var(--papel);
+    border: 1px solid var(--regla-fuerte);
+    color: var(--tinta);
+    font: inherit;
+    font-size: var(--paso-0);
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+    transition: background 0.16s var(--sal), color 0.16s var(--sal);
+  }
+  .saltar-cabecera:hover { background: var(--shu); border-color: var(--shu); color: var(--papel-alto); }
+
+  /* Aparato de control: tipográfico, debajo de la lámina */
+  .aparato {
+    border-top: 2px solid var(--regla-fuerte);
+    background: var(--papel-alto);
+    padding: var(--e3);
+    display: grid;
+    gap: var(--e3);
+  }
+
+  .pista {
+    position: relative;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .pista-fondo {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    background: var(--papel-hundido);
+    border: 1px solid var(--regla);
+  }
+  .pista-carga { position: absolute; inset: 0 auto 0 0; width: 62%; background: #cfcec9; }
+  .pista-vista { position: absolute; inset: 0 auto 0 0; width: 38%; background: var(--shu); }
+  .pista-tirador {
+    position: absolute;
+    left: 38%;
+    top: 50%;
+    width: 3px;
+    height: 20px;
+    margin-left: -1.5px;
+    transform: translateY(-50%);
+    background: var(--tinta);
+    transition: height 0.16s var(--sal);
+  }
+  .pista:hover .pista-tirador { height: 28px; }
+  .hito {
+    position: absolute;
+    top: -6px;
+    width: 1px;
+    height: 18px;
+    background: var(--tinta-45);
+  }
+  .hito b {
+    position: absolute;
+    top: -1.15rem;
+    left: 0;
+    font-size: 0.625rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--tinta-45);
+    white-space: nowrap;
+  }
+
+  .mandos-linea { display: flex; align-items: center; gap: var(--e2); flex-wrap: wrap; }
+  .mando {
+    width: 38px; height: 38px;
+    border: 1px solid var(--regla);
+    background: var(--papel);
+    color: var(--tinta);
+    display: inline-grid; place-items: center;
+    cursor: pointer;
+    transition: background 0.16s var(--sal), color 0.16s var(--sal), border-color 0.16s var(--sal);
+  }
+  .mando:hover { background: var(--tinta); color: var(--papel-alto); border-color: var(--tinta); }
+  .mando-principal { background: var(--shu); border-color: var(--shu); color: var(--papel-alto); width: 46px; height: 46px; }
+  .mando-principal:hover { background: var(--tinta); border-color: var(--tinta); }
+
+  .reloj {
+    font-family: var(--mincho);
+    font-weight: 600;
+    font-size: var(--paso-2);
+    letter-spacing: 0.06em;
+    margin-left: 0.3rem;
+  }
+  .reloj small { color: var(--tinta-45); font-family: var(--gothic); font-weight: 400; font-size: var(--paso-1); }
+  .mandos-linea .fin { margin-left: auto; display: flex; align-items: center; gap: var(--e2); }
+
+  .vol { display: flex; align-items: center; gap: 0.5rem; }
+  .vol-pista { width: 70px; height: 6px; background: var(--papel-hundido); border: 1px solid var(--regla); position: relative; }
+  .vol-pista span { position: absolute; inset: 0 auto 0 0; width: 70%; background: var(--tinta); }
+
+  /* Pie de la lámina */
+  .cartela {
+    border-top: 1px solid var(--regla);
+    padding-top: var(--e3);
+    margin-top: var(--e4);
+  }
+  .cartela h1 {
+    font-family: var(--mincho);
+    font-weight: 800;
+    font-size: var(--paso-4);
+    line-height: 1.2;
+    margin-bottom: var(--e2);
+  }
+  .cartela .serie-sup {
+    font-size: var(--paso-0);
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--tinta-45);
+    text-decoration: none;
+  }
+  .cartela .serie-sup:hover { color: var(--shu); }
+  .cartela .cuerpo-texto {
+    font-family: var(--mincho);
+    font-size: var(--paso-2);
+    line-height: 1.85;
+    max-width: 62ch;
+    margin-block: var(--e3);
+  }
+  .cartela-datos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e3);
+    font-size: var(--paso-0);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tinta-45);
+    border-top: 1px solid var(--regla);
+    border-bottom: 1px solid var(--regla);
+    padding-block: var(--e2);
+  }
+  .cartela-acciones { display: flex; flex-wrap: wrap; gap: var(--e2); margin-top: var(--e3); }
+
+  /* --- Columna de programación --- */
+  .programa { position: sticky; top: var(--e3); }
+  .programa h2 {
+    font-size: var(--paso-0);
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--tinta-45);
+    border-bottom: 2px solid var(--regla-fuerte);
+    padding-bottom: var(--e2);
+    margin-bottom: var(--e2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--e2);
+  }
+
+  .encadenar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: var(--paso-0);
+    letter-spacing: 0.08em;
+    color: var(--tinta-70);
+    cursor: pointer;
+    text-transform: none;
+    font-weight: 700;
+  }
+  .encadenar input { position: absolute; opacity: 0; pointer-events: none; }
+  .casilla {
+    width: 16px; height: 16px;
+    border: 1px solid var(--regla-fuerte);
+    background: var(--papel-alto);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+  .casilla svg { opacity: 0; color: var(--papel-alto); }
+  .encadenar input:checked + .casilla { background: var(--shu); border-color: var(--shu); }
+  .encadenar input:checked + .casilla svg { opacity: 1; }
+  .encadenar input:focus-visible + .casilla { outline: 2px solid var(--shu); outline-offset: 2px; }
+
+  .entrada-prog {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr;
+    gap: var(--e2);
+    padding: var(--e2) 0;
+    border-bottom: 1px solid var(--regla);
+    text-decoration: none;
+    align-items: baseline;
+  }
+  .entrada-prog:hover { background: var(--papel-alto); }
+  .entrada-prog[aria-current='true'] {
+    background: var(--papel-alto);
+    box-shadow: inset 3px 0 0 var(--shu);
+    padding-left: var(--e2);
+  }
+  .entrada-prog .n {
+    font-family: var(--mincho);
+    font-weight: 800;
+    font-size: var(--paso-3);
+    color: var(--tinta-45);
+    line-height: 1;
+  }
+  .entrada-prog[aria-current='true'] .n { color: var(--shu); }
+  .entrada-prog b { font-family: var(--mincho); font-weight: 600; font-size: var(--paso-2); display: block; line-height: 1.35; }
+  .entrada-prog small { font-size: var(--paso-0); color: var(--tinta-45); }
+  .entrada-prog[data-bloqueado] { opacity: 0.5; pointer-events: none; }
+
+  .aviso-siguiente {
+    border: 1px solid var(--regla-fuerte);
+    background: var(--tinta);
+    color: var(--papel-alto);
+    padding: var(--e3);
+    margin-top: var(--e3);
+  }
+  .aviso-siguiente span {
+    font-size: var(--paso-0);
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--tinta-45);
+  }
+  .aviso-siguiente b {
+    display: block;
+    font-family: var(--mincho);
+    font-weight: 600;
+    font-size: var(--paso-3);
+    margin-block: var(--e2);
+  }
+  .aviso-siguiente p { font-size: var(--paso-1); color: #b9b8b3; margin-bottom: var(--e3); }
+  .aviso-siguiente .btn {
+    border-color: var(--papel-alto);
+    color: var(--papel-alto);
+    width: 100%;
+  }
+  .aviso-siguiente .btn:hover { background: var(--papel-alto); color: var(--tinta); }
+
+  @media (max-width: 1080px) {
+    .escenario { grid-template-columns: minmax(0, 1fr); gap: var(--e5); }
+    .programa { position: static; }
+  }
+  @media (max-width: 760px) {
+    .nav-rev { display: none; }
+    .aparato { padding: var(--e2); }
+    .vol-pista { display: none; }
+    .reloj { font-size: var(--paso-1); }
+    .cartela h1 { font-size: var(--paso-3); }
+  }
+  @media (max-width: 520px) {
+    .campo-buscar input { display: none; }
+    .campo-buscar { padding: 0.45rem; }
+    .saltar-cabecera { font-size: 0.625rem; padding: 0.4rem 0.6rem; }
+  }
+</style>
+</head>
+<body>
+<!--
+THESIS: El reproductor es una lámina impresa con su aparato crítico debajo: los mandos no flotan sobre la imagen, se componen como pie de grabado. Rechaza el cromo superpuesto que tapa el fotograma.
+OWN-WORLD: Papel frío #f1f1ee, plancha de tinta sumi con filete de 2px, bermellón 朱 #d1332b en el progreso y el episodio en curso. Shippori Mincho en subtítulos y titulares, Zen Kaku Gothic en el aparato.
+STORY: El espectador ve el episodio con la imagen entera, controla la reproducción desde el pie y encadena el siguiente desde la programación lateral.
+FIRST VIEWPORT: Plancha 16:9 con filete grueso y subtítulo en mincho; debajo, franja de mandos con la línea de tiempo rotulada (cabecera, cierre); a la derecha, programación de la temporada.
+FORM: Lámina con aparato tipográfico al pie, en lugar de mandos superpuestos.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="saltar" href="#plancha">Saltar al reproductor</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-buscar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></symbol>
+    <symbol id="i-pausa" viewBox="0 0 24 24"><rect x="6.5" y="4.5" width="4" height="15" fill="currentColor"/><rect x="13.5" y="4.5" width="4" height="15" fill="currentColor"/></symbol>
+    <symbol id="i-atras10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5.5A7.5 7.5 0 114 14"/><path d="M11 2.5L8 5.5l3 3"/></symbol>
+    <symbol id="i-alante10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5.5A7.5 7.5 0 1020 14"/><path d="M13 2.5l3 3-3 3"/></symbol>
+    <symbol id="i-siguiente" viewBox="0 0 24 24"><path d="M5 5l11 7-11 7z" fill="currentColor"/><rect x="17" y="5" width="3" height="14" fill="currentColor"/></symbol>
+    <symbol id="i-volumen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 9.5h4L13 5v14L8 14.5H4z" fill="currentColor"/><path d="M16.5 9a4.5 4.5 0 010 6M19 6.5a8 8 0 010 11"/></symbol>
+    <symbol id="i-cc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M10 10.2a2.6 2.6 0 100 3.6M17 10.2a2.6 2.6 0 100 3.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-ajustes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4L5.3 5.3" stroke-linecap="round"/></symbol>
+    <symbol id="i-pantalla" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+    <symbol id="i-atras" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H6M11 5.5L5 12l6 6.5"/></symbol>
+    <symbol id="i-marcar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6.5 3.5h11v17l-5.5-4.5-5.5 4.5z"/></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11M7.5 10.5l4.5 4.5 4.5-4.5M4.5 19.5h15"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></symbol>
+
+    <symbol id="f-plancha" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+      <rect width="1600" height="900" fill="#17161a"/>
+      <circle cx="1200" cy="250" r="190" fill="#d1332b"/>
+      <path d="M0 900V620c140-58 230 38 360-4s200-130 330-94 210 114 340 74 210-132 330-98 180 118 240 86V900z" fill="#0c0b0e"/>
+      <path d="M0 900V760c150-38 240 32 370 2s210-98 340-70 220 86 340 52 200-108 330-78 160 94 220 68V900z" fill="#232228"/>
+      <g fill="#0c0b0e">
+        <path d="M520 900V520l70-54 70 54v380z"/>
+        <path d="M556 560h68v40h-68z" fill="#f1f1ee"/>
+        <path d="M590 660v150M520 700l70-42 70 42" stroke="#0c0b0e" stroke-width="18" fill="none"/>
+      </g>
+      <g stroke="#33323a" stroke-width="2" opacity="0.55"><path d="M0 170h1600M0 210h1600M0 250h1600"/></g>
+    </symbol>
+    <symbol id="e-1" viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="225" fill="#e9e9e4"/><circle cx="300" cy="66" r="48" fill="#d1332b"/>
+      <path d="M0 225V150l58-24 60 20 68-38 66 28 74-22 74 32v79z" fill="#17161a"/>
+      <path d="M118 150V96l22-16 22 16v54z" fill="#17161a"/><rect x="130" y="106" width="20" height="12" fill="#e9e9e4"/>
+    </symbol>
+    <symbol id="e-2" viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="225" fill="#e9e9e4"/>
+      <path d="M0 225V126c68-28 118 24 188-4s130-50 212-14v117z" fill="#17161a"/>
+      <circle cx="92" cy="64" r="38" fill="#d1332b"/>
+      <g fill="#e9e9e4"><rect x="250" y="150" width="8" height="26"/><rect x="284" y="140" width="8" height="36"/><rect x="318" y="156" width="8" height="20"/></g>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="regreso">
+  <div>
+    <a href="serie.html"><svg width="14" height="14" aria-hidden="true"><use href="#i-atras"/></svg> Volver a la ficha</a>
+    <span>Cielo de Hierro · Temporada 2</span>
+    <span style="margin-left:auto" class="tabular">Episodio 07 de 12</span>
+  </div>
+</div>
+
+<header class="mancheta">
+  <div class="mancheta-fila">
+    <a class="logo" href="index.html">版路 <em>HANRO</em></a>
+    <nav class="nav-rev" aria-label="Principal">
+      <a href="index.html">Número</a>
+      <a href="index.html#parrilla">Parrilla</a>
+      <a href="index.html#reportaje">Reportaje</a>
+      <a href="serie.html">Fichas</a>
+      <a href="index.html#indice">Índice</a>
+    </nav>
+    <div class="mancheta-fin">
+      <label class="campo-buscar">
+        <svg width="16" height="16" aria-hidden="true"><use href="#i-buscar"/></svg>
+        <span class="solo-lectores">Buscar en el catálogo</span>
+        <input type="search" placeholder="Buscar">
+      </label>
+      <button class="cuenta" type="button" aria-label="Tu cuenta">安</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="envoltorio">
+    <div class="escenario">
+
+      <div>
+        <div class="plancha" id="plancha">
+          <div class="plancha-visor" role="region" aria-label="Reproductor de vídeo">
+            <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#f-plancha"/></svg>
+            <p class="rotulo-sub">No se cayó del cielo. Alguien lo bajó, pieza por pieza.</p>
+            <button class="saltar-cabecera" type="button">Saltar cabecera</button>
+          </div>
+
+          <div class="aparato">
+            <div class="pista" role="slider" tabindex="0" aria-label="Progreso del episodio" aria-valuemin="0" aria-valuemax="1440" aria-valuenow="548" aria-valuetext="9 minutos 8 segundos de 24 minutos">
+              <div class="pista-fondo">
+                <div class="pista-carga"></div>
+                <div class="pista-vista"></div>
+                <div class="hito" style="left:6%"><b>Cabecera</b></div>
+                <div class="hito" style="left:91%"><b>Cierre</b></div>
+                <div class="pista-tirador"></div>
+              </div>
+            </div>
+
+            <div class="mandos-linea">
+              <button class="mando mando-principal" type="button" aria-label="Pausar">
+                <svg width="20" height="20"><use href="#i-pausa"/></svg>
+              </button>
+              <button class="mando" type="button" aria-label="Retroceder 10 segundos">
+                <svg width="18" height="18"><use href="#i-atras10"/></svg>
+              </button>
+              <button class="mando" type="button" aria-label="Avanzar 10 segundos">
+                <svg width="18" height="18"><use href="#i-alante10"/></svg>
+              </button>
+              <button class="mando" type="button" aria-label="Siguiente episodio">
+                <svg width="17" height="17"><use href="#i-siguiente"/></svg>
+              </button>
+              <div class="vol">
+                <button class="mando" type="button" aria-label="Silenciar">
+                  <svg width="18" height="18"><use href="#i-volumen"/></svg>
+                </button>
+                <div class="vol-pista" role="slider" tabindex="0" aria-label="Volumen" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70"><span></span></div>
+              </div>
+              <span class="reloj tabular">9:08 <small>/ 24:00</small></span>
+
+              <div class="fin">
+                <button class="mando" type="button" aria-label="Subtítulos y audio">
+                  <svg width="18" height="18"><use href="#i-cc"/></svg>
+                </button>
+                <button class="mando" type="button" aria-label="Calidad y velocidad">
+                  <svg width="18" height="18"><use href="#i-ajustes"/></svg>
+                </button>
+                <button class="mando" type="button" aria-label="Pantalla completa">
+                  <svg width="18" height="18"><use href="#i-pantalla"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cartela">
+          <a class="serie-sup" href="serie.html">Cielo de Hierro · Temporada 2</a>
+          <h1>Episodio 07 — Lo que pesa el aire</h1>
+          <div class="cartela-datos tabular">
+            <span>24 min</span>
+            <span>Emitido el 7 · 08 · 2026</span>
+            <span>Japonés con subtítulos</span>
+            <span>+16</span>
+          </div>
+          <p class="cuerpo-texto">
+            El taller recibe una pieza que no consta en ningún inventario. Kenzō reconoce la marca del
+            fabricante y decide no decir nada, y Rei entiende por primera vez que el silencio del
+            hangar no es prudencia sino costumbre.
+          </p>
+          <div class="cartela-acciones">
+            <button class="btn" type="button">
+              <svg width="15" height="15" aria-hidden="true"><use href="#i-marcar"/></svg>
+              Seguir la serie
+            </button>
+            <button class="btn" type="button">
+              <svg width="15" height="15" aria-hidden="true"><use href="#i-descarga"/></svg>
+              Descargar
+            </button>
+            <button class="btn" type="button">Avisar de un problema</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="programa" aria-label="Programación de la temporada">
+        <h2>
+          Temporada 2
+          <label class="encadenar">
+            <input type="checkbox" checked>
+            <span class="casilla" aria-hidden="true"><svg width="10" height="10"><use href="#i-check"/></svg></span>
+            Encadenar
+          </label>
+        </h2>
+
+        <a class="entrada-prog" href="ver.html">
+          <span class="n tabular">06</span>
+          <span><b>El peso del aire</b><small>24 min · visto</small></span>
+        </a>
+        <a class="entrada-prog" href="ver.html" aria-current="true">
+          <span class="n tabular">07</span>
+          <span><b>Lo que pesa el aire</b><small>24 min · viendo ahora</small></span>
+        </a>
+        <a class="entrada-prog" href="ver.html">
+          <span class="n tabular">08</span>
+          <span><b>Hangar siete</b><small>24 min · viernes 14</small></span>
+        </a>
+        <div class="entrada-prog" data-bloqueado>
+          <span class="n tabular">09</span>
+          <span><b>Sin título todavía</b><small>Disponible en 14 días</small></span>
+        </div>
+
+        <div class="aviso-siguiente">
+          <span>A continuación</span>
+          <b>08 — Hangar siete</b>
+          <p>Se reproduce solo al terminar este episodio.</p>
+          <a class="btn" href="ver.html">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-play"/></svg>
+            Reproducir ahora
+          </a>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</main>
+
+<footer class="colofon">
+  <div class="colofon-fila">
+    <div>
+      <a class="logo" href="index.html">版路 <em>HANRO</em></a>
+      <p style="margin-top:0.75rem;max-width:32ch;font-size:var(--paso-1)">
+        Revista de programación y catálogo de anime. Número 214, temporada de verano de 2026.
+      </p>
+    </div>
+    <div>
+      <h3>Secciones</h3>
+      <ul><li><a href="index.html#parrilla">Parrilla</a></li><li><a href="index.html#reportaje">Reportaje</a></li><li><a href="index.html#indice">Índice</a></li><li><a href="#">Archivo</a></li></ul>
+    </div>
+    <div>
+      <h3>Ayuda</h3>
+      <ul><li><a href="#">Reproducción</a></li><li><a href="#">Subtítulos</a></li><li><a href="#">Accesibilidad</a></li><li><a href="#">Contacto</a></li></ul>
+    </div>
+  </div>
+  <p class="pie-legal">
+    Maqueta de diseño. Títulos, sinopsis, diálogos, fechas y láminas son material sintético creado
+    para esta demostración: ninguna obra ni marca real aparece en la página. El reproductor es una
+    maqueta estática, sin vídeo.
+  </p>
+</footer>
+
+</body>
+</html>

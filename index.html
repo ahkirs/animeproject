@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KUROBA — Sala Oscura</title>
+<link rel="stylesheet" href="theme.css">
+<style>
+  /* ---------------- Portada ---------------- */
+
+  .escena {
+    position: relative;
+    min-height: min(88vh, 780px);
+    display: flex;
+    align-items: flex-end;
+    margin-top: calc(var(--e6) * -1 - var(--e3));
+    padding: var(--e6) var(--margen) var(--e5);
+    isolation: isolate;
+  }
+  .escena-arte {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    overflow: hidden;
+  }
+  .escena-arte svg { width: 100%; height: 100%; object-fit: cover; }
+  .escena::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(to top, var(--sala-900) 4%, rgba(11,10,9,0.72) 46%, rgba(11,10,9,0.15) 100%),
+      linear-gradient(to right, var(--sala-900) 0%, rgba(11,10,9,0.55) 42%, rgba(11,10,9,0) 78%);
+  }
+
+  .escena-texto { max-width: 48ch; }
+
+  .escena h1 {
+    font-family: var(--display);
+    font-size: var(--paso-6);
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    margin-bottom: var(--e3);
+  }
+  .escena .sinopsis {
+    color: var(--hueso-70);
+    max-width: 46ch;
+    margin-block: var(--e3) var(--e4);
+  }
+  .escena-acciones { display: flex; flex-wrap: wrap; gap: var(--e2); align-items: center; }
+
+  .sello {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: var(--paso-0);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ambar);
+    margin-bottom: var(--e3);
+  }
+  .sello::before {
+    content: '';
+    width: 26px;
+    height: 2px;
+    background: var(--ambar);
+  }
+
+  /* ---------------- Programación ---------------- */
+
+  .seccion { margin-top: var(--e6); }
+
+  .seccion-cabeza {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--e3);
+    margin-bottom: var(--e4);
+  }
+  .seccion-cabeza h2 {
+    font-family: var(--display);
+    font-size: var(--paso-4);
+    letter-spacing: -0.03em;
+  }
+  .ver-todo {
+    font-size: var(--paso-1);
+    font-weight: 600;
+    color: var(--hueso-70);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-shrink: 0;
+  }
+  .ver-todo:hover { color: var(--ambar); }
+  .ver-todo svg { transition: transform 0.18s var(--sal); }
+  .ver-todo:hover svg { transform: translateX(3px); }
+
+  .semana { border-top: 1px solid var(--borde); }
+
+  .dia {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr auto;
+    gap: var(--e3);
+    align-items: center;
+    padding: var(--e3) 0;
+    border-bottom: 1px solid var(--borde);
+    text-decoration: none;
+    transition: background 0.16s var(--sal), padding-left 0.16s var(--sal);
+  }
+  .dia:hover { background: var(--sala-800); padding-left: var(--e2); }
+
+  .dia-fecha {
+    font-size: var(--paso-0);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--hueso-45);
+  }
+  .dia-fecha strong {
+    display: block;
+    font-family: var(--display);
+    font-size: var(--paso-4);
+    letter-spacing: -0.02em;
+    color: var(--hueso);
+    line-height: 1;
+    margin-top: 0.2rem;
+  }
+  .dia[data-hoy] .dia-fecha { color: var(--ambar); }
+  .dia[data-hoy] .dia-fecha strong { color: var(--ambar); }
+
+  .dia-cuerpo h3 {
+    font-size: var(--paso-3);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin-bottom: 0.2rem;
+  }
+  .dia-cuerpo p { font-size: var(--paso-1); color: var(--hueso-45); }
+  .dia-hora {
+    font-size: var(--paso-1);
+    font-weight: 600;
+    color: var(--hueso-70);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* ---------------- Rieles ---------------- */
+
+  .riel {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(172px, 1fr);
+    gap: var(--e3);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: var(--e3);
+    margin-inline: calc(var(--margen) * -1);
+    padding-inline: var(--margen);
+  }
+  .riel > * { scroll-snap-align: start; }
+  .riel-ancho { grid-auto-columns: minmax(300px, 1fr); }
+
+  .ficha { text-decoration: none; display: block; }
+  .ficha .cartel { transition: transform 0.28s var(--sal), box-shadow 0.28s var(--sal); }
+  .ficha:hover .cartel, .ficha:focus-visible .cartel {
+    transform: translateY(-5px);
+    box-shadow: var(--sombra-alta);
+  }
+  .ficha h3 {
+    font-size: var(--paso-1);
+    font-weight: 600;
+    margin-top: var(--e2);
+    letter-spacing: -0.01em;
+  }
+  .ficha p { font-size: var(--paso-0); color: var(--hueso-45); margin-top: 0.15rem; }
+
+  /* Continuar viendo */
+  .reanudar .cartel { aspect-ratio: 16 / 9; }
+  .barra {
+    height: 3px;
+    background: var(--sala-600);
+    margin-top: var(--e2);
+    overflow: hidden;
+  }
+  .barra span { display: block; height: 100%; background: var(--ambar); }
+  .reanudar-pie {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--e2);
+    font-size: var(--paso-0);
+    color: var(--hueso-45);
+    margin-top: 0.4rem;
+  }
+  .marca-play {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(11, 10, 9, 0.32);
+    opacity: 0;
+    transition: opacity 0.22s var(--sal);
+  }
+  .ficha:hover .marca-play, .ficha:focus-visible .marca-play { opacity: 1; }
+  .marca-play span {
+    width: 52px; height: 52px;
+    border-radius: 99px;
+    background: var(--ambar);
+    color: var(--ambar-tinta);
+    display: grid;
+    place-items: center;
+    box-shadow: var(--sombra-baja);
+  }
+
+  /* ---------------- Géneros ---------------- */
+
+  .generos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e2) var(--e4);
+    border-top: 1px solid var(--borde);
+    padding-top: var(--e4);
+  }
+  .generos a {
+    font-family: var(--display);
+    font-size: clamp(1.5rem, 3.4vw, 2.5rem);
+    letter-spacing: -0.035em;
+    color: var(--sala-500);
+    text-decoration: none;
+    transition: color 0.18s var(--sal);
+  }
+  .generos a:hover { color: var(--hueso); }
+
+  /* ---------------- Responsive ---------------- */
+
+  @media (max-width: 900px) {
+    .nav { display: none; }
+    .escena { min-height: 76vh; }
+    .dia { grid-template-columns: 4.5rem 1fr; }
+    .dia-hora { grid-column: 2; font-size: var(--paso-0); }
+    .dia-fecha strong { font-size: var(--paso-3); }
+  }
+  @media (max-width: 560px) {
+    .buscar input { display: none; }
+    .buscar { padding: 0.55rem; }
+    .escena h1 { font-size: clamp(2.6rem, 13vw, 3.4rem); }
+    .escena-acciones .btn { flex: 1 1 auto; }
+  }
+</style>
+</head>
+<body>
+<!--
+THESIS: Un catálogo que se comporta como una sala a oscuras y una parrilla de emisión, no como una cuadrícula de fichas iguales. Rechaza la retícula uniforme de carátulas que envía toda plataforma de streaming.
+OWN-WORLD: Negro cálido de sala (#0b0a09), tinta hueso, un solo ámbar de proyector usado como campo sólido y nunca como halo. Archivo Black en titulares, filetes de 1px, carteles 2:3 con arte vectorial plano.
+STORY: El visitante entiende que hay algo puesto esta noche, ve qué se emite cada día de la semana y entra a un episodio en dos clics.
+FIRST VIEWPORT: Fotograma a sangre con degradado a negro por abajo e izquierda; título en display a 5.75rem sobre él, sinopsis a 46ch, botón ámbar sólido de reproducir y botón fantasma de lista.
+FORM: Parrilla de emisión semanal como estructura principal, primera de la lista ordenada; dirección fijada por el usuario, sin tirada de concepto.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="saltar" href="#principal">Saltar al contenido</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <!-- Iconos: un solo grosor de trazo, dibujados -->
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></symbol>
+    <symbol id="i-mas" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-buscar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+    <symbol id="i-flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6.5l5.5 5.5-5.5 5.5"/></symbol>
+    <symbol id="i-campana" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 0112 0c0 4 1.5 5.5 1.5 5.5h-15S6 14 6 10z"/><path d="M10.5 19a1.8 1.8 0 003 0"/></symbol>
+    <symbol id="i-cinta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><circle cx="8" cy="12" r="2.4"/><circle cx="16" cy="12" r="2.4"/></symbol>
+
+    <!-- Carteles: composiciones planas, sin fotografía -->
+    <symbol id="c-mecha" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="#191c24"/>
+      <circle cx="200" cy="215" r="118" fill="#c8442f"/>
+      <path d="M0 600V420l70-52 64 40 68-74 76 52 62-36 60 44v206z" fill="#0d0f14"/>
+      <path d="M200 150l52 44v96l-52 40-52-40v-96z" fill="#0d0f14"/>
+      <path d="M176 214h20v22h-20zM204 214h20v22h-20z" fill="#ffb03a"/>
+      <path d="M200 330v112M158 366l42-30 42 30" stroke="#0d0f14" stroke-width="13" fill="none"/>
+    </symbol>
+
+    <symbol id="c-jardin" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="#22301f"/>
+      <circle cx="288" cy="150" r="76" fill="#e8dcc0"/>
+      <path d="M0 600V400c60-38 96 22 150-16s78-70 132-44 74 8 118-22v282z" fill="#162114"/>
+      <path d="M96 600V300" stroke="#0d150c" stroke-width="16"/>
+      <path d="M96 356c-46-10-62-46-58-84 40 6 62 40 58 84zM96 402c46-14 60-52 54-90-40 10-58 46-54 90z" fill="#3f6b3a"/>
+      <g fill="#e0b3c6">
+        <circle cx="150" cy="238" r="9"/><circle cx="60" cy="286" r="7"/><circle cx="196" cy="322" r="6"/><circle cx="112" cy="196" r="5"/>
+      </g>
+    </symbol>
+
+    <symbol id="c-kaiju" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="#141b26"/>
+      <path d="M0 600V300h44v-70h40v70h50V220h46v80h58v-56h42v56h46v96h74v204z" fill="#0a0e15"/>
+      <g fill="#ffb03a" opacity="0.85">
+        <rect x="12" y="330" width="10" height="14"/><rect x="56" y="262" width="10" height="14"/><rect x="150" y="252" width="10" height="14"/><rect x="252" y="288" width="10" height="14"/><rect x="316" y="360" width="10" height="14"/>
+      </g>
+      <path d="M258 600c-16-84 8-152 46-206 22-32 18-64-8-92 62 18 96 76 88 146-6 54-34 104-70 152z" fill="#233d3a"/>
+      <circle cx="316" cy="286" r="11" fill="#e0453a"/>
+    </symbol>
+
+    <symbol id="c-noche" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="#161428"/>
+      <g stroke="#2f2a4d" stroke-width="2">
+        <path d="M40 0l-30 600M120 0l-30 600M200 0l-30 600M280 0l-30 600M360 0l-30 600M440 0l-30 600"/>
+      </g>
+      <circle cx="300" cy="120" r="58" fill="#f0e9d8"/>
+      <circle cx="272" cy="104" r="52" fill="#161428"/>
+      <path d="M0 600V486h400v114z" fill="#0d0b1b"/>
+      <path d="M130 486V376" stroke="#0d0b1b" stroke-width="7"/>
+      <path d="M74 380a56 30 0 01112 0z" fill="#e0453a"/>
+      <path d="M130 486l-14 74M130 486l16 74" stroke="#0d0b1b" stroke-width="11" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="c-tren" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="#1b1a22"/>
+      <circle cx="112" cy="164" r="86" fill="#f4efe6"/>
+      <path d="M0 600V430h400v170z" fill="#101016"/>
+      <rect x="-20" y="300" width="440" height="112" rx="10" fill="#2c3a4a"/>
+      <g fill="#ffb03a">
+        <rect x="8" y="330" width="42" height="34" rx="3"/><rect x="70" y="330" width="42" height="34" rx="3"/><rect x="132" y="330" width="42" height="34" rx="3"/><rect x="194" y="330" width="42" height="34" rx="3"/><rect x="256" y="330" width="42" height="34" rx="3"/><rect x="318" y="330" width="42" height="34" rx="3"/>
+      </g>
+      <g fill="#0a0a10">
+        <circle cx="60" cy="424" r="20"/><circle cx="150" cy="424" r="20"/><circle cx="250" cy="424" r="20"/><circle cx="340" cy="424" r="20"/>
+      </g>
+      <path d="M0 452h400" stroke="#3a3a48" stroke-width="6"/>
+    </symbol>
+
+    <symbol id="c-espada" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="#2a1a18"/>
+      <circle cx="200" cy="196" r="130" fill="#e8dcc0"/>
+      <path d="M0 600V440c70 26 118-30 200-30s130 56 200 30v160z" fill="#1a100f"/>
+      <path d="M0 470c76 22 122-26 200-26s124 48 200 26" stroke="#c8442f" stroke-width="5" fill="none"/>
+      <path d="M212 118v300" stroke="#1a100f" stroke-width="9"/>
+      <path d="M188 288h48" stroke="#1a100f" stroke-width="11"/>
+      <path d="M176 440c0-58 14-96 36-114 22 18 36 56 36 114z" fill="#1a100f"/>
+      <circle cx="212" cy="306" r="7" fill="#ffb03a"/>
+    </symbol>
+
+    <symbol id="c-escena-ancha" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+      <rect width="1600" height="900" fill="#17141f"/>
+      <circle cx="1150" cy="300" r="220" fill="#c8442f"/>
+      <circle cx="1080" cy="262" r="200" fill="#17141f" opacity="0.55"/>
+      <path d="M0 900V620c120-70 210 40 330-10s180-150 300-110 210 130 330 80 200-160 330-120 200 140 310 96V900z" fill="#0f0d16"/>
+      <path d="M0 900V740c140-46 230 40 360 6s200-108 330-78 210 96 330 60 200-118 330-86 190 104 250 72V900z" fill="#0a0910"/>
+      <g fill="#0a0910">
+        <path d="M690 900V560l52-40 52 40v340z"/>
+        <path d="M716 596h52v34h-52z" fill="#ffb03a" opacity="0.9"/>
+      </g>
+      <g stroke="#2a2438" stroke-width="2" opacity="0.5">
+        <path d="M0 200h1600M0 340h1600M0 480h1600"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="cabecera">
+  <a class="marca" href="index.html">
+    <svg width="26" height="26"><use href="#i-cinta"/></svg>
+    KUROBA
+  </a>
+  <nav class="nav" aria-label="Principal">
+    <a href="index.html" aria-current="page">Inicio</a>
+    <a href="serie.html">Series</a>
+    <a href="#estrenos">Estrenos</a>
+    <a href="#semana">Emisión</a>
+    <a href="#generos">Géneros</a>
+  </nav>
+  <div class="cabecera-fin">
+    <label class="buscar">
+      <svg width="17" height="17" aria-hidden="true"><use href="#i-buscar"/></svg>
+      <span class="solo-lectores">Buscar series</span>
+      <input type="search" placeholder="Buscar…">
+    </label>
+    <button class="btn-icono" type="button" aria-label="Novedades">
+      <svg width="19" height="19"><use href="#i-campana"/></svg>
+    </button>
+    <button class="avatar" type="button" aria-label="Tu cuenta">AR</button>
+  </div>
+</header>
+
+<main id="principal">
+
+  <section class="escena" aria-labelledby="destacado">
+    <div class="escena-arte" aria-hidden="true">
+      <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice"><use href="#c-escena-ancha"/></svg>
+    </div>
+    <div class="envoltorio escena-texto">
+      <p class="sello">Episodio nuevo esta noche</p>
+      <h1 id="destacado">Cielo de Hierro</h1>
+      <div class="datos">
+        <span class="nota">8,7</span>
+        <span class="punto" aria-hidden="true"></span>
+        <span>2026</span>
+        <span class="punto" aria-hidden="true"></span>
+        <span>Temporada 2</span>
+        <span class="punto" aria-hidden="true"></span>
+        <span>24 episodios</span>
+        <span class="punto" aria-hidden="true"></span>
+        <span class="clasif">+16</span>
+      </div>
+      <p class="sinopsis">
+        Cuando los dirigibles dejaron de volar, la ciudad aprendió a mirar hacia abajo.
+        Rei pilota lo último que queda de una flota que nadie recuerda haber construido.
+      </p>
+      <div class="escena-acciones">
+        <a class="btn btn-primario" href="ver.html">
+          <svg width="17" height="17" aria-hidden="true"><use href="#i-play"/></svg>
+          Ver T2 · E07
+        </a>
+        <a class="btn btn-fantasma" href="serie.html">Ficha de la serie</a>
+        <button class="btn-icono" type="button" aria-label="Añadir a mi lista">
+          <svg width="19" height="19"><use href="#i-mas"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="envoltorio">
+
+    <section class="seccion" id="semana" aria-labelledby="t-semana">
+      <div class="seccion-cabeza">
+        <h2 id="t-semana">Se emite esta semana</h2>
+        <a class="ver-todo" href="#">Calendario completo <svg width="16" height="16" aria-hidden="true"><use href="#i-flecha"/></svg></a>
+      </div>
+      <div class="semana">
+        <a class="dia" href="ver.html" data-hoy>
+          <span class="dia-fecha tabular">Hoy<strong>07</strong></span>
+          <span class="dia-cuerpo">
+            <h3>Cielo de Hierro — T2 E07</h3>
+            <p>«Lo que pesa el aire»</p>
+          </span>
+          <span class="dia-hora tabular">21:00</span>
+        </a>
+        <a class="dia" href="ver.html">
+          <span class="dia-fecha tabular">Sáb<strong>08</strong></span>
+          <span class="dia-cuerpo">
+            <h3>Café Yūrei — T1 E11</h3>
+            <p>«La cuenta de la casa»</p>
+          </span>
+          <span class="dia-hora tabular">18:30</span>
+        </a>
+        <a class="dia" href="ver.html">
+          <span class="dia-fecha tabular">Dom<strong>09</strong></span>
+          <span class="dia-cuerpo">
+            <h3>Los Perros de Neón — T3 E02</h3>
+            <p>«Nadie llama dos veces»</p>
+          </span>
+          <span class="dia-hora tabular">23:15</span>
+        </a>
+        <a class="dia" href="ver.html">
+          <span class="dia-fecha tabular">Lun<strong>10</strong></span>
+          <span class="dia-cuerpo">
+            <h3>El Jardín de las Cenizas — T1 E04</h3>
+            <p>«Raíz amarga»</p>
+          </span>
+          <span class="dia-hora tabular">20:00</span>
+        </a>
+        <a class="dia" href="ver.html">
+          <span class="dia-fecha tabular">Mié<strong>12</strong></span>
+          <span class="dia-cuerpo">
+            <h3>Tren de Medianoche a Sapporo — T1 E09</h3>
+            <p>«Andén cuatro»</p>
+          </span>
+          <span class="dia-hora tabular">22:45</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="seccion" aria-labelledby="t-reanudar">
+      <div class="seccion-cabeza">
+        <h2 id="t-reanudar">Seguir viendo</h2>
+        <a class="ver-todo" href="#">Tu historial <svg width="16" height="16" aria-hidden="true"><use href="#i-flecha"/></svg></a>
+      </div>
+      <div class="riel riel-ancho reanudar">
+        <a class="ficha" href="ver.html">
+          <div class="cartel"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#c-kaiju"/></svg>
+            <span class="marca-play" aria-hidden="true"><span><svg width="20" height="20"><use href="#i-play"/></svg></span></span>
+          </div>
+          <div class="barra"><span style="width:68%"></span></div>
+          <div class="reanudar-pie tabular"><span>Kaijū Blues · E03</span><span>9 min restantes</span></div>
+        </a>
+        <a class="ficha" href="ver.html">
+          <div class="cartel"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#c-noche"/></svg>
+            <span class="marca-play" aria-hidden="true"><span><svg width="20" height="20"><use href="#i-play"/></svg></span></span>
+          </div>
+          <div class="barra"><span style="width:23%"></span></div>
+          <div class="reanudar-pie tabular"><span>Noctámbula · E12</span><span>18 min restantes</span></div>
+        </a>
+        <a class="ficha" href="ver.html">
+          <div class="cartel"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#c-tren"/></svg>
+            <span class="marca-play" aria-hidden="true"><span><svg width="20" height="20"><use href="#i-play"/></svg></span></span>
+          </div>
+          <div class="barra"><span style="width:91%"></span></div>
+          <div class="reanudar-pie tabular"><span>Tren de Medianoche · E08</span><span>2 min restantes</span></div>
+        </a>
+        <a class="ficha" href="ver.html">
+          <div class="cartel"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#c-espada"/></svg>
+            <span class="marca-play" aria-hidden="true"><span><svg width="20" height="20"><use href="#i-play"/></svg></span></span>
+          </div>
+          <div class="barra"><span style="width:44%"></span></div>
+          <div class="reanudar-pie tabular"><span>La Espada y el Río · E02</span><span>14 min restantes</span></div>
+        </a>
+      </div>
+    </section>
+
+    <section class="seccion" id="estrenos" aria-labelledby="t-estrenos">
+      <div class="seccion-cabeza">
+        <h2 id="t-estrenos">Estrenos de temporada</h2>
+        <a class="ver-todo" href="#">Ver los 42 <svg width="16" height="16" aria-hidden="true"><use href="#i-flecha"/></svg></a>
+      </div>
+      <div class="riel">
+        <a class="ficha" href="serie.html">
+          <div class="cartel"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#c-mecha"/></svg></div>
+          <h3>Cielo de Hierro</h3>
+          <p>Mecha · T2</p>
+        </a>
+        <a class="ficha" href="serie.html">
+          <div class="cartel"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#c-jardin"/></svg></div>
+          <h3>El Jardín de las Cenizas</h3>
+          <p>Fantasía · T1</p>
+        </a>
+        <a class="ficha" href="serie.html">
+          <div class="cartel"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#c-kaiju"/></svg></div>
+          <h3>Kaijū Blues</h3>
+          <p>Acción · T1</p>
+        </a>
+        <a class="ficha" href="serie.html">
+          <div class="cartel"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#c-noche"/></svg></div>
+          <h3>Noctámbula</h3>
+          <p>Misterio · T2</p>
+        </a>
+        <a class="ficha" href="serie.html">
+          <div class="cartel"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#c-tren"/></svg></div>
+          <h3>Tren de Medianoche a Sapporo</h3>
+          <p>Drama · T1</p>
+        </a>
+        <a class="ficha" href="serie.html">
+          <div class="cartel"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#c-espada"/></svg></div>
+          <h3>La Espada y el Río</h3>
+          <p>Histórico · T1</p>
+        </a>
+        <a class="ficha" href="serie.html">
+          <div class="cartel"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#c-mecha"/></svg></div>
+          <h3>Ciudad Vertical</h3>
+          <p>Ciencia ficción · T1</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="seccion" id="generos" aria-labelledby="t-generos">
+      <div class="seccion-cabeza">
+        <h2 id="t-generos">Por dónde entrar</h2>
+      </div>
+      <nav class="generos" aria-label="Géneros">
+        <a href="#">Mecha</a>
+        <a href="#">Slice of life</a>
+        <a href="#">Misterio</a>
+        <a href="#">Histórico</a>
+        <a href="#">Deportes</a>
+        <a href="#">Fantasía</a>
+        <a href="#">Terror</a>
+        <a href="#">Comedia</a>
+        <a href="#">Romance</a>
+        <a href="#">Ciencia ficción</a>
+      </nav>
+    </section>
+
+  </div>
+</main>
+
+<footer class="pie">
+  <div class="pie-fila">
+    <div>
+      <a class="marca" href="index.html">
+        <svg width="24" height="24" aria-hidden="true"><use href="#i-cinta"/></svg>
+        KUROBA
+      </a>
+      <p style="margin-top:0.75rem;max-width:34ch">Catálogo de anime con emisión simultánea y subtítulos en cinco idiomas.</p>
+    </div>
+    <div>
+      <h3>Catálogo</h3>
+      <ul>
+        <li><a href="#">Novedades</a></li>
+        <li><a href="#">Simulcast</a></li>
+        <li><a href="#">Películas</a></li>
+        <li><a href="#">Doblaje en español</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Cuenta</h3>
+      <ul>
+        <li><a href="#">Mi lista</a></li>
+        <li><a href="#">Suscripción</a></li>
+        <li><a href="#">Dispositivos</a></li>
+        <li><a href="#">Descargas</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Ayuda</h3>
+      <ul>
+        <li><a href="#">Centro de soporte</a></li>
+        <li><a href="#">Accesibilidad</a></li>
+        <li><a href="#">Aviso legal</a></li>
+        <li><a href="#">Privacidad</a></li>
+      </ul>
+    </div>
+  </div>
+  <p class="aviso-sintetico">
+    Maqueta de diseño. Todos los títulos, sinopsis, fechas, valoraciones y carátulas son
+    material sintético creado para esta demostración: ninguna obra, marca ni ilustración real
+    aparece en la página. Sustituye este contenido por el catálogo real antes de publicar.
+  </p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cielo de Hierro T2 E07 — KUROBA</title>
+<link rel="stylesheet" href="theme.css">
+<style>
+  body { background: #060505; }
+
+  .barra-sup {
+    display: flex;
+    align-items: center;
+    gap: var(--e3);
+    padding: var(--e2) var(--margen);
+    border-bottom: 1px solid var(--borde);
+    background: var(--sala-900);
+    position: sticky;
+    top: 0;
+    z-index: 60;
+  }
+  .volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--paso-1);
+    font-weight: 600;
+    color: var(--hueso-70);
+    text-decoration: none;
+    padding: 0.35rem 0;
+  }
+  .volver:hover { color: var(--hueso); }
+  .barra-sup .titulo-ep {
+    font-size: var(--paso-1);
+    color: var(--hueso-45);
+    margin-left: auto;
+    text-align: right;
+  }
+  .barra-sup .titulo-ep b { color: var(--hueso); font-weight: 600; }
+
+  .escenario {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 350px;
+    gap: 0;
+    align-items: start;
+  }
+
+  /* --- Reproductor --- */
+  .visor {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .visor > svg.fotograma { width: 100%; height: 100%; }
+
+  .subtitulo {
+    position: absolute;
+    left: 50%;
+    bottom: 15%;
+    transform: translateX(-50%);
+    max-width: 74%;
+    text-align: center;
+    font-size: clamp(1rem, 1.9vw, 1.6rem);
+    font-weight: 600;
+    line-height: 1.35;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+    pointer-events: none;
+  }
+
+  .mandos {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: var(--e5) var(--e3) var(--e3);
+    background: linear-gradient(to top, rgba(0,0,0,0.92), rgba(0,0,0,0.55) 45%, rgba(0,0,0,0));
+    display: grid;
+    gap: var(--e2);
+  }
+
+  .linea {
+    position: relative;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .linea-pista {
+    position: relative;
+    width: 100%;
+    height: 4px;
+    background: rgba(244, 239, 230, 0.22);
+    border-radius: 99px;
+    overflow: visible;
+  }
+  .linea-buffer { position: absolute; inset: 0 auto 0 0; width: 62%; background: rgba(244,239,230,0.35); border-radius: 99px; }
+  .linea-vista { position: absolute; inset: 0 auto 0 0; width: 38%; background: var(--ambar); border-radius: 99px; }
+  .linea-tirador {
+    position: absolute;
+    left: 38%;
+    top: 50%;
+    width: 14px; height: 14px;
+    margin-left: -7px;
+    transform: translateY(-50%) scale(0.85);
+    background: var(--ambar);
+    border-radius: 99px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    transition: transform 0.16s var(--sal);
+  }
+  .linea:hover .linea-tirador { transform: translateY(-50%) scale(1.25); }
+  .marca-op {
+    position: absolute;
+    top: -3px;
+    height: 10px;
+    width: 3px;
+    background: var(--hueso-45);
+    border-radius: 2px;
+  }
+
+  .mandos-fila {
+    display: flex;
+    align-items: center;
+    gap: var(--e2);
+  }
+  .mando {
+    background: none;
+    border: 0;
+    color: var(--hueso);
+    padding: 0.4rem;
+    border-radius: var(--radio);
+    cursor: pointer;
+    display: inline-grid;
+    place-items: center;
+    transition: color 0.16s var(--sal), background 0.16s var(--sal);
+  }
+  .mando:hover { background: rgba(244,239,230,0.14); }
+  .mando-grande { padding: 0.55rem; }
+  .tiempo {
+    font-size: var(--paso-0);
+    color: var(--hueso-70);
+    letter-spacing: 0.02em;
+    margin-left: 0.35rem;
+  }
+  .mandos-fila .derecha { margin-left: auto; display: flex; align-items: center; gap: var(--e1); }
+
+  .volumen { display: flex; align-items: center; gap: 0.5rem; }
+  .volumen-pista {
+    width: 74px; height: 4px;
+    background: rgba(244,239,230,0.22);
+    border-radius: 99px;
+    position: relative;
+  }
+  .volumen-pista span { position: absolute; inset: 0 auto 0 0; width: 70%; background: var(--hueso); border-radius: 99px; }
+
+  .saltar-intro {
+    position: absolute;
+    right: var(--e3);
+    bottom: 96px;
+    background: rgba(11,10,9,0.86);
+    border: 1px solid var(--borde-vivo);
+    color: var(--hueso);
+    font: inherit;
+    font-size: var(--paso-1);
+    font-weight: 600;
+    padding: 0.6rem 1.1rem;
+    border-radius: var(--radio);
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: background 0.16s var(--sal), border-color 0.16s var(--sal);
+  }
+  .saltar-intro:hover { background: var(--ambar); color: var(--ambar-tinta); border-color: var(--ambar); }
+
+  /* --- Debajo del reproductor --- */
+  .bajo { padding: var(--e4) var(--e4) var(--e6); }
+  .bajo h1 {
+    font-family: var(--display);
+    font-size: var(--paso-4);
+    letter-spacing: -0.03em;
+    margin-bottom: var(--e2);
+  }
+  .bajo .serie-enlace {
+    font-size: var(--paso-1);
+    color: var(--ambar);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .bajo .serie-enlace:hover { text-decoration: underline; }
+  .bajo .sinopsis { color: var(--hueso-70); max-width: 68ch; margin-top: var(--e3); }
+  .bajo-acciones { display: flex; flex-wrap: wrap; gap: var(--e2); margin-top: var(--e4); }
+
+  /* --- Cola lateral --- */
+  .cola {
+    border-left: 1px solid var(--borde);
+    background: var(--sala-900);
+    min-height: 100%;
+    position: sticky;
+    top: 57px;
+    max-height: calc(100vh - 57px);
+    overflow-y: auto;
+  }
+  .cola-cabeza {
+    padding: var(--e3);
+    border-bottom: 1px solid var(--borde);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--e2);
+    position: sticky;
+    top: 0;
+    background: var(--sala-900);
+    z-index: 2;
+  }
+  .cola-cabeza h2 {
+    font-size: var(--paso-0);
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--hueso-45);
+  }
+  .autoplay {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--paso-0);
+    color: var(--hueso-70);
+    cursor: pointer;
+  }
+  .palanca {
+    width: 34px; height: 19px;
+    border-radius: 99px;
+    background: var(--ambar);
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.18s var(--sal);
+  }
+  .palanca::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 17px;
+    width: 15px; height: 15px;
+    border-radius: 99px;
+    background: var(--ambar-tinta);
+    transition: left 0.18s var(--sal);
+  }
+  .autoplay input { position: absolute; opacity: 0; pointer-events: none; }
+  .autoplay input:not(:checked) + .palanca { background: var(--sala-500); }
+  .autoplay input:not(:checked) + .palanca::after { left: 2px; background: var(--hueso-45); }
+  .autoplay input:focus-visible + .palanca { outline: 2px solid var(--ambar); outline-offset: 3px; }
+
+  .fila-ep {
+    display: grid;
+    grid-template-columns: 118px 1fr;
+    gap: var(--e2);
+    padding: var(--e2) var(--e3);
+    text-decoration: none;
+    border-bottom: 1px solid var(--borde);
+    align-items: start;
+    transition: background 0.16s var(--sal);
+  }
+  .fila-ep:hover { background: var(--sala-800); }
+  .fila-ep[aria-current='true'] { background: var(--sala-800); box-shadow: inset 3px 0 0 var(--ambar); }
+  .fila-ep .cartel { aspect-ratio: 16/9; box-shadow: none; }
+  .fila-ep b {
+    display: block;
+    font-size: var(--paso-1);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .fila-ep small { color: var(--hueso-45); font-size: var(--paso-0); display: block; margin-top: 0.15rem; }
+  .fila-ep[data-bloqueado] { opacity: 0.5; pointer-events: none; }
+
+  .siguiente {
+    margin: var(--e3);
+    border: 1px solid var(--borde-vivo);
+    border-radius: var(--radio);
+    padding: var(--e3);
+    background: var(--sala-800);
+  }
+  .siguiente h3 {
+    font-size: var(--paso-0);
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--hueso-45);
+    margin-bottom: var(--e2);
+  }
+  .siguiente b { font-size: var(--paso-2); font-weight: 600; display: block; }
+  .siguiente p { font-size: var(--paso-1); color: var(--hueso-45); margin-block: 0.3rem var(--e3); }
+
+  @media (max-width: 1100px) {
+    .escenario { grid-template-columns: minmax(0, 1fr); }
+    .cola { border-left: 0; border-top: 1px solid var(--borde); position: static; max-height: none; }
+  }
+  @media (max-width: 640px) {
+    .bajo { padding: var(--e3) var(--e3) var(--e5); }
+    .mandos { padding: var(--e4) var(--e2) var(--e2); }
+    .volumen-pista { display: none; }
+    .saltar-intro { bottom: 84px; right: var(--e2); font-size: var(--paso-0); padding: 0.5rem 0.85rem; }
+    .barra-sup .titulo-ep { font-size: var(--paso-0); }
+  }
+</style>
+</head>
+<body>
+<!--
+THESIS: Un reproductor que se comporta como una sala a oscuras: el fotograma ocupa el ancho, el cromo se retira al degradado inferior y la cola de episodios queda al lado, no escondida tras un menú.
+OWN-WORLD: Negro cálido de sala (#0b0a09) sobre negro de proyección (#060505), tinta hueso, ámbar de proyector como campo sólido en progreso y acciones. Archivo Black en titulares, filetes de 1px.
+STORY: El visitante ve el episodio, sabe cuánto le queda, salta la cabecera si quiere y encadena el siguiente sin volver atrás.
+FIRST VIEWPORT: Fotograma 16:9 a todo el ancho con subtítulo centrado y mandos sobre degradado; a la derecha, columna fija con la cola de la temporada y el aviso del siguiente episodio.
+FORM: Reproductor con cola lateral persistente, en la línea de tiempo se marcan cabecera y cierre como datos reales.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="saltar" href="#visor">Saltar al reproductor</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></symbol>
+    <symbol id="i-pausa" viewBox="0 0 24 24"><rect x="6.5" y="4.5" width="4" height="15" fill="currentColor"/><rect x="13.5" y="4.5" width="4" height="15" fill="currentColor"/></symbol>
+    <symbol id="i-atras10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5.5A7.5 7.5 0 114 14"/><path d="M11 2.5L8 5.5l3 3"/></symbol>
+    <symbol id="i-alante10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5.5A7.5 7.5 0 1020 14"/><path d="M13 2.5l3 3-3 3"/></symbol>
+    <symbol id="i-siguiente" viewBox="0 0 24 24"><path d="M5 5l11 7-11 7z" fill="currentColor"/><rect x="17" y="5" width="3" height="14" fill="currentColor"/></symbol>
+    <symbol id="i-volumen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 9.5h4L13 5v14L8 14.5H4z" fill="currentColor"/><path d="M16.5 9a4.5 4.5 0 010 6M19 6.5a8 8 0 010 11"/></symbol>
+    <symbol id="i-cc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M10 10.2a2.6 2.6 0 100 3.6M17 10.2a2.6 2.6 0 100 3.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-ajustes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4L5.3 5.3" stroke-linecap="round"/></symbol>
+    <symbol id="i-pantalla" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+    <symbol id="i-emitir" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19.5h.01M3 15a4.5 4.5 0 014.5 4.5M3 10.5a9 9 0 019 9"/><path d="M3 7.5v-2a1.5 1.5 0 011.5-1.5h15A1.5 1.5 0 0121 5.5v13a1.5 1.5 0 01-1.5 1.5H14"/></symbol>
+    <symbol id="i-atras" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H6M11 5.5L5 12l6 6.5"/></symbol>
+    <symbol id="i-mas" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11M7.5 10.5l4.5 4.5 4.5-4.5M4.5 19.5h15"/></symbol>
+    <symbol id="i-cinta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><circle cx="8" cy="12" r="2.4"/><circle cx="16" cy="12" r="2.4"/></symbol>
+
+    <symbol id="f-actual" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+      <rect width="1600" height="900" fill="#10131b"/>
+      <circle cx="1220" cy="250" r="180" fill="#c8442f"/>
+      <path d="M0 900V640c140-58 230 36 360-6s200-128 330-92 210 112 340 72 210-130 330-96 180 116 240 84V900z" fill="#080a10"/>
+      <g fill="#080a10">
+        <path d="M520 900V520l70-54 70 54v380z"/>
+        <path d="M556 560h68v40h-68z" fill="#ffb03a"/>
+        <path d="M590 660v150M520 700l70-42 70 42" stroke="#080a10" stroke-width="18" fill="none"/>
+      </g>
+      <g stroke="#1b2130" stroke-width="3" opacity="0.5"><path d="M0 200h1600M0 340h1600M0 480h1600"/></g>
+      <g fill="#f4efe6" opacity="0.5"><circle cx="180" cy="140" r="3"/><circle cx="420" cy="90" r="2"/><circle cx="760" cy="180" r="2.5"/><circle cx="980" cy="110" r="2"/></g>
+    </symbol>
+    <symbol id="f-mini1" viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="225" fill="#1c2029"/><circle cx="300" cy="70" r="52" fill="#c8442f"/>
+      <path d="M0 225V150l60-28 58 22 70-40 66 30 74-24 72 34v81z" fill="#0d0f14"/>
+      <path d="M120 150V96l22-16 22 16v54z" fill="#0d0f14"/><rect x="132" y="106" width="20" height="12" fill="#ffb03a"/>
+    </symbol>
+    <symbol id="f-mini2" viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="225" fill="#182028"/>
+      <path d="M0 225V120c70-30 120 26 190-4s130-52 210-16v125z" fill="#0f1620"/>
+      <circle cx="92" cy="66" r="40" fill="#f4efe6"/>
+      <g fill="#ffb03a"><rect x="250" y="130" width="8" height="26"/><rect x="284" y="118" width="8" height="38"/><rect x="318" y="136" width="8" height="20"/></g>
+    </symbol>
+    <symbol id="f-mini3" viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="225" fill="#231a1c"/><circle cx="200" cy="104" r="74" fill="#e8dcc0"/>
+      <path d="M0 225V168c80 22 130-24 200-24s124 46 200 24v57z" fill="#150f11"/>
+      <path d="M200 44v130" stroke="#150f11" stroke-width="7"/><path d="M182 118h36" stroke="#150f11" stroke-width="9"/>
+    </symbol>
+    <symbol id="f-mini4" viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="225" fill="#141b26"/>
+      <path d="M0 225V110h40v-26h34v26h44V70h40v40h50v-22h36v22h40v40h76v75z" fill="#0a0e15"/>
+      <g fill="#ffb03a" opacity="0.85"><rect x="14" y="126" width="8" height="10"/><rect x="86" y="90" width="8" height="10"/><rect x="176" y="80" width="8" height="10"/><rect x="272" y="104" width="8" height="10"/></g>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="barra-sup">
+  <a class="volver" href="serie.html">
+    <svg width="18" height="18" aria-hidden="true"><use href="#i-atras"/></svg>
+    Cielo de Hierro
+  </a>
+  <a class="marca" href="index.html" style="font-size:var(--paso-2);margin-inline:auto">
+    <svg width="20" height="20" aria-hidden="true"><use href="#i-cinta"/></svg>
+    KUROBA
+  </a>
+  <p class="titulo-ep"><b>T2 · E07</b><br>Lo que pesa el aire</p>
+</div>
+
+<div class="escenario">
+
+  <div>
+    <div class="visor" id="visor" role="region" aria-label="Reproductor de vídeo">
+      <svg class="fotograma" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#f-actual"/></svg>
+
+      <p class="subtitulo">No se cayó del cielo. Alguien lo bajó, pieza por pieza.</p>
+
+      <button class="saltar-intro" type="button">Saltar cabecera</button>
+
+      <div class="mandos">
+        <div class="linea" role="slider" tabindex="0" aria-label="Progreso del episodio" aria-valuemin="0" aria-valuemax="1440" aria-valuenow="548" aria-valuetext="9 minutos 8 segundos de 24 minutos">
+          <div class="linea-pista">
+            <div class="linea-buffer"></div>
+            <div class="linea-vista"></div>
+            <div class="marca-op" style="left:6%" title="Cabecera"></div>
+            <div class="marca-op" style="left:91%" title="Cierre"></div>
+            <div class="linea-tirador"></div>
+          </div>
+        </div>
+
+        <div class="mandos-fila">
+          <button class="mando mando-grande" type="button" aria-label="Pausar">
+            <svg width="24" height="24"><use href="#i-pausa"/></svg>
+          </button>
+          <button class="mando" type="button" aria-label="Retroceder 10 segundos">
+            <svg width="21" height="21"><use href="#i-atras10"/></svg>
+          </button>
+          <button class="mando" type="button" aria-label="Avanzar 10 segundos">
+            <svg width="21" height="21"><use href="#i-alante10"/></svg>
+          </button>
+          <button class="mando" type="button" aria-label="Siguiente episodio">
+            <svg width="20" height="20"><use href="#i-siguiente"/></svg>
+          </button>
+          <div class="volumen">
+            <button class="mando" type="button" aria-label="Silenciar">
+              <svg width="21" height="21"><use href="#i-volumen"/></svg>
+            </button>
+            <div class="volumen-pista" role="slider" tabindex="0" aria-label="Volumen" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70"><span></span></div>
+          </div>
+          <span class="tiempo tabular">9:08 / 24:00</span>
+
+          <div class="derecha">
+            <button class="mando" type="button" aria-label="Subtítulos y audio">
+              <svg width="21" height="21"><use href="#i-cc"/></svg>
+            </button>
+            <button class="mando" type="button" aria-label="Calidad y velocidad">
+              <svg width="21" height="21"><use href="#i-ajustes"/></svg>
+            </button>
+            <button class="mando" type="button" aria-label="Emitir en otro dispositivo">
+              <svg width="21" height="21"><use href="#i-emitir"/></svg>
+            </button>
+            <button class="mando" type="button" aria-label="Pantalla completa">
+              <svg width="21" height="21"><use href="#i-pantalla"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bajo">
+      <a class="serie-enlace" href="serie.html">Cielo de Hierro · Temporada 2</a>
+      <h1>E07 — Lo que pesa el aire</h1>
+      <div class="datos">
+        <span>24 min</span>
+        <span class="punto" aria-hidden="true"></span>
+        <span>Emitido el 7 de agosto de 2026</span>
+        <span class="punto" aria-hidden="true"></span>
+        <span>Japonés con subtítulos</span>
+        <span class="punto" aria-hidden="true"></span>
+        <span class="clasif">+16</span>
+      </div>
+      <p class="sinopsis">
+        El taller recibe una pieza que no consta en ningún inventario. Kenzō reconoce la marca del
+        fabricante y decide no decir nada, y Rei entiende por primera vez que el silencio del hangar
+        no es prudencia sino costumbre.
+      </p>
+      <div class="bajo-acciones">
+        <button class="btn btn-fantasma" type="button">
+          <svg width="17" height="17" aria-hidden="true"><use href="#i-mas"/></svg>
+          Mi lista
+        </button>
+        <button class="btn btn-fantasma" type="button">
+          <svg width="17" height="17" aria-hidden="true"><use href="#i-descarga"/></svg>
+          Descargar
+        </button>
+        <button class="btn btn-fantasma" type="button">Denunciar un problema</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="cola" aria-label="Episodios de la temporada">
+    <div class="cola-cabeza">
+      <h2>Temporada 2</h2>
+      <label class="autoplay">
+        <input type="checkbox" checked>
+        <span class="palanca" aria-hidden="true"></span>
+        Encadenar
+      </label>
+    </div>
+
+    <a class="fila-ep" href="ver.html">
+      <div class="cartel"><svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><use href="#f-mini1"/></svg></div>
+      <div><b>E06 · El peso del aire</b><small>24 min · visto</small></div>
+    </a>
+
+    <a class="fila-ep" href="ver.html" aria-current="true">
+      <div class="cartel"><svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><use href="#f-mini2"/></svg></div>
+      <div><b>E07 · Lo que pesa el aire</b><small>24 min · viendo ahora</small></div>
+    </a>
+
+    <a class="fila-ep" href="ver.html">
+      <div class="cartel"><svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><use href="#f-mini3"/></svg></div>
+      <div><b>E08 · Hangar siete</b><small>24 min · viernes 14</small></div>
+    </a>
+
+    <div class="fila-ep" data-bloqueado>
+      <div class="cartel"><svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><use href="#f-mini4"/></svg></div>
+      <div><b>E09 · Sin título todavía</b><small>Disponible en 14 días</small></div>
+    </div>
+
+    <div class="siguiente">
+      <h3>A continuación</h3>
+      <b>E08 — Hangar siete</b>
+      <p>Se reproduce solo al terminar este episodio.</p>
+      <a class="btn btn-primario" href="ver.html" style="width:100%">
+        <svg width="16" height="16" aria-hidden="true"><use href="#i-play"/></svg>
+        Reproducir ahora
+      </a>
+    </div>
+  </aside>
+
+</div>
+
+<footer class="pie" style="margin-top:0">
+  <p class="aviso-sintetico" style="border-top:0;padding-top:0;margin-top:0">
+    Maqueta de diseño. Títulos, sinopsis, diálogos, fechas y fotogramas son material sintético
+    creado para esta demostración: ninguna obra ni marca real aparece en la página. El reproductor
+    es una maqueta estática, sin vídeo.
+  </p>
+</footer>
+
+</body>
+</html>

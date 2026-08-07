@@ -1,0 +1,28 @@
+# Sistema operativo
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*~
+
+# Node, por si más adelante entra herramienta de build
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Entorno
+.env
+.env.local
+*.local
+
+# Salidas de build
+dist/
+build/
+.cache/

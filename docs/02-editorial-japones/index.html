@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HANRO 版路 — Revista de programación</title>
+<link rel="stylesheet" href="theme.css">
+<style>
+  /* ---------------- Apertura ---------------- */
+
+  .apertura {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) 6.5rem;
+    gap: var(--e4);
+    padding-block: var(--e5) var(--e6);
+    align-items: start;
+  }
+
+  .apertura-lamina { border: 1px solid var(--regla-fuerte); }
+  .apertura-lamina svg { width: 100%; height: auto; display: block; }
+
+  .apertura-texto { padding-top: var(--e2); }
+
+  .apertura h1 {
+    font-family: var(--mincho);
+    font-weight: 800;
+    font-size: var(--paso-6);
+    line-height: 1.06;
+    letter-spacing: -0.005em;
+    margin-block: var(--e3) var(--e3);
+  }
+  .apertura .entradilla {
+    font-family: var(--mincho);
+    font-size: var(--paso-3);
+    line-height: 1.8;
+    max-width: 34ch;
+    margin-bottom: var(--e4);
+  }
+  .apertura .cuerpo-texto {
+    font-size: var(--paso-1);
+    color: var(--tinta-70);
+    max-width: 40ch;
+    margin-bottom: var(--e4);
+    column-count: 1;
+  }
+  .apertura-acciones { display: flex; flex-wrap: wrap; gap: var(--e2); }
+
+  /* Raíl vertical con el título original */
+  .rail {
+    justify-self: end;
+    height: 100%;
+    min-height: 26rem;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--e2);
+    border-left: 1px solid var(--regla);
+    padding-left: var(--e3);
+  }
+  .rail .titulo-jp {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-family: var(--mincho);
+    font-weight: 800;
+    font-size: clamp(1.6rem, 2.6vw, 2.3rem);
+    letter-spacing: 0.16em;
+    line-height: 1;
+  }
+  .rail .credito-jp {
+    writing-mode: vertical-rl;
+    font-family: var(--gothic);
+    font-size: var(--paso-0);
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: var(--tinta-45);
+  }
+
+  /* Tabla de datos de la apertura */
+  .datos-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--paso-1);
+    margin-bottom: var(--e4);
+  }
+  .datos-tabla th, .datos-tabla td {
+    text-align: left;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--regla);
+    vertical-align: top;
+  }
+  .datos-tabla th {
+    font-weight: 700;
+    color: var(--tinta-45);
+    letter-spacing: 0.1em;
+    font-size: var(--paso-0);
+    text-transform: uppercase;
+    width: 9rem;
+    white-space: nowrap;
+  }
+
+  /* ---------------- Parrilla semanal ---------------- */
+
+  .seccion { margin-bottom: var(--e6); }
+
+  .parrilla { width: 100%; border-collapse: collapse; }
+  .parrilla caption { text-align: left; }
+  .parrilla th {
+    font-size: var(--paso-0);
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--tinta-45);
+    text-align: left;
+    padding-bottom: var(--e2);
+    border-bottom: 1px solid var(--regla-fuerte);
+  }
+  .parrilla td {
+    padding: var(--e3) var(--e3) var(--e3) 0;
+    border-bottom: 1px solid var(--regla);
+    vertical-align: baseline;
+  }
+  .parrilla tr:hover td { background: var(--papel-alto); }
+  .parrilla .col-dia { width: 6.5rem; }
+  .parrilla .col-hora { width: 5.5rem; text-align: right; padding-right: 0; }
+
+  .dia-marca {
+    font-family: var(--mincho);
+    font-weight: 800;
+    font-size: var(--paso-3);
+    line-height: 1.2;
+  }
+  .dia-marca small {
+    display: block;
+    font-family: var(--gothic);
+    font-size: var(--paso-0);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--tinta-45);
+  }
+  tr[data-hoy] .dia-marca, tr[data-hoy] .dia-marca small { color: var(--shu); }
+
+  .parrilla a.serie-t {
+    font-family: var(--mincho);
+    font-weight: 600;
+    font-size: var(--paso-3);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+  }
+  .parrilla a.serie-t:hover { color: var(--shu); text-decoration: underline; }
+  .parrilla .ep-t { font-size: var(--paso-1); color: var(--tinta-70); }
+  .parrilla .col-hora span { font-weight: 700; font-size: var(--paso-2); }
+
+  /* ---------------- Reportaje / destacados ---------------- */
+
+  .pliego {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--e4) var(--e3);
+  }
+  .pieza { text-decoration: none; display: block; }
+  .pieza .lamina { transition: box-shadow 0.24s var(--sal); }
+  .pieza:hover .lamina, .pieza:focus-visible .lamina { box-shadow: var(--sombra); }
+  .pieza h3 {
+    font-family: var(--mincho);
+    font-weight: 600;
+    font-size: var(--paso-3);
+    line-height: 1.35;
+    margin-top: var(--e2);
+  }
+  .pieza:hover h3 { color: var(--shu); }
+  .pieza .sumario { font-size: var(--paso-1); color: var(--tinta-70); margin-top: 0.3rem; }
+  .pieza .pie-dato {
+    font-size: var(--paso-0);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--tinta-45);
+    margin-top: var(--e2);
+    padding-top: var(--e2);
+    border-top: 1px solid var(--regla);
+  }
+
+  .pieza-grande { grid-column: span 6; }
+  .pieza-grande .lamina { aspect-ratio: 3 / 2; }
+  .pieza-grande h3 { font-size: var(--paso-4); }
+  .pieza-media { grid-column: span 3; }
+  .pieza-media .lamina { aspect-ratio: 3 / 4; }
+  .pieza-fina { grid-column: span 2; }
+
+  /* ---------------- Índice ---------------- */
+
+  .indice { columns: 3; column-gap: var(--e5); }
+  .indice a {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    text-decoration: none;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--regla);
+    break-inside: avoid;
+    font-size: var(--paso-1);
+  }
+  .indice a:hover { color: var(--shu); }
+  .indice .puntos {
+    flex: 1;
+    border-bottom: 1px dotted var(--tinta-45);
+    transform: translateY(-0.25em);
+  }
+  .indice .cifra { font-weight: 700; color: var(--tinta-45); }
+  .indice a:hover .cifra { color: var(--shu); }
+
+  /* ---------------- Responsive ---------------- */
+
+  @media (max-width: 1080px) {
+    .apertura { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .rail { display: none; }
+    .pieza-grande { grid-column: span 12; }
+    .pieza-media { grid-column: span 6; }
+    .pieza-fina { grid-column: span 4; }
+    .indice { columns: 2; }
+  }
+  @media (max-width: 760px) {
+    .nav-rev { display: none; }
+    .apertura { grid-template-columns: 1fr; gap: var(--e3); }
+    .apertura h1 { font-size: clamp(2.25rem, 10vw, 3rem); }
+    .parrilla .col-dia { width: 4rem; }
+    .parrilla .col-hora { width: 4rem; }
+    .pieza-media, .pieza-fina { grid-column: span 6; }
+    .indice { columns: 1; }
+  }
+  @media (max-width: 520px) {
+    .campo-buscar input { display: none; }
+    .campo-buscar { padding: 0.45rem; }
+    .pieza-media, .pieza-fina { grid-column: span 12; }
+  }
+</style>
+</head>
+<body>
+<!--
+THESIS: El catálogo se lee como el número de esta semana de una revista de programación: parrilla, reportaje e índice. Rechaza el carrusel infinito de carátulas iguales.
+OWN-WORLD: Papel frío #f1f1ee, tinta sumi en campos grandes, bermellón 朱 #d1332b reservado a lo que se emite hoy. Shippori Mincho en titulares, Zen Kaku Gothic en datos, reglas de 1px y 2px, escritura vertical real en el raíl.
+STORY: El lector ve de qué va el número, qué se emite cada día y entra a la ficha desde el índice.
+FIRST VIEWPORT: Cintillo de fecha, mancheta, y apertura a tres columnas: lámina impresa, entradilla en mincho con tabla de datos, y raíl vertical con el título original en japonés.
+FORM: Retícula de doce columnas con piezas de tamaño desigual, primera de la lista ordenada; dirección fijada por el usuario.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="saltar" href="#principal">Saltar al contenido</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-buscar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></symbol>
+    <symbol id="i-marcar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6.5 3.5h11v17l-5.5-4.5-5.5 4.5z"/></symbol>
+
+    <!-- Láminas: estampa plana, tres tintas -->
+    <symbol id="l-cielo" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice">
+      <rect width="600" height="400" fill="#f1f1ee"/>
+      <circle cx="430" cy="130" r="92" fill="#d1332b"/>
+      <path d="M0 400V286c66-30 108 20 176-8s108-64 176-36 122 44 190 12h58v146z" fill="#17161a"/>
+      <path d="M0 400V342c70-18 118 22 188 4s112-42 180-24 132 32 232 8v70z" fill="#3c3a44"/>
+      <g fill="#17161a">
+        <path d="M212 286V168l40-30 40 30v118z"/>
+        <path d="M232 190h40v26h-40z" fill="#f1f1ee"/>
+        <path d="M252 286v62M212 314l40-24 40 24" stroke="#17161a" stroke-width="11" fill="none"/>
+      </g>
+      <g stroke="#17161a" stroke-width="1.5" opacity="0.28">
+        <path d="M0 60h600M0 92h600M0 124h600"/>
+      </g>
+    </symbol>
+
+    <symbol id="l-jardin" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="#e9e9e4"/>
+      <circle cx="272" cy="140" r="80" fill="#d1332b"/>
+      <path d="M0 600V420c60-34 100 22 154-14s86-64 140-40 74 12 106-14v248z" fill="#17161a"/>
+      <path d="M104 600V286" stroke="#17161a" stroke-width="14"/>
+      <path d="M104 344c-44-10-58-44-54-80 38 6 58 38 54 80zM104 388c44-14 58-50 52-86-38 10-56 44-52 86z" fill="#17161a"/>
+      <g fill="#d1332b"><circle cx="158" cy="232" r="8"/><circle cx="66" cy="278" r="6"/><circle cx="198" cy="312" r="5"/></g>
+    </symbol>
+
+    <symbol id="l-kaiju" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="#e9e9e4"/>
+      <path d="M0 600V320h44v-64h40v64h50V246h46v74h58v-52h42v52h46v90h74v190z" fill="#17161a"/>
+      <path d="M256 600c-14-84 10-152 48-206 22-32 18-62-8-90 62 18 94 76 86 146-6 54-32 102-68 150z" fill="#d1332b"/>
+      <circle cx="314" cy="288" r="10" fill="#f1f1ee"/>
+      <g stroke="#17161a" stroke-width="1.5" opacity="0.3"><path d="M0 80h400M0 112h400"/></g>
+    </symbol>
+
+    <symbol id="l-noche" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="#17161a"/>
+      <g stroke="#3c3a44" stroke-width="2"><path d="M40 0l-30 600M130 0l-30 600M220 0l-30 600M310 0l-30 600M400 0l-30 600"/></g>
+      <circle cx="296" cy="122" r="56" fill="#f1f1ee"/>
+      <circle cx="268" cy="106" r="50" fill="#17161a"/>
+      <path d="M0 600V488h400v112z" fill="#0c0b0e"/>
+      <path d="M132 488V380" stroke="#f1f1ee" stroke-width="5"/>
+      <path d="M76 384a56 30 0 01112 0z" fill="#d1332b"/>
+      <path d="M132 488l-14 74M132 488l16 74" stroke="#f1f1ee" stroke-width="8" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="l-tren" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="#e9e9e4"/>
+      <circle cx="110" cy="152" r="78" fill="#d1332b"/>
+      <rect x="-20" y="300" width="440" height="110" fill="#17161a"/>
+      <g fill="#f1f1ee"><rect x="10" y="328" width="42" height="34"/><rect x="72" y="328" width="42" height="34"/><rect x="134" y="328" width="42" height="34"/><rect x="196" y="328" width="42" height="34"/><rect x="258" y="328" width="42" height="34"/><rect x="320" y="328" width="42" height="34"/></g>
+      <g fill="#17161a"><circle cx="64" cy="424" r="18"/><circle cx="154" cy="424" r="18"/><circle cx="254" cy="424" r="18"/><circle cx="344" cy="424" r="18"/></g>
+      <path d="M0 452h400" stroke="#17161a" stroke-width="6"/>
+      <path d="M0 600V500h400v100z" fill="#17161a" opacity="0.12"/>
+    </symbol>
+
+    <symbol id="l-espada" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="#e9e9e4"/>
+      <circle cx="200" cy="200" r="128" fill="#17161a"/>
+      <path d="M0 600V444c72 26 118-30 200-30s130 56 200 30v156z" fill="#17161a"/>
+      <path d="M0 474c76 22 122-26 200-26s124 48 200 26" stroke="#d1332b" stroke-width="6" fill="none"/>
+      <path d="M212 120v300" stroke="#f1f1ee" stroke-width="7"/>
+      <path d="M188 290h48" stroke="#f1f1ee" stroke-width="10"/>
+      <path d="M176 444c0-58 14-96 36-114 22 18 36 56 36 114z" fill="#e9e9e4"/>
+    </symbol>
+
+    <symbol id="l-cafe" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="600" fill="#e9e9e4"/>
+      <rect x="40" y="90" width="320" height="240" fill="#17161a"/>
+      <rect x="70" y="120" width="120" height="90" fill="#d1332b"/>
+      <rect x="210" y="120" width="120" height="90" fill="#e9e9e4"/>
+      <rect x="70" y="238" width="260" height="60" fill="#e9e9e4"/>
+      <path d="M120 600V400h160v200z" fill="#17161a"/>
+      <path d="M150 400v-52h100v52z" fill="#d1332b"/>
+      <g stroke="#17161a" stroke-width="2" opacity="0.3"><path d="M0 380h120M280 380h120M0 440h120M280 440h120"/></g>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="cintillo">
+  <div>
+    <span>Número 214</span>
+    <span>Viernes 7 de agosto de 2026</span>
+    <span class="vivo">3 títulos en emisión hoy</span>
+    <span style="margin-left:auto">Temporada de verano</span>
+  </div>
+</div>
+
+<header class="mancheta">
+  <div class="mancheta-fila">
+    <a class="logo" href="index.html">版路 <em>HANRO</em></a>
+    <nav class="nav-rev" aria-label="Principal">
+      <a href="index.html" aria-current="page">Número</a>
+      <a href="#parrilla">Parrilla</a>
+      <a href="#reportaje">Reportaje</a>
+      <a href="serie.html">Fichas</a>
+      <a href="#indice">Índice</a>
+    </nav>
+    <div class="mancheta-fin">
+      <label class="campo-buscar">
+        <svg width="16" height="16" aria-hidden="true"><use href="#i-buscar"/></svg>
+        <span class="solo-lectores">Buscar en el catálogo</span>
+        <input type="search" placeholder="Buscar">
+      </label>
+      <button class="cuenta" type="button" aria-label="Tu cuenta">安</button>
+    </div>
+  </div>
+</header>
+
+<main id="principal">
+  <div class="envoltorio">
+
+    <section class="apertura" aria-labelledby="apertura-t">
+      <div class="apertura-lamina">
+        <svg viewBox="0 0 600 400" aria-hidden="true"><use href="#l-cielo"/></svg>
+      </div>
+
+      <div class="apertura-texto">
+        <p class="emision">Episodio nuevo esta noche</p>
+        <h1 id="apertura-t">Cielo de Hierro</h1>
+        <p class="entradilla">
+          Cuando los dirigibles dejaron de volar, la ciudad aprendió a mirar hacia abajo.
+        </p>
+        <p class="cuerpo-texto">
+          Segunda temporada de la adaptación del manga de Sae Fujimoto. Rei pilota lo último que
+          queda de una flota que nadie recuerda haber construido, y cada vuelo la acerca menos al
+          cielo y más a la pregunta de quién decidió bajarlo.
+        </p>
+        <table class="datos-tabla">
+          <tbody>
+            <tr><th scope="row">Estudio</th><td>Studio Hanabi</td></tr>
+            <tr><th scope="row">Dirección</th><td>Mizuki Ono</td></tr>
+            <tr><th scope="row">Emisión</th><td>Viernes, 21:00</td></tr>
+            <tr><th scope="row">Episodios</th><td class="tabular">24 · 24 min</td></tr>
+            <tr><th scope="row">Valoración</th><td class="tabular">8,7 sobre 2.418 votos</td></tr>
+          </tbody>
+        </table>
+        <div class="apertura-acciones">
+          <a class="btn btn-shu" href="ver.html">
+            <svg width="15" height="15" aria-hidden="true"><use href="#i-play"/></svg>
+            Ver T2 · E07
+          </a>
+          <a class="btn" href="serie.html">Ficha completa</a>
+        </div>
+      </div>
+
+      <div class="rail" aria-hidden="true">
+        <span class="titulo-jp">鉄の空</span>
+        <span class="credito-jp">第二期・第七話</span>
+      </div>
+    </section>
+
+    <section class="seccion" id="parrilla" aria-labelledby="t-parrilla">
+      <div class="regla-titulo">
+        <h2 id="t-parrilla">Parrilla de la semana</h2>
+        <span class="kana">今週の放送</span>
+        <a href="#">Mes completo</a>
+      </div>
+      <table class="parrilla">
+        <caption class="solo-lectores">Emisiones previstas del 7 al 12 de agosto de 2026</caption>
+        <thead>
+          <tr>
+            <th scope="col" class="col-dia">Día</th>
+            <th scope="col">Título y episodio</th>
+            <th scope="col" class="col-hora">Hora</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-hoy>
+            <td class="col-dia"><span class="dia-marca">07<small>Vie · hoy</small></span></td>
+            <td>
+              <a class="serie-t" href="serie.html">Cielo de Hierro</a>
+              <p class="ep-t">T2 E07 · «Lo que pesa el aire» · estreno simultáneo</p>
+            </td>
+            <td class="col-hora tabular"><span>21:00</span></td>
+          </tr>
+          <tr>
+            <td class="col-dia"><span class="dia-marca">08<small>Sáb</small></span></td>
+            <td>
+              <a class="serie-t" href="serie.html">Café Yūrei</a>
+              <p class="ep-t">T1 E11 · «La cuenta de la casa»</p>
+            </td>
+            <td class="col-hora tabular"><span>18:30</span></td>
+          </tr>
+          <tr>
+            <td class="col-dia"><span class="dia-marca">09<small>Dom</small></span></td>
+            <td>
+              <a class="serie-t" href="serie.html">Los Perros de Neón</a>
+              <p class="ep-t">T3 E02 · «Nadie llama dos veces»</p>
+            </td>
+            <td class="col-hora tabular"><span>23:15</span></td>
+          </tr>
+          <tr>
+            <td class="col-dia"><span class="dia-marca">10<small>Lun</small></span></td>
+            <td>
+              <a class="serie-t" href="serie.html">El Jardín de las Cenizas</a>
+              <p class="ep-t">T1 E04 · «Raíz amarga»</p>
+            </td>
+            <td class="col-hora tabular"><span>20:00</span></td>
+          </tr>
+          <tr>
+            <td class="col-dia"><span class="dia-marca">12<small>Mié</small></span></td>
+            <td>
+              <a class="serie-t" href="serie.html">Tren de Medianoche a Sapporo</a>
+              <p class="ep-t">T1 E09 · «Andén cuatro» · final de temporada</p>
+            </td>
+            <td class="col-hora tabular"><span>22:45</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="seccion" id="reportaje" aria-labelledby="t-reportaje">
+      <div class="regla-titulo">
+        <h2 id="t-reportaje">El número de esta semana</h2>
+        <span class="kana">特集</span>
+        <a href="#">Todos los reportajes</a>
+      </div>
+
+      <div class="pliego">
+        <a class="pieza pieza-grande" href="serie.html">
+          <div class="lamina" style="aspect-ratio:3/2"><svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice"><use href="#l-cielo"/></svg></div>
+          <h3>El taller que dibuja los dirigibles antes de escribir el guion</h3>
+          <p class="sumario">Studio Hanabi construye maquetas físicas de cada nave y las fotografía para el fondo. Visitamos el taller durante la producción del séptimo episodio.</p>
+          <p class="pie-dato">Reportaje · 12 min de lectura</p>
+        </a>
+
+        <a class="pieza pieza-media" href="serie.html">
+          <div class="lamina"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#l-jardin"/></svg></div>
+          <h3>El Jardín de las Cenizas</h3>
+          <p class="sumario">Fantasía botánica con un ritmo que se toma su tiempo.</p>
+          <p class="pie-dato">Estreno · T1</p>
+        </a>
+
+        <a class="pieza pieza-media" href="serie.html">
+          <div class="lamina"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#l-kaiju"/></svg></div>
+          <h3>Kaijū Blues</h3>
+          <p class="sumario">Los monstruos ya no son el problema; el papeleo sí.</p>
+          <p class="pie-dato">Estreno · T1</p>
+        </a>
+
+        <a class="pieza pieza-fina" href="serie.html">
+          <div class="lamina"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#l-noche"/></svg></div>
+          <h3>Noctámbula</h3>
+          <p class="pie-dato">Misterio · T2</p>
+        </a>
+
+        <a class="pieza pieza-fina" href="serie.html">
+          <div class="lamina"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#l-tren"/></svg></div>
+          <h3>Tren de Medianoche a Sapporo</h3>
+          <p class="pie-dato">Drama · T1</p>
+        </a>
+
+        <a class="pieza pieza-fina" href="serie.html">
+          <div class="lamina"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#l-espada"/></svg></div>
+          <h3>La Espada y el Río</h3>
+          <p class="pie-dato">Histórico · T1</p>
+        </a>
+
+        <a class="pieza pieza-fina" href="serie.html">
+          <div class="lamina"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#l-cafe"/></svg></div>
+          <h3>Café Yūrei</h3>
+          <p class="pie-dato">Slice of life · T1</p>
+        </a>
+
+        <a class="pieza pieza-fina" href="serie.html">
+          <div class="lamina"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#l-jardin"/></svg></div>
+          <h3>Marea Alta</h3>
+          <p class="pie-dato">Drama · T2</p>
+        </a>
+
+        <a class="pieza pieza-fina" href="serie.html">
+          <div class="lamina"><svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice"><use href="#l-kaiju"/></svg></div>
+          <h3>Ciudad Vertical</h3>
+          <p class="pie-dato">Ciencia ficción · T1</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="seccion" id="indice" aria-labelledby="t-indice">
+      <div class="regla-titulo">
+        <h2 id="t-indice">Índice del catálogo</h2>
+        <span class="kana">索引</span>
+        <a href="#">Ver los 412 títulos</a>
+      </div>
+      <nav class="indice" aria-label="Índice de series">
+        <a href="serie.html"><span>Ámbar</span><span class="puntos" aria-hidden="true"></span><span class="cifra tabular">12 ep</span></a>
+        <a href="serie.html"><span>Café Yūrei</span><span class="puntos" aria-hidden="true"></span><span class="cifra tabular">11 ep</span></a>
+        <a href="serie.html"><span>Ciudad Vertical</span><span class="puntos" aria-hidden="true"></span><span class="cifra tabular">13 ep</span></a>
+        <a href="serie.html"><span>Cielo de Hierro</span><span class="puntos" aria-hidden="true"></span><span class="cifra tabular">24 ep</span></a>
+        <a href="serie.html"><span>El Jardín de las Cenizas</span><span class="puntos" aria-hidden="true"></span><span class="cifra tabular">4 ep</span></a>
+        <a href="serie.html"><span>Kaijū Blues</span><span class="puntos" aria-hidden="true"></span><span class="cifra tabular">9 ep</span></a>
+        <a href="serie.html"><span>La Espada y el Río</span><span class="puntos" aria-hidden="true"></span><span class="cifra tabular">10 ep</span></a>
+        <a href="serie.html"><span>Los Perros de Neón</span><span class="puntos" aria-hidden="true"></span><span class="cifra tabular">38 ep</span></a>
+        <a href="serie.html"><span>Marea Alta</span><span class="puntos" aria-hidden="true"></span><span class="cifra tabular">22 ep</span></a>
+        <a href="serie.html"><span>Noctámbula</span><span class="puntos" aria-hidden="true"></span><span class="cifra tabular">25 ep</span></a>
+        <a href="serie.html"><span>Ruido Blanco</span><span class="puntos" aria-hidden="true"></span><span class="cifra tabular">6 ep</span></a>
+        <a href="serie.html"><span>Tren de Medianoche a Sapporo</span><span class="puntos" aria-hidden="true"></span><span class="cifra tabular">9 ep</span></a>
+      </nav>
+    </section>
+
+  </div>
+</main>
+
+<footer class="colofon">
+  <div class="colofon-fila">
+    <div>
+      <a class="logo" href="index.html">版路 <em>HANRO</em></a>
+      <p style="margin-top:0.75rem;max-width:32ch;font-size:var(--paso-1)">
+        Revista de programación y catálogo de anime. Número 214, temporada de verano de 2026.
+      </p>
+    </div>
+    <div>
+      <h3>Secciones</h3>
+      <ul><li><a href="#parrilla">Parrilla</a></li><li><a href="#reportaje">Reportaje</a></li><li><a href="#indice">Índice</a></li><li><a href="#">Archivo</a></li></ul>
+    </div>
+    <div>
+      <h3>Suscripción</h3>
+      <ul><li><a href="#">Planes</a></li><li><a href="#">Edición impresa</a></li><li><a href="#">Regalo</a></li><li><a href="#">Dispositivos</a></li></ul>
+    </div>
+    <div>
+      <h3>Redacción</h3>
+      <ul><li><a href="#">Quiénes somos</a></li><li><a href="#">Contacto</a></li><li><a href="#">Accesibilidad</a></li><li><a href="#">Aviso legal</a></li></ul>
+    </div>
+  </div>
+  <p class="pie-legal">
+    Maqueta de diseño. Todos los títulos, sinopsis, nombres, fechas, valoraciones y láminas son
+    material sintético creado para esta demostración: ninguna obra, marca ni persona real aparece
+    en la página. Sustituye este contenido por el catálogo real antes de publicar.
+  </p>
+</footer>
+
+</body>
+</html>

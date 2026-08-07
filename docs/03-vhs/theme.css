@@ -1,0 +1,405 @@
+/* ============================================================
+   VIDEOCLUB NOVA — sistema visual
+   Dirección 3 de 4. La plataforma como videoclub y magnetoscopio:
+   estantería de cintas, rótulos de OSD y guía de canales en
+   teletexto. Aberración cromática desplazada, nunca halo.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Chivo:wght@400;700;900&family=VT323&display=swap');
+
+:root {
+  /* Cinta y carcasa */
+  --cinta: #0c0a18;
+  --cinta-alta: #15122a;
+  --carcasa: #1e1a38;
+  --carcasa-clara: #2c2750;
+
+  /* Fósforo del tubo */
+  --fosforo: #eae7f5;
+  --fosforo-70: #a8a2c4;
+  --fosforo-45: #746e94;
+
+  /* Tintas de vídeo compuesto */
+  --magenta: #ff2d95;
+  --cian: #22e0ff;
+  --ambar-rec: #ffcc22;
+  --verde-osd: #4dff9e;
+
+  --borde: #322c58;
+  --borde-vivo: #4a4280;
+
+  --display: 'Anton', 'Arial Narrow', sans-serif;
+  --osd: 'VT323', 'Courier New', monospace;
+  --texto: 'Chivo', system-ui, sans-serif;
+
+  --paso-0: 0.75rem;
+  --paso-1: 0.875rem;
+  --paso-2: 1rem;
+  --paso-3: 1.25rem;
+  --paso-4: 1.875rem;
+  --paso-5: clamp(2.5rem, 6vw, 4rem);
+  --paso-6: clamp(3.25rem, 10vw, 6rem);
+
+  --e1: 0.3rem;
+  --e2: 0.7rem;
+  --e3: 1.15rem;
+  --e4: 1.9rem;
+  --e5: 3rem;
+  --e6: 5rem;
+
+  --margen: clamp(1rem, 3.5vw, 3rem);
+  --sal: cubic-bezier(0.16, 1, 0.3, 1);
+  --sombra: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--cinta);
+  color: var(--fosforo);
+  font-family: var(--texto);
+  font-size: var(--paso-2);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Líneas de barrido del tubo, sobre todo el documento */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.18) 0 1px,
+    rgba(0, 0, 0, 0) 1px 3px
+  );
+  mix-blend-mode: multiply;
+}
+
+::selection { background: var(--magenta); color: var(--cinta); }
+* { scrollbar-width: thin; scrollbar-color: var(--borde-vivo) var(--cinta); }
+*::-webkit-scrollbar { width: 12px; height: 12px; }
+*::-webkit-scrollbar-track { background: var(--cinta-alta); }
+*::-webkit-scrollbar-thumb { background: var(--borde-vivo); border: 3px solid var(--cinta-alta); }
+*::-webkit-scrollbar-thumb:hover { background: var(--magenta); }
+
+:focus-visible { outline: 2px solid var(--cian); outline-offset: 2px; }
+
+a { color: inherit; text-underline-offset: 0.2em; }
+img, svg { display: block; max-width: 100%; }
+h1, h2, h3 { margin: 0; font-weight: 400; text-wrap: balance; }
+p { margin: 0; }
+
+.tabular { font-variant-numeric: tabular-nums; }
+
+.envoltorio { max-width: 1500px; margin-inline: auto; padding-inline: var(--margen); }
+
+/* Aberración cromática: desplazamiento real de canales, no resplandor */
+.aberrado {
+  text-shadow: -0.055em 0 0 var(--magenta), 0.055em 0 0 var(--cian);
+}
+
+/* ---------------- Barra de OSD ---------------- */
+
+.osd-barra {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: var(--cinta-alta);
+  border-bottom: 2px solid var(--borde-vivo);
+}
+.osd-fila {
+  max-width: 1500px;
+  margin-inline: auto;
+  padding: var(--e2) var(--margen);
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+}
+
+.logo-nova {
+  font-family: var(--display);
+  font-size: var(--paso-4);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-decoration: none;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.canales { display: flex; gap: var(--e2); font-family: var(--osd); font-size: var(--paso-3); }
+.canales a {
+  text-decoration: none;
+  color: var(--fosforo-70);
+  padding: 0.1rem 0.55rem;
+  border: 1px solid transparent;
+  letter-spacing: 0.04em;
+  transition: color 0.14s var(--sal), background 0.14s var(--sal), border-color 0.14s var(--sal);
+}
+.canales a:hover { color: var(--fosforo); border-color: var(--borde-vivo); }
+.canales a[aria-current='page'] { background: var(--magenta); color: var(--cinta); border-color: var(--magenta); }
+
+.osd-fin { margin-left: auto; display: flex; align-items: center; gap: var(--e2); }
+
+.rec {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--osd);
+  font-size: var(--paso-3);
+  color: var(--ambar-rec);
+  letter-spacing: 0.08em;
+}
+.rec::before {
+  content: '';
+  width: 9px; height: 9px;
+  border-radius: 99px;
+  background: var(--magenta);
+  animation: parpadeo 1.6s steps(1, end) infinite;
+}
+@keyframes parpadeo { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0.15; } }
+
+.busca-osd {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--borde-vivo);
+  background: var(--cinta);
+  padding: 0.25rem 0.6rem;
+}
+.busca-osd:focus-within { border-color: var(--cian); }
+.busca-osd svg { color: var(--fosforo-45); flex-shrink: 0; }
+.busca-osd input {
+  border: 0; background: none; outline: 0;
+  font-family: var(--osd);
+  font-size: var(--paso-3);
+  color: var(--fosforo);
+  width: 10ch;
+  transition: width 0.24s var(--sal);
+}
+.busca-osd input:focus { width: 16ch; }
+.busca-osd input::placeholder { color: var(--fosforo-45); }
+
+.socio {
+  font-family: var(--osd);
+  font-size: var(--paso-3);
+  border: 1px solid var(--borde-vivo);
+  background: var(--cinta);
+  color: var(--fosforo-70);
+  padding: 0.15rem 0.6rem;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+}
+.socio:hover { color: var(--cinta); background: var(--cian); border-color: var(--cian); }
+
+/* Cinta de estado */
+.tira-estado {
+  background: var(--carcasa);
+  border-bottom: 1px solid var(--borde);
+  font-family: var(--osd);
+  font-size: var(--paso-3);
+  letter-spacing: 0.06em;
+  color: var(--fosforo-70);
+}
+.tira-estado div {
+  max-width: 1500px;
+  margin-inline: auto;
+  padding: 0.2rem var(--margen);
+  display: flex;
+  gap: var(--e3);
+  flex-wrap: wrap;
+}
+.tira-estado .ok { color: var(--verde-osd); }
+
+/* ---------------- Botones ---------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--osd);
+  font-size: var(--paso-4);
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.45rem 1.15rem;
+  border: 2px solid var(--fosforo);
+  background: none;
+  color: var(--fosforo);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.14s var(--sal), color 0.14s var(--sal), border-color 0.14s var(--sal);
+}
+.btn:hover { background: var(--fosforo); color: var(--cinta); }
+
+.btn-play { background: var(--magenta); border-color: var(--magenta); color: var(--cinta); }
+.btn-play:hover { background: var(--cian); border-color: var(--cian); color: var(--cinta); }
+
+.btn-cuadro {
+  width: 42px; height: 42px; padding: 0;
+  border: 2px solid var(--borde-vivo);
+  background: var(--cinta-alta);
+  color: var(--fosforo);
+  display: inline-grid; place-items: center;
+  cursor: pointer;
+  transition: background 0.14s var(--sal), color 0.14s var(--sal), border-color 0.14s var(--sal);
+}
+.btn-cuadro:hover { background: var(--cian); border-color: var(--cian); color: var(--cinta); }
+
+.btn[disabled], .btn[aria-disabled='true'] { opacity: 0.4; pointer-events: none; }
+
+/* ---------------- La cinta ---------------- */
+
+/* Etiqueta de cassette: el catálogo son cintas, no carátulas */
+.cassette {
+  position: relative;
+  background: var(--carcasa);
+  border: 2px solid var(--borde-vivo);
+  display: block;
+  text-decoration: none;
+  transition: transform 0.22s var(--sal), border-color 0.22s var(--sal), box-shadow 0.22s var(--sal);
+}
+.cassette:hover, .cassette:focus-visible {
+  transform: translateY(-4px);
+  border-color: var(--magenta);
+  box-shadow: var(--sombra);
+}
+.cassette-ventana {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-bottom: 2px solid var(--borde-vivo);
+  background: var(--cinta);
+}
+.cassette-ventana svg { width: 100%; height: 100%; }
+
+.cassette-etiqueta { padding: var(--e2); background: var(--fosforo); color: var(--cinta); }
+.cassette-etiqueta h3 {
+  font-family: var(--display);
+  font-size: var(--paso-3);
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+.cassette-etiqueta .linea-datos {
+  font-family: var(--osd);
+  font-size: var(--paso-3);
+  line-height: 1;
+  color: #4a4570;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e2);
+  margin-top: 0.35rem;
+  border-top: 1px solid #b9b3d4;
+  padding-top: 0.3rem;
+  letter-spacing: 0.04em;
+}
+
+.carretes {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 0;
+}
+
+/* ---------------- Títulos de sección ---------------- */
+
+.seccion { margin-bottom: var(--e6); }
+
+.titulo-seccion {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  margin-bottom: var(--e4);
+  border-bottom: 2px solid var(--borde-vivo);
+  padding-bottom: var(--e2);
+}
+.titulo-seccion h2 {
+  font-family: var(--display);
+  font-size: var(--paso-4);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+.titulo-seccion .codigo {
+  font-family: var(--osd);
+  font-size: var(--paso-3);
+  color: var(--cian);
+  letter-spacing: 0.1em;
+}
+.titulo-seccion a {
+  margin-left: auto;
+  font-family: var(--osd);
+  font-size: var(--paso-3);
+  color: var(--fosforo-70);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+.titulo-seccion a:hover { color: var(--magenta); }
+
+/* ---------------- Pie ---------------- */
+
+.pie-nova {
+  border-top: 2px solid var(--borde-vivo);
+  background: var(--cinta-alta);
+  padding: var(--e5) var(--margen) var(--e4);
+}
+.pie-fila {
+  max-width: 1500px;
+  margin-inline: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e5);
+  justify-content: space-between;
+}
+.pie-nova h3 {
+  font-family: var(--osd);
+  font-size: var(--paso-3);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cian);
+  margin-bottom: var(--e2);
+}
+.pie-nova ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; font-size: var(--paso-1); }
+.pie-nova a { text-decoration: none; color: var(--fosforo-70); }
+.pie-nova a:hover { color: var(--fosforo); text-decoration: underline; }
+
+.legal-nova {
+  max-width: 1500px;
+  margin: var(--e4) auto 0;
+  padding-top: var(--e3);
+  border-top: 1px solid var(--borde);
+  font-size: var(--paso-0);
+  line-height: 1.6;
+  color: var(--fosforo-45);
+}
+
+/* ---------------- Utilidades ---------------- */
+
+.solo-lectores {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.saltar {
+  position: absolute; left: var(--margen); top: -100px; z-index: 210;
+  background: var(--magenta); color: var(--cinta);
+  font-family: var(--osd); font-size: var(--paso-3);
+  padding: 0.4rem 0.9rem; text-decoration: none;
+  transition: top 0.2s var(--sal);
+}
+.saltar:focus { top: var(--e2); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .rec::before { animation: none; }
+}

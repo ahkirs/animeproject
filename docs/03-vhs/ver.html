@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cielo de Hierro · Cinta 07 — VIDEOCLUB NOVA</title>
+<link rel="stylesheet" href="theme.css">
+<style>
+  body { background: #070512; }
+
+  .regreso-osd {
+    border-bottom: 1px solid var(--borde);
+    background: var(--cinta-alta);
+    font-family: var(--osd);
+    font-size: var(--paso-3);
+    letter-spacing: 0.06em;
+  }
+  .regreso-osd div {
+    max-width: 1500px;
+    margin-inline: auto;
+    padding: 0.25rem var(--margen);
+    display: flex;
+    align-items: center;
+    gap: var(--e3);
+    color: var(--fosforo-70);
+  }
+  .regreso-osd a { text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; }
+  .regreso-osd a:hover { color: var(--magenta); }
+
+  .banco {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: var(--e4);
+    padding-block: var(--e4) 0;
+    align-items: start;
+  }
+
+  /* --- El tubo --- */
+  .tubo-ver {
+    position: relative;
+    border: 2px solid var(--borde-vivo);
+    background: #000;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    cursor: pointer;
+  }
+  .tubo-ver > svg { width: 100%; height: 100%; }
+
+  .tracking {
+    position: absolute;
+    left: 0; right: 0;
+    height: 30px;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(234,231,245,0.16) 0 2px,
+      rgba(34,224,255,0.1) 2px 4px,
+      rgba(255,45,149,0.08) 4px 6px
+    );
+    animation: arrastre 11s linear infinite;
+    pointer-events: none;
+    z-index: 3;
+  }
+  @keyframes arrastre {
+    0% { top: -8%; opacity: 0; }
+    8% { opacity: 1; }
+    92% { opacity: 1; }
+    100% { top: 104%; opacity: 0; }
+  }
+
+  /* OSD del aparato, esquinas */
+  .osd-esq {
+    position: absolute;
+    z-index: 4;
+    font-family: var(--osd);
+    font-size: var(--paso-4);
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+  }
+  .osd-ti { top: var(--e3); left: var(--e3); color: var(--fosforo); }
+  .osd-td { top: var(--e3); right: var(--e3); color: var(--ambar-rec); }
+
+  .rotulo-vhs {
+    position: absolute;
+    left: 50%;
+    bottom: 17%;
+    transform: translateX(-50%);
+    max-width: 76%;
+    text-align: center;
+    z-index: 4;
+    font-family: var(--osd);
+    font-size: clamp(1.15rem, 2.3vw, 1.9rem);
+    line-height: 1.3;
+    letter-spacing: 0.04em;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.95);
+    pointer-events: none;
+  }
+
+  .salta-cabecera {
+    position: absolute;
+    right: var(--e3);
+    bottom: 110px;
+    z-index: 5;
+    font-family: var(--osd);
+    font-size: var(--paso-4);
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--cinta-alta);
+    border: 2px solid var(--fosforo);
+    color: var(--fosforo);
+    padding: 0.4rem 0.85rem;
+    cursor: pointer;
+    transition: background 0.14s var(--sal), color 0.14s var(--sal), border-color 0.14s var(--sal);
+  }
+  .salta-cabecera:hover { background: var(--magenta); border-color: var(--magenta); color: var(--cinta); }
+
+  /* --- Transporte: la botonera del aparato, bajo el tubo --- */
+  .transporte {
+    border: 2px solid var(--borde-vivo);
+    border-top: 0;
+    background: var(--carcasa);
+    padding: var(--e3);
+    display: grid;
+    gap: var(--e3);
+  }
+
+  .cinta-linea { position: relative; height: 22px; display: flex; align-items: center; cursor: pointer; }
+  .cinta-pista {
+    position: relative;
+    width: 100%;
+    height: 12px;
+    background: var(--cinta);
+    border: 1px solid var(--borde-vivo);
+  }
+  .cinta-carga { position: absolute; inset: 0 auto 0 0; width: 62%; background: var(--carcasa-clara); }
+  .cinta-vista { position: absolute; inset: 0 auto 0 0; width: 38%; background: var(--magenta); }
+  .cinta-tirador {
+    position: absolute;
+    left: 38%;
+    top: 50%;
+    width: 6px; height: 24px;
+    margin-left: -3px;
+    transform: translateY(-50%);
+    background: var(--fosforo);
+    border: 1px solid var(--cinta);
+    transition: height 0.14s var(--sal);
+  }
+  .cinta-linea:hover .cinta-tirador { height: 32px; }
+  .marca-tt {
+    position: absolute;
+    top: -7px;
+    width: 2px; height: 26px;
+    background: var(--cian);
+  }
+  .marca-tt b {
+    position: absolute;
+    top: -1.1rem; left: 0;
+    font-family: var(--osd);
+    font-size: var(--paso-2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cian);
+    white-space: nowrap;
+  }
+
+  .botonera { display: flex; align-items: center; gap: var(--e2); flex-wrap: wrap; }
+  .tecla {
+    min-width: 44px;
+    height: 40px;
+    padding-inline: 0.7rem;
+    border: 2px solid var(--borde-vivo);
+    background: var(--cinta-alta);
+    color: var(--fosforo);
+    font-family: var(--osd);
+    font-size: var(--paso-3);
+    letter-spacing: 0.08em;
+    display: inline-grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background 0.12s var(--sal), color 0.12s var(--sal), border-color 0.12s var(--sal);
+  }
+  .tecla:hover { background: var(--cian); border-color: var(--cian); color: var(--cinta); }
+  .tecla-play { background: var(--magenta); border-color: var(--magenta); color: var(--cinta); min-width: 54px; height: 46px; }
+  .tecla-play:hover { background: var(--fosforo); border-color: var(--fosforo); color: var(--cinta); }
+
+  .contador-grande {
+    font-family: var(--osd);
+    font-size: 1.75rem;
+    line-height: 1;
+    letter-spacing: 0.1em;
+    color: var(--ambar-rec);
+    background: var(--cinta);
+    border: 1px solid var(--borde-vivo);
+    padding: 0.25rem 0.6rem;
+    margin-left: 0.3rem;
+  }
+  .botonera .fin { margin-left: auto; display: flex; align-items: center; gap: var(--e2); }
+
+  .vol-vhs { display: flex; align-items: center; gap: 0.5rem; }
+  .vol-barra { display: flex; gap: 2px; }
+  .vol-barra i { width: 5px; height: 18px; background: var(--borde-vivo); display: block; }
+  .vol-barra i.on { background: var(--verde-osd); }
+
+  /* --- Cartela --- */
+  .cartela-vhs { margin-top: var(--e4); }
+  .cartela-vhs .sup {
+    font-family: var(--osd);
+    font-size: var(--paso-4);
+    line-height: 1;
+    letter-spacing: 0.08em;
+    color: var(--cian);
+    text-decoration: none;
+  }
+  .cartela-vhs .sup:hover { color: var(--magenta); }
+  .cartela-vhs h1 {
+    font-family: var(--display);
+    font-size: var(--paso-4);
+    text-transform: uppercase;
+    line-height: 1.05;
+    margin-block: var(--e2);
+  }
+  .cartela-vhs .datos-osd {
+    font-family: var(--osd);
+    font-size: var(--paso-3);
+    letter-spacing: 0.06em;
+    color: var(--fosforo-45);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e3);
+    border-block: 1px solid var(--borde);
+    padding-block: var(--e2);
+    margin-bottom: var(--e3);
+  }
+  .cartela-vhs p { color: var(--fosforo-70); max-width: 66ch; }
+  .cartela-acciones { display: flex; flex-wrap: wrap; gap: var(--e2); margin-top: var(--e3); }
+
+  /* --- Cola --- */
+  .cola-vhs { border: 2px solid var(--borde-vivo); background: var(--cinta-alta); }
+  .cola-cabeza {
+    background: var(--cian);
+    color: var(--cinta);
+    font-family: var(--osd);
+    font-size: var(--paso-3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: var(--e2) var(--e3);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--e2);
+  }
+  .auto-vhs { display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; }
+  .auto-vhs input { position: absolute; opacity: 0; pointer-events: none; }
+  .led {
+    width: 12px; height: 12px;
+    border: 1px solid var(--cinta);
+    background: transparent;
+    flex-shrink: 0;
+  }
+  .auto-vhs input:checked + .led { background: var(--magenta); }
+  .auto-vhs input:focus-visible + .led { outline: 2px solid var(--cinta); outline-offset: 2px; }
+
+  .cinta-fila {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: var(--e2);
+    padding: var(--e2) var(--e3);
+    border-bottom: 1px dotted var(--borde-vivo);
+    text-decoration: none;
+    align-items: center;
+    transition: background 0.12s var(--sal);
+  }
+  .cinta-fila:hover { background: var(--carcasa); }
+  .cinta-fila[aria-current='true'] { background: var(--carcasa); box-shadow: inset 4px 0 0 var(--magenta); }
+  .cinta-fila .cnt {
+    font-family: var(--osd);
+    font-size: var(--paso-3);
+    color: var(--ambar-rec);
+    letter-spacing: 0.06em;
+  }
+  .cinta-fila b { font-family: var(--display); font-size: var(--paso-2); text-transform: uppercase; display: block; line-height: 1.1; }
+  .cinta-fila small { font-family: var(--osd); font-size: var(--paso-3); color: var(--fosforo-45); letter-spacing: 0.06em; }
+  .cinta-fila[data-bloqueado] { opacity: 0.45; pointer-events: none; }
+
+  .expulsar {
+    margin: var(--e3);
+    border: 2px solid var(--magenta);
+    background: var(--cinta);
+    padding: var(--e3);
+  }
+  .expulsar span {
+    font-family: var(--osd);
+    font-size: var(--paso-3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--magenta);
+  }
+  .expulsar b {
+    display: block;
+    font-family: var(--display);
+    font-size: var(--paso-3);
+    text-transform: uppercase;
+    margin-block: var(--e2);
+    line-height: 1.1;
+  }
+  .expulsar p { font-family: var(--osd); font-size: var(--paso-3); color: var(--fosforo-45); letter-spacing: 0.04em; margin-bottom: var(--e3); }
+
+  @media (max-width: 1080px) {
+    .banco { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 900px) {
+    .canales { display: none; }
+    .contador-grande { font-size: var(--paso-4); }
+  }
+  @media (max-width: 560px) {
+    .busca-osd input { display: none; }
+    .busca-osd { padding: 0.25rem; }
+    .vol-barra { display: none; }
+    .salta-cabecera { bottom: 96px; right: var(--e2); font-size: var(--paso-3); }
+    .transporte { padding: var(--e2); }
+  }
+</style>
+</head>
+<body>
+<!--
+THESIS: El reproductor es un magnetoscopio: contador de cinta, botonera de transporte bajo el tubo y OSD en las esquinas. Rechaza los mandos minimalistas flotantes que se desvanecen.
+OWN-WORLD: Cinta #0c0a18 y carcasa #1e1a38 sobre negro de tubo, fósforo #eae7f5, magenta y cian de vídeo compuesto, ámbar de contador. Anton en rótulos, VT323 en todo el OSD y en los subtítulos, barrido y banda de arrastre como material.
+STORY: El socio ve la cinta, controla el transporte, salta la cabecera y encadena la siguiente sin levantarse.
+FIRST VIEWPORT: Tubo 16:9 con contador arriba a la izquierda e indicador SP arriba a la derecha, banda de arrastre recorriendo la imagen, y botonera de transporte inmediatamente debajo.
+FORM: Botonera de magnetoscopio bajo el tubo, con la cola de cintas a la derecha.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="saltar" href="#tubo">Saltar al reproductor</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-buscar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></symbol>
+    <symbol id="i-pausa" viewBox="0 0 24 24"><rect x="6.5" y="4.5" width="4" height="15" fill="currentColor"/><rect x="13.5" y="4.5" width="4" height="15" fill="currentColor"/></symbol>
+    <symbol id="i-rew" viewBox="0 0 24 24"><path d="M12 5v14L3 12z" fill="currentColor"/><path d="M21 5v14l-9-7z" fill="currentColor"/></symbol>
+    <symbol id="i-ff" viewBox="0 0 24 24"><path d="M12 5v14l9-7z" fill="currentColor"/><path d="M3 5v14l9-7z" fill="currentColor"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" fill="currentColor"/></symbol>
+    <symbol id="i-volumen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 9.5h4L13 5v14L8 14.5H4z" fill="currentColor"/><path d="M16.5 9a4.5 4.5 0 010 6"/></symbol>
+    <symbol id="i-atras" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H6M11 5.5L5 12l6 6.5"/></symbol>
+    <symbol id="i-mas" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-descarga" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11M7.5 10.5l4.5 4.5 4.5-4.5M4.5 19.5h15"/></symbol>
+
+    <symbol id="v-emision" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+      <rect width="1600" height="900" fill="#100d22"/>
+      <circle cx="1230" cy="240" r="190" fill="#ff2d95"/>
+      <circle cx="1170" cy="210" r="168" fill="#100d22" opacity="0.45"/>
+      <path d="M0 900V600c140-58 236 36 366-6s206-128 336-92 216 112 346 72 216-130 346-96 186 114 206 84V900z" fill="#0a0816"/>
+      <path d="M0 900V742c156-38 252 32 386 2s216-98 350-70 226 86 350 52 206-106 344-78 160 92 170 68V900z" fill="#1c1738"/>
+      <g fill="#0a0816">
+        <path d="M520 900V510l72-56 72 56v390z"/>
+        <rect x="558" y="552" width="68" height="44" fill="#22e0ff"/>
+        <path d="M592 656v150M520 696l72-44 72 44" stroke="#0a0816" stroke-width="18" fill="none"/>
+      </g>
+      <g stroke="#22e0ff" stroke-width="2" opacity="0.2"><path d="M0 130h1600M0 178h1600M0 226h1600M0 274h1600"/></g>
+    </symbol>
+    <symbol id="m-1" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="250" fill="#100d22"/><circle cx="300" cy="72" r="52" fill="#ff2d95"/>
+      <path d="M0 250V166l58-26 60 22 68-40 66 30 74-24 74 34v88z" fill="#0a0816"/>
+      <path d="M118 166V108l22-18 22 18v58z" fill="#0a0816"/><rect x="130" y="120" width="20" height="14" fill="#22e0ff"/>
+    </symbol>
+    <symbol id="m-2" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="250" fill="#0f1424"/>
+      <path d="M0 250V140c68-30 118 26 188-4s130-54 212-16v130z" fill="#080c18"/>
+      <circle cx="92" cy="70" r="42" fill="#22e0ff"/>
+      <g fill="#ffcc22"><rect x="250" y="170" width="8" height="28"/><rect x="284" y="158" width="8" height="40"/><rect x="318" y="176" width="8" height="22"/></g>
+    </symbol>
+    <symbol id="m-3" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="250" fill="#221024"/><circle cx="200" cy="106" r="76" fill="#ff2d95"/>
+      <path d="M0 250V186c80 22 130-24 200-24s124 46 200 24v64z" fill="#0f0713"/>
+      <path d="M200 40v140" stroke="#0f0713" stroke-width="7"/><path d="M182 122h36" stroke="#0f0713" stroke-width="9"/>
+    </symbol>
+    <symbol id="m-4" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="250" fill="#0e1424"/>
+      <path d="M0 250V128h40v-26h34v26h44V86h40v42h50V104h36v24h40v42h76v82z" fill="#080c18"/>
+      <g fill="#22e0ff"><rect x="14" y="146" width="8" height="12"/><rect x="86" y="106" width="8" height="12"/><rect x="176" y="94" width="8" height="12"/></g>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="regreso-osd">
+  <div>
+    <a href="serie.html"><svg width="14" height="14" aria-hidden="true"><use href="#i-atras"/></svg> VOLVER A LA FICHA</a>
+    <span>CIELO DE HIERRO · T2</span>
+    <span style="margin-left:auto" class="tabular">CINTA 07 / 12</span>
+  </div>
+</div>
+
+<header class="osd-barra">
+  <div class="osd-fila">
+    <a class="logo-nova aberrado" href="index.html">NOVA</a>
+    <nav class="canales" aria-label="Principal">
+      <a href="index.html">01 ESTANTERÍA</a>
+      <a href="index.html#guia">02 GUÍA</a>
+      <a href="serie.html">03 FICHAS</a>
+      <a href="index.html#generos">04 GÉNEROS</a>
+    </nav>
+    <div class="osd-fin">
+      <span class="rec">REC</span>
+      <label class="busca-osd">
+        <svg width="15" height="15" aria-hidden="true"><use href="#i-buscar"/></svg>
+        <span class="solo-lectores">Buscar cintas</span>
+        <input type="search" placeholder="BUSCAR">
+      </label>
+      <button class="socio" type="button">SOCIO ▸</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="envoltorio">
+    <div class="banco">
+
+      <div>
+        <div class="tubo-ver" id="tubo" role="region" aria-label="Reproductor de vídeo">
+          <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#v-emision"/></svg>
+          <span class="tracking" aria-hidden="true"></span>
+          <span class="osd-esq osd-ti tabular" aria-hidden="true">▶ 0:09:08</span>
+          <span class="osd-esq osd-td tabular" aria-hidden="true">SP · T2-07</span>
+          <p class="rotulo-vhs">No se cayó del cielo. Alguien lo bajó, pieza por pieza.</p>
+          <button class="salta-cabecera" type="button">Saltar cabecera</button>
+        </div>
+
+        <div class="transporte">
+          <div class="cinta-linea" role="slider" tabindex="0" aria-label="Posición de la cinta" aria-valuemin="0" aria-valuemax="1440" aria-valuenow="548" aria-valuetext="9 minutos 8 segundos de 24 minutos">
+            <div class="cinta-pista">
+              <div class="cinta-carga"></div>
+              <div class="cinta-vista"></div>
+              <div class="marca-tt" style="left:6%"><b>Cabecera</b></div>
+              <div class="marca-tt" style="left:91%"><b>Cierre</b></div>
+              <div class="cinta-tirador"></div>
+            </div>
+          </div>
+
+          <div class="botonera">
+            <button class="tecla tecla-play" type="button" aria-label="Pausar">
+              <svg width="18" height="18"><use href="#i-pausa"/></svg>
+            </button>
+            <button class="tecla" type="button" aria-label="Rebobinar">
+              <svg width="17" height="17"><use href="#i-rew"/></svg>
+            </button>
+            <button class="tecla" type="button" aria-label="Avance rápido">
+              <svg width="17" height="17"><use href="#i-ff"/></svg>
+            </button>
+            <button class="tecla" type="button" aria-label="Detener">
+              <svg width="15" height="15"><use href="#i-stop"/></svg>
+            </button>
+            <span class="contador-grande tabular">0908 / 2400</span>
+
+            <div class="fin">
+              <div class="vol-vhs">
+                <button class="tecla" type="button" aria-label="Silenciar">
+                  <svg width="17" height="17"><use href="#i-volumen"/></svg>
+                </button>
+                <span class="vol-barra" role="slider" tabindex="0" aria-label="Volumen" aria-valuemin="0" aria-valuemax="10" aria-valuenow="7">
+                  <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i>
+                </span>
+              </div>
+              <button class="tecla" type="button">CC</button>
+              <button class="tecla" type="button">SP/LP</button>
+              <button class="tecla" type="button" aria-label="Pantalla completa">⛶</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cartela-vhs">
+          <a class="sup tabular" href="serie.html">CIELO DE HIERRO · TEMPORADA 2</a>
+          <h1 class="aberrado">07 — Lo que pesa el aire</h1>
+          <p class="datos-osd tabular">
+            <span>24 MIN</span><span>EMITIDO 07·08·2026</span><span>JP + SUBTÍTULOS</span><span>+16</span>
+          </p>
+          <p>
+            El taller recibe una pieza que no consta en ningún inventario. Kenzō reconoce la marca
+            del fabricante y decide no decir nada, y Rei entiende por primera vez que el silencio
+            del hangar no es prudencia sino costumbre.
+          </p>
+          <div class="cartela-acciones">
+            <button class="btn" type="button">
+              <svg width="16" height="16" aria-hidden="true"><use href="#i-mas"/></svg>
+              Reservar
+            </button>
+            <button class="btn" type="button">
+              <svg width="16" height="16" aria-hidden="true"><use href="#i-descarga"/></svg>
+              Copiar cinta
+            </button>
+            <button class="btn" type="button">Avisar de un fallo</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="cola-vhs" aria-label="Cintas de la temporada">
+        <div class="cola-cabeza">
+          <span>Temporada 2</span>
+          <label class="auto-vhs">
+            <input type="checkbox" checked>
+            <span class="led" aria-hidden="true"></span>
+            Auto
+          </label>
+        </div>
+
+        <a class="cinta-fila" href="ver.html">
+          <span class="cnt tabular">0000</span>
+          <span><b>06 · El peso del aire</b><small class="tabular">24 MIN · VISTA</small></span>
+        </a>
+        <a class="cinta-fila" href="ver.html" aria-current="true">
+          <span class="cnt tabular">0908</span>
+          <span><b>07 · Lo que pesa el aire</b><small class="tabular">24 MIN · EN EL TUBO</small></span>
+        </a>
+        <a class="cinta-fila" href="ver.html">
+          <span class="cnt tabular">----</span>
+          <span><b>08 · Hangar siete</b><small class="tabular">24 MIN · VIE 14</small></span>
+        </a>
+        <div class="cinta-fila" data-bloqueado>
+          <span class="cnt tabular">----</span>
+          <span><b>09 · Sin título todavía</b><small class="tabular">EN 14 DÍAS</small></span>
+        </div>
+
+        <div class="expulsar">
+          <span class="tabular">▸ SIGUIENTE CINTA</span>
+          <b>08 · Hangar siete</b>
+          <p class="tabular">SE CARGA SOLA AL TERMINAR</p>
+          <a class="btn btn-play" href="ver.html" style="width:100%">
+            <svg width="15" height="15" aria-hidden="true"><use href="#i-play"/></svg>
+            Cargar ahora
+          </a>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</main>
+
+<footer class="pie-nova">
+  <div class="pie-fila">
+    <div>
+      <a class="logo-nova aberrado" href="index.html">NOVA</a>
+      <p style="margin-top:0.75rem;max-width:34ch;font-size:var(--paso-1);color:var(--fosforo-70)">
+        Videoclub y emisión simultánea. Abierto todos los días hasta las dos de la madrugada.
+      </p>
+    </div>
+    <div>
+      <h3>Mostrador</h3>
+      <ul><li><a href="#">Ayuda</a></li><li><a href="#">Subtítulos</a></li><li><a href="#">Accesibilidad</a></li><li><a href="#">Aviso legal</a></li></ul>
+    </div>
+  </div>
+  <p class="legal-nova">
+    Maqueta de diseño. Títulos, sinopsis, diálogos, fechas y fotogramas son material sintético
+    creado para esta demostración: ninguna obra ni marca real aparece en la página. El reproductor
+    es una maqueta estática, sin vídeo.
+  </p>
+</footer>
+
+</body>
+</html>

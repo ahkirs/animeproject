@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cielo de Hierro — VIDEOCLUB NOVA</title>
+<link rel="stylesheet" href="theme.css">
+<style>
+  /* --- Carátula de la caja --- */
+  .caja {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: var(--e4);
+    border: 2px solid var(--borde-vivo);
+    background: var(--carcasa);
+    margin-block: var(--e4) var(--e6);
+    padding: var(--e4);
+    align-items: start;
+  }
+
+  .caja-lomo {
+    border: 2px solid var(--borde-vivo);
+    background: var(--cinta);
+    overflow: hidden;
+  }
+  .caja-lomo svg { width: 100%; height: auto; }
+  .caja-sello {
+    font-family: var(--osd);
+    font-size: var(--paso-3);
+    letter-spacing: 0.08em;
+    color: var(--cinta);
+    background: var(--ambar-rec);
+    padding: 0.2rem 0.6rem;
+    display: block;
+    text-align: center;
+  }
+
+  .caja h1 {
+    font-family: var(--display);
+    font-size: var(--paso-5);
+    line-height: 0.92;
+    text-transform: uppercase;
+    margin-bottom: var(--e2);
+  }
+  .caja .jp {
+    font-family: var(--osd);
+    font-size: var(--paso-4);
+    line-height: 1;
+    color: var(--cian);
+    letter-spacing: 0.1em;
+    margin-bottom: var(--e3);
+  }
+  .caja .sinopsis { color: var(--fosforo-70); max-width: 64ch; margin-block: var(--e3) var(--e4); }
+  .caja-acciones { display: flex; flex-wrap: wrap; gap: var(--e2); align-items: center; margin-bottom: var(--e4); }
+
+  /* Ficha de alquiler: datos en rejilla de OSD */
+  .alquiler {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--borde-vivo);
+    border: 1px solid var(--borde-vivo);
+    font-family: var(--osd);
+    font-size: var(--paso-3);
+    line-height: 1.2;
+  }
+  .alquiler div { background: var(--cinta); padding: var(--e2); }
+  .alquiler dt { color: var(--fosforo-45); letter-spacing: 0.1em; text-transform: uppercase; font-size: var(--paso-2); }
+  .alquiler dd { margin: 0.2rem 0 0; color: var(--fosforo); letter-spacing: 0.04em; }
+  .alquiler .destaca { color: var(--magenta); }
+
+  .sellos { display: flex; flex-wrap: wrap; gap: var(--e1); margin-top: var(--e3); }
+  .sellos a {
+    font-family: var(--osd);
+    font-size: var(--paso-3);
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--fosforo-70);
+    border: 1px solid var(--borde-vivo);
+    padding: 0.25rem 0.6rem;
+  }
+  .sellos a:hover { color: var(--cinta); background: var(--cian); border-color: var(--cian); }
+
+  /* --- Cuerpo --- */
+  .cuerpo-caja {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: var(--e5);
+    align-items: start;
+  }
+
+  .selector-cinta {
+    display: flex;
+    gap: var(--e2);
+    margin-bottom: var(--e3);
+    flex-wrap: wrap;
+  }
+  .selector-cinta button {
+    font-family: var(--osd);
+    font-size: var(--paso-4);
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.9rem;
+    border: 2px solid var(--borde-vivo);
+    background: var(--carcasa);
+    color: var(--fosforo-70);
+    cursor: pointer;
+    transition: background 0.14s var(--sal), color 0.14s var(--sal), border-color 0.14s var(--sal);
+  }
+  .selector-cinta button:hover { color: var(--fosforo); border-color: var(--fosforo-45); }
+  .selector-cinta button[aria-selected='true'] { background: var(--magenta); border-color: var(--magenta); color: var(--cinta); }
+
+  /* Registro de cinta: filas con posición de contador */
+  .registro { border: 2px solid var(--borde-vivo); background: var(--cinta-alta); }
+  .registro-cabeza {
+    display: grid;
+    grid-template-columns: 4rem 128px 1fr 7.5rem;
+    gap: var(--e3);
+    padding: var(--e2) var(--e3);
+    background: var(--cian);
+    color: var(--cinta);
+    font-family: var(--osd);
+    font-size: var(--paso-3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .pista-ep {
+    display: grid;
+    grid-template-columns: 4rem 128px 1fr 7.5rem;
+    gap: var(--e3);
+    padding: var(--e3);
+    border-bottom: 1px dotted var(--borde-vivo);
+    text-decoration: none;
+    align-items: start;
+    transition: background 0.14s var(--sal);
+  }
+  .pista-ep:hover { background: var(--carcasa); }
+  .pista-ep .contador-ep {
+    font-family: var(--osd);
+    font-size: var(--paso-4);
+    line-height: 1;
+    color: var(--ambar-rec);
+    letter-spacing: 0.06em;
+  }
+  .pista-ep .mini {
+    border: 1px solid var(--borde-vivo);
+    overflow: hidden;
+    aspect-ratio: 16/10;
+  }
+  .pista-ep .mini svg { width: 100%; height: 100%; }
+  .pista-ep h3 {
+    font-family: var(--display);
+    font-size: var(--paso-3);
+    text-transform: uppercase;
+    line-height: 1.05;
+    margin-bottom: 0.3rem;
+  }
+  .pista-ep:hover h3 { color: var(--magenta); }
+  .pista-ep p { font-size: var(--paso-1); color: var(--fosforo-70); max-width: 56ch; }
+  .pista-ep .estado {
+    font-family: var(--osd);
+    font-size: var(--paso-3);
+    line-height: 1.2;
+    letter-spacing: 0.06em;
+    text-align: right;
+    color: var(--fosforo-45);
+  }
+  .pista-ep .estado .curso { color: var(--magenta); }
+  .pista-ep .estado .ok { color: var(--verde-osd); }
+  .medidor-cinta { height: 8px; background: var(--cinta); border: 1px solid var(--borde-vivo); margin-top: 0.4rem; }
+  .medidor-cinta span { display: block; height: 100%; background: var(--magenta); }
+  .pista-ep[data-bloqueado] { opacity: 0.5; pointer-events: none; }
+  .pista-ep[data-bloqueado] .mini svg { filter: grayscale(1); }
+
+  /* --- Lateral --- */
+  .panel + .panel { margin-top: var(--e4); }
+  .panel {
+    border: 2px solid var(--borde-vivo);
+    background: var(--cinta-alta);
+  }
+  .panel h2 {
+    font-family: var(--osd);
+    font-size: var(--paso-3);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    background: var(--carcasa);
+    color: var(--cian);
+    padding: var(--e2) var(--e3);
+    border-bottom: 1px solid var(--borde-vivo);
+  }
+  .panel-cuerpo { padding: var(--e3); }
+
+  .lista-tec { font-family: var(--osd); font-size: var(--paso-3); line-height: 1.5; letter-spacing: 0.04em; display: grid; gap: 0.4rem; }
+  .lista-tec div { display: grid; grid-template-columns: 7.5rem 1fr; gap: var(--e2); }
+  .lista-tec dt { color: var(--fosforo-45); text-transform: uppercase; }
+  .lista-tec dd { margin: 0; }
+
+  .nota-osd {
+    font-family: var(--display);
+    font-size: 2.75rem;
+    line-height: 1;
+    color: var(--ambar-rec);
+  }
+  .nota-osd + p { font-family: var(--osd); font-size: var(--paso-3); color: var(--fosforo-45); letter-spacing: 0.06em; }
+
+  .vecina {
+    display: grid;
+    grid-template-columns: 76px 1fr;
+    gap: var(--e2);
+    text-decoration: none;
+    padding: var(--e2) 0;
+    border-bottom: 1px dotted var(--borde-vivo);
+    align-items: center;
+  }
+  .vecina:last-child { border-bottom: 0; }
+  .vecina span.mini { border: 1px solid var(--borde-vivo); overflow: hidden; aspect-ratio: 16/10; }
+  .vecina span.mini svg { width: 100%; height: 100%; }
+  .vecina b { font-family: var(--display); font-size: var(--paso-2); text-transform: uppercase; display: block; line-height: 1.1; }
+  .vecina small { font-family: var(--osd); font-size: var(--paso-3); color: var(--fosforo-45); letter-spacing: 0.06em; }
+  .vecina:hover b { color: var(--magenta); }
+
+  @media (max-width: 1100px) {
+    .cuerpo-caja { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 900px) {
+    .canales { display: none; }
+    .caja { grid-template-columns: 1fr; }
+    .caja-lomo { max-width: 260px; }
+    .caja h1 { font-size: clamp(2.25rem, 10vw, 3rem); }
+    .registro-cabeza, .pista-ep { grid-template-columns: 3.5rem 1fr 6rem; }
+    .registro-cabeza span:nth-child(2), .pista-ep .mini { display: none; }
+  }
+  @media (max-width: 560px) {
+    .busca-osd input { display: none; }
+    .busca-osd { padding: 0.25rem; }
+    .caja { padding: var(--e3); }
+    .registro-cabeza, .pista-ep { grid-template-columns: 3rem 1fr; }
+    .pista-ep .estado { grid-column: 2; text-align: left; }
+  }
+</style>
+</head>
+<body>
+<!--
+THESIS: La ficha es la caja de la cinta y su hoja de alquiler: registro de episodios con posición de contador, no lista de tarjetas. Rechaza el encabezado a sangre con carátula difuminada.
+OWN-WORLD: Cinta #0c0a18 y carcasa #1e1a38, fósforo #eae7f5, magenta y cian de vídeo compuesto, ámbar de contador. Anton en rótulos, VT323 en todo el OSD, filetes de 2px y barrido sobre el documento.
+STORY: El socio confirma de qué va la cinta, dónde paró el contador y qué episodio toca.
+FIRST VIEWPORT: Caja con lomo ilustrado a la izquierda, título en Anton, sinopsis y rejilla de datos de alquiler en OSD.
+FORM: Registro tabulado con contador de cinta, no cuadrícula de episodios.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="saltar" href="#principal">Saltar al contenido</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-buscar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></symbol>
+    <symbol id="i-mas" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-compartir" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.3 10.8l7.4-3.6M8.3 13.2l7.4 3.6"/></symbol>
+
+    <symbol id="v-cielo" viewBox="0 0 640 400" preserveAspectRatio="xMidYMid slice">
+      <rect width="640" height="400" fill="#100d22"/>
+      <circle cx="470" cy="118" r="86" fill="#ff2d95"/>
+      <path d="M0 400V276c72-30 118 22 190-6s114-62 186-34 128 44 200 12h64v152z" fill="#0a0816"/>
+      <path d="M0 400V330c76-18 126 22 200 4s118-40 190-22 138 30 250 6v82z" fill="#1c1738"/>
+      <g fill="#0a0816">
+        <path d="M226 276V158l42-32 42 32v118z"/>
+        <rect x="248" y="182" width="40" height="24" fill="#22e0ff"/>
+        <path d="M268 276v64M226 306l42-26 42 26" stroke="#0a0816" stroke-width="12" fill="none"/>
+      </g>
+      <g stroke="#22e0ff" stroke-width="1.5" opacity="0.28"><path d="M0 60h640M0 92h640M0 124h640"/></g>
+    </symbol>
+    <symbol id="m-1" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="250" fill="#100d22"/><circle cx="300" cy="72" r="52" fill="#ff2d95"/>
+      <path d="M0 250V166l58-26 60 22 68-40 66 30 74-24 74 34v88z" fill="#0a0816"/>
+      <path d="M118 166V108l22-18 22 18v58z" fill="#0a0816"/><rect x="130" y="120" width="20" height="14" fill="#22e0ff"/>
+    </symbol>
+    <symbol id="m-2" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="250" fill="#0f1424"/>
+      <path d="M0 250V140c68-30 118 26 188-4s130-54 212-16v130z" fill="#080c18"/>
+      <circle cx="92" cy="70" r="42" fill="#22e0ff"/>
+      <g fill="#ffcc22"><rect x="250" y="170" width="8" height="28"/><rect x="284" y="158" width="8" height="40"/><rect x="318" y="176" width="8" height="22"/></g>
+    </symbol>
+    <symbol id="m-3" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="250" fill="#221024"/><circle cx="200" cy="106" r="76" fill="#ff2d95"/>
+      <path d="M0 250V186c80 22 130-24 200-24s124 46 200 24v64z" fill="#0f0713"/>
+      <path d="M200 40v140" stroke="#0f0713" stroke-width="7"/><path d="M182 122h36" stroke="#0f0713" stroke-width="9"/>
+      <path d="M0 208c80 18 130-20 200-20s124 40 200 20" stroke="#22e0ff" stroke-width="4" fill="none"/>
+    </symbol>
+    <symbol id="m-4" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="250" fill="#0e1424"/>
+      <path d="M0 250V128h40v-26h34v26h44V86h40v42h50V104h36v24h40v42h76v82z" fill="#080c18"/>
+      <g fill="#22e0ff"><rect x="14" y="146" width="8" height="12"/><rect x="86" y="106" width="8" height="12"/><rect x="176" y="94" width="8" height="12"/><rect x="272" y="122" width="8" height="12"/></g>
+    </symbol>
+    <symbol id="v-kaiju" viewBox="0 0 640 400" preserveAspectRatio="xMidYMid slice">
+      <rect width="640" height="400" fill="#0e1424"/>
+      <path d="M0 400V210h60v-46h56v46h72V150h64v60h84v-40h60v40h64v66h96v124z" fill="#080c18"/>
+      <path d="M420 400c-16-72 8-132 48-178 22-26 18-54-8-78 62 16 96 66 88 128-6 46-32 88-68 128z" fill="#ff2d95"/>
+      <circle cx="482" cy="196" r="11" fill="#0e1424"/>
+    </symbol>
+    <symbol id="v-tren" viewBox="0 0 640 400" preserveAspectRatio="xMidYMid slice">
+      <rect width="640" height="400" fill="#141024"/>
+      <circle cx="130" cy="100" r="66" fill="#22e0ff"/>
+      <rect x="-20" y="196" width="700" height="94" fill="#241d46"/>
+      <g fill="#ffcc22"><rect x="10" y="218" width="44" height="30"/><rect x="76" y="218" width="44" height="30"/><rect x="142" y="218" width="44" height="30"/><rect x="208" y="218" width="44" height="30"/><rect x="274" y="218" width="44" height="30"/><rect x="340" y="218" width="44" height="30"/></g>
+      <g fill="#0b0819"><circle cx="70" cy="302" r="18"/><circle cx="180" cy="302" r="18"/><circle cx="330" cy="302" r="18"/></g>
+    </symbol>
+    <symbol id="v-espada" viewBox="0 0 640 400" preserveAspectRatio="xMidYMid slice">
+      <rect width="640" height="400" fill="#221024"/>
+      <circle cx="320" cy="140" r="112" fill="#ff2d95"/>
+      <path d="M0 400V282c112 26 188-32 320-32s208 58 320 32v118z" fill="#0f0713"/>
+      <path d="M334 60v230" stroke="#0f0713" stroke-width="8"/><path d="M308 194h52" stroke="#0f0713" stroke-width="10"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="tira-estado">
+  <div>
+    <span>NOVA VIDEO SYSTEM</span>
+    <span class="ok">CINTA OK</span>
+    <span>FICHA DE ALQUILER</span>
+    <span style="margin-left:auto">SOCIO 04871</span>
+  </div>
+</div>
+
+<header class="osd-barra">
+  <div class="osd-fila">
+    <a class="logo-nova aberrado" href="index.html">NOVA</a>
+    <nav class="canales" aria-label="Principal">
+      <a href="index.html">01 ESTANTERÍA</a>
+      <a href="index.html#guia">02 GUÍA</a>
+      <a href="serie.html" aria-current="page">03 FICHAS</a>
+      <a href="index.html#generos">04 GÉNEROS</a>
+    </nav>
+    <div class="osd-fin">
+      <span class="rec">REC</span>
+      <label class="busca-osd">
+        <svg width="15" height="15" aria-hidden="true"><use href="#i-buscar"/></svg>
+        <span class="solo-lectores">Buscar cintas</span>
+        <input type="search" placeholder="BUSCAR">
+      </label>
+      <button class="socio" type="button">SOCIO ▸</button>
+    </div>
+  </div>
+</header>
+
+<main id="principal">
+  <div class="envoltorio">
+
+    <section class="caja" aria-labelledby="t-caja">
+      <div>
+        <div class="caja-lomo">
+          <svg viewBox="0 0 640 400" aria-hidden="true"><use href="#v-cielo"/></svg>
+        </div>
+        <span class="caja-sello tabular">CINTA 07 / 12 · SP</span>
+      </div>
+
+      <div>
+        <p class="jp tabular">鉄の空 · KUROGANE NO SORA · 2026</p>
+        <h1 class="aberrado" id="t-caja">Cielo de Hierro</h1>
+        <p class="sinopsis">
+          Rei pilota lo último que queda de una flota que nadie recuerda haber construido. Cada
+          vuelo la acerca menos al cielo y más a la pregunta de quién decidió bajarlo. La segunda
+          temporada adapta los volúmenes cuarto a séptimo del manga y estrena cinta cada viernes.
+        </p>
+
+        <div class="caja-acciones">
+          <a class="btn btn-play" href="ver.html">
+            <svg width="16" height="16" aria-hidden="true"><use href="#i-play"/></svg>
+            Continuar 07
+          </a>
+          <button class="btn" type="button">
+            <svg width="16" height="16" aria-hidden="true"><use href="#i-mas"/></svg>
+            Reservar
+          </button>
+          <button class="btn-cuadro" type="button" aria-label="Compartir">
+            <svg width="17" height="17"><use href="#i-compartir"/></svg>
+          </button>
+        </div>
+
+        <dl class="alquiler">
+          <div><dt>Estudio</dt><dd>Studio Hanabi</dd></div>
+          <div><dt>Dirección</dt><dd>Mizuki Ono</dd></div>
+          <div><dt>Emisión</dt><dd class="destaca">VIE 21:00</dd></div>
+          <div><dt>Duración</dt><dd class="tabular">24 MIN</dd></div>
+          <div><dt>Cintas</dt><dd class="tabular">24</dd></div>
+          <div><dt>Nota</dt><dd class="destaca tabular">8,7</dd></div>
+        </dl>
+
+        <div class="sellos">
+          <a href="#">Mecha</a><a href="#">Drama</a><a href="#">Distopía</a><a href="#">Aviación</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="cuerpo-caja">
+      <div>
+        <div class="selector-cinta" role="tablist" aria-label="Temporadas">
+          <button role="tab" aria-selected="true">Cinta T2</button>
+          <button role="tab" aria-selected="false">Cinta T1</button>
+          <button role="tab" aria-selected="false">Extras</button>
+        </div>
+
+        <div class="registro" role="tabpanel">
+          <div class="registro-cabeza">
+            <span>CONT.</span>
+            <span>IMAGEN</span>
+            <span>TÍTULO</span>
+            <span style="text-align:right">ESTADO</span>
+          </div>
+
+          <a class="pista-ep" href="ver.html">
+            <span class="contador-ep tabular">0000</span>
+            <span class="mini"><svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice"><use href="#m-1"/></svg></span>
+            <span>
+              <h3>06 · El peso del aire</h3>
+              <p>Rei acepta un encargo que la obliga a volar por debajo de la cota mínima. Abajo, la ciudad no se parece a los mapas.</p>
+            </span>
+            <span class="estado tabular"><span class="ok">VISTA</span><span class="medidor-cinta"><span style="width:100%"></span></span></span>
+          </a>
+
+          <a class="pista-ep" href="ver.html">
+            <span class="contador-ep tabular">0908</span>
+            <span class="mini"><svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice"><use href="#m-2"/></svg></span>
+            <span>
+              <h3>07 · Lo que pesa el aire</h3>
+              <p>El taller recibe una pieza que no consta en ningún inventario. Kenzō reconoce la marca del fabricante y no dice nada.</p>
+            </span>
+            <span class="estado tabular"><span class="curso">A MEDIAS<br>QUEDAN 15:00</span><span class="medidor-cinta"><span style="width:38%"></span></span></span>
+          </a>
+
+          <a class="pista-ep" href="ver.html">
+            <span class="contador-ep tabular">----</span>
+            <span class="mini"><svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice"><use href="#m-3"/></svg></span>
+            <span>
+              <h3>08 · Hangar siete</h3>
+              <p>Una inspección rutinaria encuentra la puerta abierta. Dentro no falta nada, y eso es exactamente el problema.</p>
+            </span>
+            <span class="estado tabular">VIE 14</span>
+          </a>
+
+          <div class="pista-ep" data-bloqueado>
+            <span class="contador-ep tabular">----</span>
+            <span class="mini"><svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice"><use href="#m-4"/></svg></span>
+            <span>
+              <h3>09 · Sin título todavía</h3>
+              <p>Se publica el viernes 21 de agosto a las 21:00, para toda la región al mismo tiempo.</p>
+            </span>
+            <span class="estado tabular">EN 14 DÍAS</span>
+          </div>
+        </div>
+      </div>
+
+      <aside>
+        <section class="panel">
+          <h2>Ficha técnica</h2>
+          <div class="panel-cuerpo">
+            <dl class="lista-tec">
+              <div><dt>Estudio</dt><dd>Studio Hanabi</dd></div>
+              <div><dt>Dirección</dt><dd>Mizuki Ono</dd></div>
+              <div><dt>Guion</dt><dd>Sae Fujimoto</dd></div>
+              <div><dt>Música</dt><dd>Rei Katsuragi</dd></div>
+              <div><dt>Origen</dt><dd>Manga 2021</dd></div>
+              <div><dt>Audio</dt><dd>JP · ES</dd></div>
+              <div><dt>Subtít.</dt><dd>5 idiomas</dd></div>
+            </dl>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Valoración</h2>
+          <div class="panel-cuerpo">
+            <p class="nota-osd tabular">8,7</p>
+            <p class="tabular">SOBRE 2.418 VOTOS</p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Voces</h2>
+          <div class="panel-cuerpo">
+            <dl class="lista-tec">
+              <div><dt>Rei Amano</dt><dd>Haru Nishimura</dd></div>
+              <div><dt>Kenzō Sano</dt><dd>Tatsuya Mori</dd></div>
+              <div><dt>Yuna Ishii</dt><dd>Mei Kobayashi</dd></div>
+              <div><dt>Cartógrafo</dt><dd>Jun Takeda</dd></div>
+            </dl>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>En el mismo pasillo</h2>
+          <div class="panel-cuerpo">
+            <a class="vecina" href="serie.html">
+              <span class="mini"><svg viewBox="0 0 640 400" preserveAspectRatio="xMidYMid slice"><use href="#v-kaiju"/></svg></span>
+              <span><b>Kaijū Blues</b><small class="tabular">ACCIÓN · 9 EP</small></span>
+            </a>
+            <a class="vecina" href="serie.html">
+              <span class="mini"><svg viewBox="0 0 640 400" preserveAspectRatio="xMidYMid slice"><use href="#v-tren"/></svg></span>
+              <span><b>Tren de Medianoche</b><small class="tabular">DRAMA · 9 EP</small></span>
+            </a>
+            <a class="vecina" href="serie.html">
+              <span class="mini"><svg viewBox="0 0 640 400" preserveAspectRatio="xMidYMid slice"><use href="#v-espada"/></svg></span>
+              <span><b>La Espada y el Río</b><small class="tabular">HISTÓRICO · 10 EP</small></span>
+            </a>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+  </div>
+</main>
+
+<footer class="pie-nova">
+  <div class="pie-fila">
+    <div>
+      <a class="logo-nova aberrado" href="index.html">NOVA</a>
+      <p style="margin-top:0.75rem;max-width:34ch;font-size:var(--paso-1);color:var(--fosforo-70)">
+        Videoclub y emisión simultánea. Abierto todos los días hasta las dos de la madrugada.
+      </p>
+    </div>
+    <div>
+      <h3>Estantería</h3>
+      <ul><li><a href="index.html">Novedades</a></li><li><a href="index.html#guia">Guía</a></li><li><a href="#">Películas</a></li><li><a href="#">Doblaje</a></li></ul>
+    </div>
+    <div>
+      <h3>Mostrador</h3>
+      <ul><li><a href="#">Ayuda</a></li><li><a href="#">Accesibilidad</a></li><li><a href="#">Aviso legal</a></li><li><a href="#">Privacidad</a></li></ul>
+    </div>
+  </div>
+  <p class="legal-nova">
+    Maqueta de diseño. Todos los títulos, sinopsis, nombres, fechas y etiquetas de cinta son
+    material sintético creado para esta demostración: ninguna obra, marca ni persona real aparece
+    en la página. Sustituye este contenido por el catálogo real antes de publicar.
+  </p>
+</footer>
+
+</body>
+</html>

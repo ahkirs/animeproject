@@ -1,9 +1,32 @@
-# Sistema operativo
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-.DS_Store
+# Dependencias
+node_modules/
+.pnp
+.pnp.*
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Salidas de build
+dist/
+build/
+.cache/
+
+# Entorno
+.env
+.env.local
+.env*.local
+*.local
+
+# Despliegue
+.vercel
+
+# Registros
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
 # Editores
 .vscode/
@@ -11,18 +34,9 @@ $RECYCLE.BIN/
 *.swp
 *~
 
-# Node, por si más adelante entra herramienta de build
-node_modules/
-npm-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# Entorno
-.env
-.env.local
-*.local
-
-# Salidas de build
-dist/
-build/
-.cache/
+# Sistema operativo
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store

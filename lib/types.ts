@@ -65,20 +65,23 @@ export interface FichaTecnica {
 /** 0 es domingo, como en Date.getDay(). */
 export type DiaSemana = 0 | 1 | 2 | 3 | 4 | 5 | 6
 
-/** Una emisión programada. La parrilla es una lista de estas. */
+/** Una emisión programada. La parrilla es una lista de estas.
+ *
+ *  El instante se guarda en UTC y todo lo demás se deriva de él: el día
+ *  de la semana, la hora en Japón, la hora local del visitante y la
+ *  cuenta atrás. Guardar «21:00» a secas no serviría, porque una cadena
+ *  suelta no dice a qué zona horaria pertenece. */
 export interface Programacion {
   serieId: string
-  dia: DiaSemana
-  /** Día del mes, para la tira de la portada. */
-  fecha: string
-  /** Hora local de emisión, formato 24h. */
-  hora: string
+  /** Instante exacto de emisión, en UTC. */
+  emitidoUtc: string
   /** Número del episodio que se emite a continuación. */
   proximoEpisodio: number
-  /** Cuenta atrás hasta la emisión, p. ej. «6D 10H».
-   *  En la maqueta es texto fijo; con la API pasa a calcularse. */
-  cuentaAtras: string
 }
+
+/** Las dos lecturas que ofrece la interfaz. La hora de Japón se sigue
+ *  usando por dentro para agrupar los días, pero no se muestra. */
+export type ZonaHoraria = 'local' | 'utc'
 
 export interface Serie {
   id: string

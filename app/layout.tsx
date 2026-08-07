@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Archivo, Archivo_Black } from 'next/font/google'
+import { ProveedorHora } from '@/components/PreferenciaHora'
 import './globals.css'
 
 // next/font autoaloja las fuentes: desaparece la petición a Google Fonts
@@ -32,7 +33,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es" className={`${texto.variable} ${display.variable}`}>
-      <body>{children}</body>
+      <body>
+        <ProveedorHora>{children}</ProveedorHora>
+      </body>
     </html>
   )
 }

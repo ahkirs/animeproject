@@ -7,6 +7,7 @@ import Riel from '@/components/Riel'
 import FichaSerie, { Cartel } from '@/components/FichaSerie'
 import Datos, { Clasificacion, Nota } from '@/components/Datos'
 import { BotonEnlace, BotonIcono } from '@/components/Boton'
+import HoraEmision from '@/components/HoraEmision'
 import {
   DIAS,
   EN_CURSO,
@@ -14,7 +15,10 @@ import {
   HOY,
   SERIES,
   SERIE_DESTACADA,
+  diaJst,
   episodioDeEntrada,
+  fechaJst,
+  horaUtc,
   proximasEmisiones,
   resolverEmision,
   rutaReproductor,
@@ -130,12 +134,13 @@ export default function Inicio() {
               {proximasEmisiones().map((p) => {
                 const { serie, temporada, episodio } = resolverEmision(p)
                 if (!serie) return null
-                const esHoy = p.dia === HOY
-                const dia = DIAS.find((d) => d.n === p.dia)
+                const diaDeLaSemana = diaJst(p)
+                const esHoy = diaDeLaSemana === HOY
+                const dia = DIAS.find((d) => d.n === diaDeLaSemana)
 
                 return (
                   <Link
-                    key={`${p.serieId}-${p.dia}`}
+                    key={`${p.serieId}-${p.emitidoUtc}`}
                     href={rutaReproductor(p.serieId) ?? `/serie/${p.serieId}`}
                     className="grid grid-cols-[7.5rem_1fr_auto] items-center gap-e3 border-b border-borde py-e3 no-underline transition-all duration-150 ease-sal hover:bg-sala-800 hover:pl-e2 max-[900px]:grid-cols-[4.5rem_1fr]"
                   >
@@ -150,7 +155,7 @@ export default function Inicio() {
                           esHoy ? 'text-ambar' : 'text-hueso'
                         }`}
                       >
-                        {p.fecha}
+                        {fechaJst(p)}
                       </strong>
                     </span>
 
@@ -165,7 +170,7 @@ export default function Inicio() {
                     </span>
 
                     <span className="flex items-center gap-2 text-paso-1 font-semibold text-hueso-70 tabular-nums max-[900px]:col-start-2 max-[900px]:text-paso-0">
-                      {p.hora}
+                      <HoraEmision iso={p.emitidoUtc} utc={horaUtc(p)} />
                     </span>
                   </Link>
                 )

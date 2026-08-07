@@ -4,10 +4,13 @@ import Cabecera from '@/components/Cabecera'
 import Pie from '@/components/Pie'
 import Lamina from '@/components/Lamina'
 import Icono from '@/components/Icono'
+import HoraEmision, { CuentaAtras } from '@/components/HoraEmision'
+import { SelectorHora } from '@/components/PreferenciaHora'
 import {
   DIAS,
   HOY,
   PARRILLA,
+  horaUtc,
   parrillaDe,
   resolverEmision,
   rutaReproductor,
@@ -40,13 +43,15 @@ function Tarjeta({ p }: { p: Programacion }) {
           </h3>
 
           <p className="mt-[0.45rem] flex flex-wrap items-center gap-x-[0.45rem] gap-y-1 text-paso-0 tabular-nums">
-            <span className="font-semibold text-hueso">
-              EP {p.proximoEpisodio}
+            <span className="font-semibold text-hueso">EP {p.proximoEpisodio}</span>
+            <span aria-hidden="true" className="size-[3px] rounded-full bg-hueso-45" />
+            <span className="font-bold text-ambar">
+              <HoraEmision iso={p.emitidoUtc} utc={horaUtc(p)} />
             </span>
             <span aria-hidden="true" className="size-[3px] rounded-full bg-hueso-45" />
-            <span className="font-bold text-ambar">{p.hora}</span>
-            <span aria-hidden="true" className="size-[3px] rounded-full bg-hueso-45" />
-            <span className="text-hueso-45">{p.cuentaAtras}</span>
+            <span className="text-hueso-45">
+              <CuentaAtras iso={p.emitidoUtc} />
+            </span>
             <span className="ml-auto tracking-[0.08em] text-hueso-45 uppercase">
               {serie.genero}
             </span>
@@ -91,6 +96,14 @@ export default function Emision() {
 
         {/* ---------- Pestañas de día ---------- */}
         <div className="sticky top-[72px] z-50 -mx-margen mb-e5 border-y border-borde bg-sala-900/95 px-margen py-e2 backdrop-blur-sm">
+          <div className="mb-e2 flex flex-wrap items-center justify-between gap-e2 border-b border-borde pb-e2">
+            <SelectorHora />
+            <p className="text-paso-0 text-hueso-45">
+              Los días agrupan por la emisión en Japón. Al cambiar de huso, la hora se
+              recalcula pero el episodio sigue en su día de estreno.
+            </p>
+          </div>
+
           <div className="flex flex-wrap items-center gap-e2">
             <nav aria-label="Días de la semana" className="flex flex-wrap gap-e1">
               {DIAS.map((d) => {
@@ -167,7 +180,7 @@ export default function Emision() {
               {emisiones.length > 0 ? (
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-e3">
                   {emisiones.map((p) => (
-                    <Tarjeta key={`${p.serieId}-${p.dia}`} p={p} />
+                    <Tarjeta key={`${p.serieId}-${p.emitidoUtc}`} p={p} />
                   ))}
                 </div>
               ) : (

@@ -701,85 +701,79 @@ export const DIAS: { n: DiaSemana; nombre: string; corto: string }[] = [
   { n: 6, nombre: 'Sábado', corto: 'Sáb' },
 ]
 
+/** Desfase de la hora de Japón respecto a UTC. JST no tiene horario
+ *  de verano, así que es constante todo el año. */
+const JST_MINUTOS = 9 * 60
+
+/* Los instantes se declaran en UTC. Entre paréntesis, la hora japonesa
+   equivalente, que es como la publica cualquier calendario de anime. */
 export const PARRILLA: Programacion[] = [
-  {
-    serieId: 'perros-de-neon',
-    dia: 0,
-    fecha: '09',
-    hora: '23:15',
-    proximoEpisodio: 2,
-    cuentaAtras: '2D 01H',
-  },
+  // viernes 19:00 JST
+  { serieId: 'kaiju-blues', emitidoUtc: '2026-08-07T10:00:00Z', proximoEpisodio: 4 },
+  // viernes 21:00 JST
+  { serieId: 'cielo-de-hierro', emitidoUtc: '2026-08-07T12:00:00Z', proximoEpisodio: 8 },
+  // sábado 00:30 JST — en Europa cae aún en viernes por la noche
+  { serieId: 'noctambula', emitidoUtc: '2026-08-07T15:30:00Z', proximoEpisodio: 13 },
+  // sábado 18:30 JST
+  { serieId: 'cafe-yurei', emitidoUtc: '2026-08-08T09:30:00Z', proximoEpisodio: 11 },
+  // domingo 23:15 JST
+  { serieId: 'perros-de-neon', emitidoUtc: '2026-08-09T14:15:00Z', proximoEpisodio: 2 },
+  // lunes 20:00 JST
   {
     serieId: 'jardin-de-las-cenizas',
-    dia: 1,
-    fecha: '10',
-    hora: '20:00',
+    emitidoUtc: '2026-08-10T11:00:00Z',
     proximoEpisodio: 4,
-    cuentaAtras: '2D 22H',
   },
-  {
-    serieId: 'ciudad-vertical',
-    dia: 2,
-    fecha: '11',
-    hora: '22:00',
-    proximoEpisodio: 1,
-    cuentaAtras: '4D 00H',
-  },
+  // martes 22:00 JST
+  { serieId: 'ciudad-vertical', emitidoUtc: '2026-08-11T13:00:00Z', proximoEpisodio: 1 },
+  // miércoles 22:45 JST
   {
     serieId: 'tren-de-medianoche',
-    dia: 3,
-    fecha: '12',
-    hora: '22:45',
+    emitidoUtc: '2026-08-12T13:45:00Z',
     proximoEpisodio: 9,
-    cuentaAtras: '5D 00H',
   },
+  // jueves 21:30 JST
   {
     serieId: 'la-espada-y-el-rio',
-    dia: 4,
-    fecha: '13',
-    hora: '21:30',
+    emitidoUtc: '2026-08-13T12:30:00Z',
     proximoEpisodio: 3,
-    cuentaAtras: '5D 23H',
-  },
-  {
-    serieId: 'kaiju-blues',
-    dia: 5,
-    fecha: '07',
-    hora: '19:00',
-    proximoEpisodio: 4,
-    cuentaAtras: '0D 00H',
-  },
-  {
-    serieId: 'cielo-de-hierro',
-    dia: 5,
-    fecha: '07',
-    hora: '21:00',
-    proximoEpisodio: 8,
-    cuentaAtras: '0D 02H',
-  },
-  {
-    serieId: 'cafe-yurei',
-    dia: 6,
-    fecha: '08',
-    hora: '18:30',
-    proximoEpisodio: 11,
-    cuentaAtras: '0D 23H',
-  },
-  {
-    serieId: 'noctambula',
-    dia: 6,
-    fecha: '08',
-    hora: '00:30',
-    proximoEpisodio: 13,
-    cuentaAtras: '1D 05H',
   },
 ]
 
-/** Emisiones de un día, ordenadas por hora. */
+/** El mismo instante desplazado a hora japonesa, para poder leer sus
+ *  componentes con los métodos UTC sin depender del reloj del servidor. */
+function enJst(iso: string): Date {
+  return new Date(new Date(iso).getTime() + JST_MINUTOS * 60_000)
+}
+
+function dosDigitos(n: number): string {
+  return String(n).padStart(2, '0')
+}
+
+/** Día de la semana en Japón, que es como se agrupan las parrillas. */
+export function diaJst(p: Programacion): DiaSemana {
+  return enJst(p.emitidoUtc).getUTCDay() as DiaSemana
+}
+
+/** Día del mes en Japón, para la tira de la portada. */
+export function fechaJst(p: Programacion): string {
+  return dosDigitos(enJst(p.emitidoUtc).getUTCDate())
+}
+
+export function horaJst(p: Programacion): string {
+  const d = enJst(p.emitidoUtc)
+  return `${dosDigitos(d.getUTCHours())}:${dosDigitos(d.getUTCMinutes())}`
+}
+
+export function horaUtc(p: Programacion): string {
+  const d = new Date(p.emitidoUtc)
+  return `${dosDigitos(d.getUTCHours())}:${dosDigitos(d.getUTCMinutes())}`
+}
+
+/** Emisiones de un día japonés, ordenadas por hora. */
 export function parrillaDe(dia: DiaSemana): Programacion[] {
-  return PARRILLA.filter((p) => p.dia === dia).sort((a, b) =>
-    a.hora.localeCompare(b.hora),
+  return PARRILLA.filter((p) => diaJst(p) === dia).sort((a, b) =>
+    a.emitidoUtc.localeCompare(b.emitidoUtc),
   )
 }
 
@@ -791,11 +785,10 @@ export function resolverEmision(p: Programacion) {
   return { serie, temporada, episodio }
 }
 
-/** Las próximas n emisiones a partir de hoy, para la tira de la portada. */
+/** Las próximas n emisiones, en orden cronológico. */
 export function proximasEmisiones(n = 5): Programacion[] {
-  const orden = (p: Programacion) => (p.dia - HOY + 7) % 7
   return [...PARRILLA]
-    .sort((a, b) => orden(a) - orden(b) || a.hora.localeCompare(b.hora))
+    .sort((a, b) => a.emitidoUtc.localeCompare(b.emitidoUtc))
     .slice(0, n)
 }
 

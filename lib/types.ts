@@ -106,6 +106,27 @@ export interface Serie {
   temporadas?: Temporada[]
 }
 
+/* ---------------- Lista del usuario ---------------- */
+
+export type EstadoLista =
+  | 'viendo'
+  | 'pendiente'
+  | 'completada'
+  | 'pausada'
+  | 'abandonada'
+
+/** Una serie dentro de la lista de alguien. Cuando haya cuentas, esto
+ *  es una fila por usuario y serie en la base de datos. */
+export interface EntradaLista {
+  serieId: string
+  estado: EstadoLista
+  episodiosVistos: number
+  /** Puntuación personal del 1 al 10. Sin puntuar si falta. */
+  puntuacion?: number
+  /** Última vez que se tocó la entrada, en ISO. */
+  actualizado: string
+}
+
 /** Una entrada de «Seguir viendo». */
 export interface EnCurso {
   serieId: string

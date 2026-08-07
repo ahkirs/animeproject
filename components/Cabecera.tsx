@@ -65,13 +65,13 @@ export default function Cabecera({ activa }: { activa?: Seccion }) {
           <Icono nombre="campana" tam={19} />
         </button>
 
-        <button
-          type="button"
-          aria-label="Tu cuenta"
-          className="grid size-[34px] cursor-pointer place-items-center rounded-full border border-borde-vivo bg-sala-600 text-paso-0 font-bold text-hueso-70 hover:border-hueso-45 hover:text-hueso"
+        <Link
+          href="/mi-lista"
+          aria-label="Tu lista y tu cuenta"
+          className="grid size-[34px] shrink-0 place-items-center rounded-full border border-borde-vivo bg-sala-600 text-paso-0 font-bold text-hueso-70 no-underline transition-colors duration-200 ease-sal hover:border-hueso-45 hover:text-hueso"
         >
           AR
-        </button>
+        </Link>
       </div>
     </header>
   )

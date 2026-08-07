@@ -1,18 +1,33 @@
 import Link from 'next/link'
 import { Marca } from './Cabecera'
 
-const COLUMNAS = [
+const COLUMNAS: { titulo: string; enlaces: { texto: string; href: string }[] }[] = [
   {
     titulo: 'Catálogo',
-    enlaces: ['Novedades', 'Simulcast', 'Películas', 'Doblaje en español'],
+    enlaces: [
+      { texto: 'Explorar', href: '/explorar' },
+      { texto: 'Emisión', href: '/emision' },
+      { texto: 'Simulcast', href: '/explorar?estado=emision' },
+      { texto: 'Doblaje en español', href: '/explorar' },
+    ],
   },
   {
     titulo: 'Cuenta',
-    enlaces: ['Mi lista', 'Suscripción', 'Dispositivos', 'Descargas'],
+    enlaces: [
+      { texto: 'Mi lista', href: '/mi-lista' },
+      { texto: 'Entrar', href: '/acceder' },
+      { texto: 'Crear cuenta', href: '/registro' },
+      { texto: 'Dispositivos', href: '/mi-lista' },
+    ],
   },
   {
     titulo: 'Ayuda',
-    enlaces: ['Centro de soporte', 'Accesibilidad', 'Aviso legal', 'Privacidad'],
+    enlaces: [
+      { texto: 'Centro de soporte', href: '#' },
+      { texto: 'Accesibilidad', href: '#' },
+      { texto: 'Aviso legal', href: '#' },
+      { texto: 'Privacidad', href: '#' },
+    ],
   },
 ]
 
@@ -47,10 +62,13 @@ export default function Pie({ aviso = AVISO_POR_DEFECTO, pegado }: Props) {
               {col.titulo}
             </h3>
             <ul className="grid list-none gap-[0.45rem] p-0">
-              {col.enlaces.map((texto) => (
-                <li key={texto}>
-                  <Link href="#" className="no-underline hover:text-hueso hover:underline">
-                    {texto}
+              {col.enlaces.map((e) => (
+                <li key={e.texto}>
+                  <Link
+                    href={e.href}
+                    className="no-underline hover:text-hueso hover:underline"
+                  >
+                    {e.texto}
                   </Link>
                 </li>
               ))}

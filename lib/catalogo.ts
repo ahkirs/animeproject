@@ -1,4 +1,12 @@
-import type { DiaSemana, EnCurso, Programacion, Serie, Temporada } from './types'
+import type {
+  DiaSemana,
+  EnCurso,
+  EntradaLista,
+  EstadoLista,
+  Programacion,
+  Serie,
+  Temporada,
+} from './types'
 
 /* ============================================================
    CATÁLOGO SINTÉTICO
@@ -907,6 +915,124 @@ export function explorar({
   }
 
   return resultado.sort(comparar[orden])
+}
+
+/* ------------------------------------------------------------
+   LISTA DEL USUARIO
+   Datos de ejemplo mientras no hay cuentas. Cuando entre la base de
+   datos, esto pasa a ser una consulta por usuario; las formas de
+   EntradaLista son el contrato.
+   ------------------------------------------------------------ */
+
+export const ESTADOS_LISTA: {
+  id: EstadoLista
+  texto: string
+  descripcion: string
+}[] = [
+  { id: 'viendo', texto: 'Viendo', descripcion: 'Series que tienes empezadas' },
+  { id: 'pendiente', texto: 'Pendientes', descripcion: 'Guardadas para más adelante' },
+  { id: 'completada', texto: 'Completadas', descripcion: 'Terminadas de ver' },
+  { id: 'pausada', texto: 'En pausa', descripcion: 'Aparcadas por ahora' },
+  { id: 'abandonada', texto: 'Abandonadas', descripcion: 'Dejadas a medias' },
+]
+
+export const USUARIO = {
+  nombre: 'Adrián',
+  alias: 'ahkirs',
+  iniciales: 'AR',
+  desde: 'agosto de 2026',
+}
+
+export const MI_LISTA: EntradaLista[] = [
+  {
+    serieId: 'cielo-de-hierro',
+    estado: 'viendo',
+    episodiosVistos: 6,
+    puntuacion: 9,
+    actualizado: '2026-08-07T12:40:00Z',
+  },
+  {
+    serieId: 'kaiju-blues',
+    estado: 'viendo',
+    episodiosVistos: 2,
+    puntuacion: 8,
+    actualizado: '2026-08-06T21:10:00Z',
+  },
+  {
+    serieId: 'noctambula',
+    estado: 'viendo',
+    episodiosVistos: 11,
+    actualizado: '2026-08-05T23:55:00Z',
+  },
+  {
+    serieId: 'tren-de-medianoche',
+    estado: 'viendo',
+    episodiosVistos: 7,
+    puntuacion: 9,
+    actualizado: '2026-08-04T19:20:00Z',
+  },
+  {
+    serieId: 'la-espada-y-el-rio',
+    estado: 'pausada',
+    episodiosVistos: 1,
+    actualizado: '2026-07-28T18:00:00Z',
+  },
+  {
+    serieId: 'perros-de-neon',
+    estado: 'completada',
+    episodiosVistos: 3,
+    puntuacion: 10,
+    actualizado: '2026-07-30T01:15:00Z',
+  },
+  {
+    serieId: 'cafe-yurei',
+    estado: 'pendiente',
+    episodiosVistos: 0,
+    actualizado: '2026-08-02T11:00:00Z',
+  },
+  {
+    serieId: 'jardin-de-las-cenizas',
+    estado: 'pendiente',
+    episodiosVistos: 0,
+    actualizado: '2026-08-01T09:30:00Z',
+  },
+  {
+    serieId: 'ciudad-vertical',
+    estado: 'abandonada',
+    episodiosVistos: 1,
+    puntuacion: 5,
+    actualizado: '2026-07-19T22:40:00Z',
+  },
+]
+
+/** Entradas de la lista, opcionalmente de un solo estado, de más
+ *  reciente a más antigua. */
+export function miLista(estado?: EstadoLista): EntradaLista[] {
+  return MI_LISTA.filter((e) => !estado || e.estado === estado).sort((a, b) =>
+    b.actualizado.localeCompare(a.actualizado),
+  )
+}
+
+export function cuantasEnEstado(estado: EstadoLista): number {
+  return MI_LISTA.filter((e) => e.estado === estado).length
+}
+
+/** Resumen para la cabecera del perfil. */
+export function resumenLista() {
+  const episodios = MI_LISTA.reduce((s, e) => s + e.episodiosVistos, 0)
+  const puntuadas = MI_LISTA.filter((e) => e.puntuacion !== undefined)
+  const media =
+    puntuadas.length > 0
+      ? puntuadas.reduce((s, e) => s + (e.puntuacion ?? 0), 0) / puntuadas.length
+      : undefined
+
+  return {
+    series: MI_LISTA.length,
+    episodios,
+    // Cada episodio dura 24 minutos en este catálogo.
+    horas: Math.round((episodios * 24) / 60),
+    media,
+  }
 }
 
 export const GENEROS = [

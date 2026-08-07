@@ -6,6 +6,7 @@ import Pie from '@/components/Pie'
 import Icono from '@/components/Icono'
 import Lamina from '@/components/Lamina'
 import Datos, { Clasificacion, Nota } from '@/components/Datos'
+import { CapaVineteado } from '@/components/EfectosSala'
 import Boton, { BotonEnlace, BotonIcono } from '@/components/Boton'
 import { SERIES, episodioDeEntrada, obtenerSerie, rutaReproductor } from '@/lib/catalogo'
 import type { Episodio } from '@/lib/types'
@@ -134,6 +135,7 @@ export default async function PaginaSerie({
             <Lamina arte={serie.panoramica ?? 'panoramica-obra'} />
           </div>
           <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_top,#0b0a09_8%,rgba(11,10,9,0.86)_52%,rgba(11,10,9,0.55)_100%)]" />
+          <CapaVineteado />
 
           <div className="mx-auto grid max-w-[1600px] grid-cols-[260px_1fr] items-end gap-e5 max-[900px]:grid-cols-[150px_1fr] max-[900px]:items-start max-[900px]:gap-e3 max-[560px]:grid-cols-1">
             <div className="relative aspect-2/3 overflow-hidden rounded-radio bg-sala-700 shadow-baja max-[560px]:max-w-[160px]">

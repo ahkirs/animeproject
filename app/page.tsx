@@ -2,20 +2,16 @@ import Link from 'next/link'
 import Cabecera from '@/components/Cabecera'
 import Pie from '@/components/Pie'
 import Icono from '@/components/Icono'
-import Lamina from '@/components/Lamina'
 import Riel from '@/components/Riel'
 import FichaSerie, { Cartel } from '@/components/FichaSerie'
-import Datos, { Clasificacion, Nota } from '@/components/Datos'
-import { BotonEnlace, BotonIcono } from '@/components/Boton'
 import HoraEmision from '@/components/HoraEmision'
+import CarruselDestacado, { type Diapositiva } from '@/components/CarruselDestacado'
 import {
   DIAS,
   EN_CURSO,
   HOY,
   SERIES,
-  SERIE_DESTACADA,
   diaJst,
-  episodioDeEntrada,
   fechaJst,
   generosDisponibles,
   horaUtc,
@@ -57,9 +53,41 @@ function CabezaSeccion({
   )
 }
 
+/** Las próximas emisiones convertidas en diapositivas del destacado.
+ *  Cada una lleva su propia etiqueta según cuándo se emite. */
+function construirDestacados(): Diapositiva[] {
+  return proximasEmisiones(4).flatMap((p) => {
+    const { serie, temporada, episodio } = resolverEmision(p)
+    if (!serie || !temporada || !episodio) return []
+
+    const dia = DIAS.find((d) => d.n === diaJst(p))
+    const etiqueta =
+      diaJst(p) === HOY
+        ? 'Episodio nuevo esta noche'
+        : `Nuevo episodio el ${dia?.nombre.toLowerCase() ?? 'próximo día'}`
+
+    return [
+      {
+        id: serie.id,
+        titulo: serie.titulo,
+        sinopsis: serie.sinopsisCorta,
+        nota: serie.nota,
+        anio: serie.anio,
+        clasificacion: serie.clasificacion,
+        lamina: serie.panoramica ?? 'panoramica-escena',
+        etiqueta,
+        temporada: temporada.numero,
+        episodio: episodio.numero,
+        episodiosTotales: temporada.episodios.length,
+        hrefVer: `/ver/${serie.id}/${temporada.numero}/${episodio.numero}`,
+        hrefFicha: `/serie/${serie.id}`,
+      },
+    ]
+  })
+}
+
 export default function Inicio() {
-  const d = SERIE_DESTACADA
-  const entrada = episodioDeEntrada(d)
+  const destacados = construirDestacados()
 
   return (
     <>
@@ -74,52 +102,7 @@ export default function Inicio() {
 
       <main id="principal">
         {/* ---------- Destacado ---------- */}
-        <section
-          aria-labelledby="destacado"
-          className="relative isolate -mt-[calc(var(--spacing-e6)+var(--spacing-e3))] flex min-h-[min(88vh,780px)] items-end px-margen pt-e6 pb-e5 max-[900px]:min-h-[76vh]"
-        >
-          <div className="absolute inset-0 -z-20 overflow-hidden">
-            <Lamina arte="panoramica-escena" />
-          </div>
-          <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_top,#0b0a09_4%,rgba(11,10,9,0.72)_46%,rgba(11,10,9,0.15)_100%),linear-gradient(to_right,#0b0a09_0%,rgba(11,10,9,0.55)_42%,rgba(11,10,9,0)_78%)]" />
-
-          <div className="mx-auto w-full max-w-[1600px] px-margen">
-            <div className="max-w-[48ch]">
-              <p className="mb-e3 inline-flex items-center gap-[0.45rem] text-paso-0 font-bold tracking-[0.12em] text-ambar uppercase before:h-[2px] before:w-[26px] before:bg-ambar before:content-['']">
-                Episodio nuevo esta noche
-              </p>
-
-              <h1
-                id="destacado"
-                className="mb-e3 font-display text-paso-6 leading-[0.92] tracking-[-0.035em] max-[560px]:text-[clamp(2.6rem,13vw,3.4rem)]"
-              >
-                {d.titulo}
-              </h1>
-
-              <Datos>
-                <Nota valor={d.nota} />
-                <>{d.anio}</>
-                <>Temporada {d.temporadas?.[0].numero ?? 1}</>
-                <>{d.temporadas?.[0].episodios.length ?? 0} episodios</>
-                <Clasificacion valor={d.clasificacion} />
-              </Datos>
-
-              <p className="mt-e3 mb-e4 max-w-[46ch] text-hueso-70">{d.sinopsisCorta}</p>
-
-              <div className="flex flex-wrap items-center gap-e2 max-[560px]:[&>a]:flex-auto">
-                <BotonEnlace href={rutaReproductor(d.id) ?? '#'} variante="primario">
-                  <Icono nombre="play" tam={17} />
-                  Ver T{entrada?.temporada.numero} · E
-                  {String(entrada?.episodio.numero ?? 1).padStart(2, '0')}
-                </BotonEnlace>
-                <BotonEnlace href={`/serie/${d.id}`}>Ficha de la serie</BotonEnlace>
-                <BotonIcono aria-label="Añadir a mi lista">
-                  <Icono nombre="mas" tam={19} />
-                </BotonIcono>
-              </div>
-            </div>
-          </div>
-        </section>
+        <CarruselDestacado slides={destacados} />
 
         <div className="mx-auto max-w-[1600px] px-margen">
           {/* ---------- Parrilla semanal ---------- */}

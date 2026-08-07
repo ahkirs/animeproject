@@ -88,7 +88,7 @@ export default function Laboratorio() {
         <section className="py-e5">
           <div className="mb-e3 border-b border-borde pb-e2">
             <h2 className="font-display text-paso-4 tracking-[-0.03em]">
-              Las tres capas juntas
+              Las capas juntas
             </h2>
           </div>
           <p className="mb-e4 max-w-[70ch] text-paso-1 text-hueso-70">

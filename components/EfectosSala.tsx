@@ -36,33 +36,6 @@ export function CapaVineteado() {
   )
 }
 
-export function CapaProyector() {
-  return (
-    <span
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
-    >
-      {/* El halo cálido del foco, detrás de todo */}
-      <span
-        className="absolute -top-1/3 left-1/2 h-[140%] w-[85%] -translate-x-1/2"
-        style={{
-          background:
-            'radial-gradient(closest-side, rgba(255,176,58,0.22), rgba(255,176,58,0.06) 55%, transparent 78%)',
-        }}
-      />
-      {/* El haz, un trapecio que se abre hacia abajo */}
-      <span
-        className="absolute -top-[10%] left-1/2 h-[120%] w-[70%] -translate-x-1/2"
-        style={{
-          background:
-            'linear-gradient(to bottom, rgba(255,176,58,0.14), transparent 70%)',
-          clipPath: 'polygon(42% 0%, 58% 0%, 100% 100%, 0% 100%)',
-        }}
-      />
-    </span>
-  )
-}
-
 /** Silueta plana, en el mismo lenguaje vectorial que las láminas.
  *  Es lo que sí puedo dibujar: recorte, no ilustración. */
 export function SiluetaMarca({ tam = 120 }: { tam?: number }) {
@@ -93,7 +66,7 @@ export function SiluetaMarca({ tam = 120 }: { tam?: number }) {
 /* ---------------- Demostración interactiva ---------------- */
 
 interface Interruptor {
-  id: 'grano' | 'vineteado' | 'proyector'
+  id: 'grano' | 'vineteado'
   texto: string
   explicacion: string
 }
@@ -111,19 +84,12 @@ const EFECTOS: Interruptor[] = [
     explicacion:
       'Una capa de ruido finísimo sobre todo. Le quita la planitud digital al negro: sin él, un fondo oscuro grande se ve como un vacío liso; con él, parece una superficie con material.',
   },
-  {
-    id: 'proyector',
-    texto: 'Luz de proyector',
-    explicacion:
-      'Un halo cálido y un haz que se abre desde arriba, en el mismo ámbar del acento. Justifica de dónde sale el color de marca: deja de ser un tono elegido y pasa a ser la lámpara de la sala.',
-  },
 ]
 
 export default function EfectosSala() {
   const [activos, setActivos] = useState<Record<Interruptor['id'], boolean>>({
     vineteado: true,
     grano: true,
-    proyector: true,
   })
 
   const alternar = (id: Interruptor['id']) =>
@@ -153,9 +119,7 @@ export default function EfectosSala() {
         ))}
         <button
           type="button"
-          onClick={() =>
-            setActivos({ vineteado: false, grano: false, proyector: false })
-          }
+          onClick={() => setActivos({ vineteado: false, grano: false })}
           className="ml-auto cursor-pointer text-paso-1 font-semibold text-hueso-70 underline-offset-4 hover:text-ambar hover:underline"
         >
           Quitar todo
@@ -164,8 +128,6 @@ export default function EfectosSala() {
 
       {/* Escenario */}
       <div className="relative isolate aspect-video overflow-hidden rounded-radio border border-borde">
-        {activos.proyector && <CapaProyector />}
-
         <span className="absolute inset-0 z-10">
           <Lamina arte="panoramica-escena" />
         </span>

@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Lamina from './Lamina'
 import Icono from './Icono'
 import Datos, { Clasificacion, Nota } from './Datos'
-import { CapaProyector, CapaVineteado } from './EfectosSala'
+import { CapaVineteado } from './EfectosSala'
 import type { ClaveLamina } from '@/lib/types'
 
 export interface Diapositiva {
@@ -73,8 +73,6 @@ export default function CarruselDestacado({ slides }: { slides: Diapositiva[] })
       onKeyDown={teclas}
       className="relative isolate -mt-[calc(var(--spacing-e6)+var(--spacing-e3))] flex min-h-[min(88vh,780px)] items-end overflow-hidden px-margen pt-e6 pb-e5 max-[900px]:min-h-[76vh]"
     >
-      <CapaProyector />
-
       {/* Láminas, una por diapositiva, fundiéndose entre sí */}
       {slides.map((s, i) => (
         <div

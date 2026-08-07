@@ -1,14 +1,12 @@
 import Link from 'next/link'
 import Icono from './Icono'
 
-type Seccion = 'inicio' | 'series' | 'estrenos' | 'emision' | 'generos'
+type Seccion = 'inicio' | 'explorar' | 'emision'
 
 const ENLACES: { id: Seccion; texto: string; href: string }[] = [
   { id: 'inicio', texto: 'Inicio', href: '/' },
-  { id: 'series', texto: 'Series', href: '/serie/cielo-de-hierro' },
-  { id: 'estrenos', texto: 'Estrenos', href: '/#estrenos' },
+  { id: 'explorar', texto: 'Explorar', href: '/explorar' },
   { id: 'emision', texto: 'Emisión', href: '/emision' },
-  { id: 'generos', texto: 'Géneros', href: '/#generos' },
 ]
 
 export function Marca({ className = '' }: { className?: string }) {

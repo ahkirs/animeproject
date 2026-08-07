@@ -122,7 +122,7 @@ export default async function PaginaSerie({
         Saltar al contenido
       </a>
 
-      <Cabecera activa="series" />
+      <Cabecera activa="explorar" />
 
       <main id="principal">
         {/* ---------- Cabecera de la obra ---------- */}

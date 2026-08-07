@@ -11,13 +11,13 @@ import HoraEmision from '@/components/HoraEmision'
 import {
   DIAS,
   EN_CURSO,
-  GENEROS,
   HOY,
   SERIES,
   SERIE_DESTACADA,
   diaJst,
   episodioDeEntrada,
   fechaJst,
+  generosDisponibles,
   horaUtc,
   proximasEmisiones,
   resolverEmision,
@@ -239,13 +239,13 @@ export default function Inicio() {
               aria-label="Géneros"
               className="flex flex-wrap gap-x-e4 gap-y-e2 border-t border-borde pt-e4"
             >
-              {GENEROS.map((g) => (
+              {generosDisponibles().map((g) => (
                 <Link
-                  key={g}
-                  href="#"
+                  key={g.nombre}
+                  href={`/explorar?genero=${encodeURIComponent(g.nombre)}`}
                   className="font-display text-[clamp(1.5rem,3.4vw,2.5rem)] tracking-[-0.035em] text-sala-500 no-underline transition-colors duration-200 ease-sal hover:text-hueso"
                 >
-                  {g}
+                  {g.nombre}
                 </Link>
               ))}
             </nav>

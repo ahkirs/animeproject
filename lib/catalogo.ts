@@ -828,6 +828,87 @@ export const EN_CURSO: EnCurso[] = [
   },
 ]
 
+/* ------------------------------------------------------------
+   EXPLORAR
+   Filtros y orden. Todo se deriva del catálogo, así que ningún
+   filtro puede ofrecer una opción que no devuelva resultados.
+   ------------------------------------------------------------ */
+
+export type EstadoSerie = 'emision' | 'completa'
+export type OrdenSerie = 'titulo' | 'nota' | 'anio' | 'episodios'
+
+export const ORDENES: { id: OrdenSerie; texto: string }[] = [
+  { id: 'nota', texto: 'Mejor valoradas' },
+  { id: 'anio', texto: 'Más recientes' },
+  { id: 'titulo', texto: 'A–Z' },
+  { id: 'episodios', texto: 'Más episodios' },
+]
+
+export const ESTADOS: { id: EstadoSerie; texto: string }[] = [
+  { id: 'emision', texto: 'En emisión' },
+  { id: 'completa', texto: 'Completas' },
+]
+
+export function estaEnEmision(serie: Serie): boolean {
+  return (
+    PARRILLA.some((p) => p.serieId === serie.id) ||
+    (serie.temporadas?.some((t) => t.enEmision) ?? false)
+  )
+}
+
+export function totalEpisodios(serie: Serie): number {
+  return (
+    serie.temporadas?.reduce((suma, t) => suma + t.episodios.length, 0) ?? 0
+  )
+}
+
+/** Géneros presentes en el catálogo, con cuántas series tiene cada uno. */
+export function generosDisponibles(): { nombre: string; cuantas: number }[] {
+  const cuenta = new Map<string, number>()
+  for (const s of SERIES) {
+    for (const g of s.generos) cuenta.set(g, (cuenta.get(g) ?? 0) + 1)
+  }
+  return [...cuenta.entries()]
+    .map(([nombre, cuantas]) => ({ nombre, cuantas }))
+    .sort((a, b) => b.cuantas - a.cuantas || a.nombre.localeCompare(b.nombre))
+}
+
+/** Años presentes en el catálogo, del más reciente al más antiguo. */
+export function aniosDisponibles(): number[] {
+  return [...new Set(SERIES.map((s) => s.anio))].sort((a, b) => b - a)
+}
+
+export interface FiltrosExplorar {
+  genero?: string
+  anio?: number
+  estado?: EstadoSerie
+  orden?: OrdenSerie
+}
+
+export function explorar({
+  genero,
+  anio,
+  estado,
+  orden = 'nota',
+}: FiltrosExplorar): Serie[] {
+  const resultado = SERIES.filter((s) => {
+    if (genero && !s.generos.includes(genero)) return false
+    if (anio && s.anio !== anio) return false
+    if (estado === 'emision' && !estaEnEmision(s)) return false
+    if (estado === 'completa' && estaEnEmision(s)) return false
+    return true
+  })
+
+  const comparar: Record<OrdenSerie, (a: Serie, b: Serie) => number> = {
+    nota: (a, b) => b.nota - a.nota,
+    anio: (a, b) => b.anio - a.anio || a.titulo.localeCompare(b.titulo),
+    titulo: (a, b) => a.titulo.localeCompare(b.titulo, 'es'),
+    episodios: (a, b) => totalEpisodios(b) - totalEpisodios(a),
+  }
+
+  return resultado.sort(comparar[orden])
+}
+
 export const GENEROS = [
   'Mecha',
   'Slice of life',

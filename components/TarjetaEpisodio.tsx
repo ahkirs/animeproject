@@ -15,6 +15,8 @@
 
 import Link from 'next/link'
 import Icono from './Icono'
+import BotonQuitar from './BotonQuitar'
+import { quitarDelHistorial } from '@/lib/acciones'
 import type { VistaEpisodio } from '@/lib/perfil'
 import { haceCuanto } from '@/lib/perfil'
 
@@ -99,13 +101,12 @@ export default function TarjetaEpisodio({ vista }: { vista: VistaEpisodio }) {
       </p>
 
       {/* Por encima del enlace estirado, si no sería inalcanzable */}
-      <button
-        type="button"
-        aria-label={`Quitar ${vista.episodeTitle} del historial`}
-        className="absolute top-e2 right-e2 z-1 grid size-8 cursor-pointer place-items-center rounded-full border border-borde-vivo bg-sala-900/85 text-hueso-70 opacity-0 transition-all duration-200 ease-sal group-hover:opacity-100 hover:border-hueso-45 hover:text-hueso focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
-      >
-        <Icono nombre="cerrar" tam={14} />
-      </button>
+      <div className="absolute top-e2 right-e2 opacity-0 transition-opacity duration-200 ease-sal group-hover:opacity-100 focus-within:opacity-100 [@media(hover:none)]:opacity-100">
+        <BotonQuitar
+          accion={quitarDelHistorial.bind(null, vista.episodeId)}
+          etiqueta={`Quitar ${vista.episodeTitle || 'este episodio'} del historial`}
+        />
+      </div>
     </article>
   )
 }

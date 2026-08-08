@@ -18,6 +18,9 @@ import Cabecera from '@/components/Cabecera'
 import Pie from '@/components/Pie'
 import Icono from '@/components/Icono'
 import TarjetaEpisodio from '@/components/TarjetaEpisodio'
+import BotonQuitar from '@/components/BotonQuitar'
+import VaciarHistorial from '@/components/VaciarHistorial'
+import { quitarDeFavoritos, quitarDeWatchlist, vaciarHistorial } from '@/lib/acciones'
 import {
   favoritos,
   grupoDeDia,
@@ -118,12 +121,15 @@ async function Historial() {
             <> · página {pagina.pagina} de {pagina.paginas}</>
           )}
         </p>
-        <button
-          type="button"
-          className="cursor-pointer border-0 bg-transparent p-0 text-paso-0 font-semibold tracking-[0.06em] text-hueso-45 uppercase transition-colors duration-200 ease-sal hover:text-rojo"
-        >
-          Borrar historial
-        </button>
+        {/* Solo puede vaciar lo que tiene cargado: el backend no ofrece
+            un borrado en bloque, así que va episodio por episodio. */}
+        <VaciarHistorial
+          cuantos={pagina.filas.length}
+          accion={vaciarHistorial.bind(
+            null,
+            pagina.filas.map((f) => f.episodeId),
+          )}
+        />
       </div>
 
       {grupos.map((g) => (
@@ -162,38 +168,66 @@ async function Historial() {
 /* El título y la imagen vienen dentro de la propia entrada, así que ya no
    hace falta resolver cada serie contra el catálogo: eran veinte llamadas
    por pantalla para datos que la API ya mandaba. */
-function Carta({ guardada }: { guardada: ObraGuardada }) {
-  return (
-    <li>
-      <Link href={`/serie/${guardada.animeId}`} className="group block no-underline">
-        <span className="relative block aspect-2/3 overflow-hidden rounded-radio bg-sala-700 shadow-baja transition-all duration-300 ease-sal group-hover:-translate-y-[4px] group-hover:shadow-alta">
-          {guardada.imagen && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={guardada.imagen}
-              alt=""
-              loading="lazy"
-              className="size-full object-cover"
-            />
-          )}
-        </span>
+function Carta({
+  guardada,
+  lista,
+}: {
+  guardada: ObraGuardada
+  lista: 'favoritos' | 'despues'
+}) {
+  const quitar =
+    lista === 'favoritos'
+      ? quitarDeFavoritos.bind(null, guardada.animeId)
+      : quitarDeWatchlist.bind(null, guardada.animeId)
 
-        <b className="mt-e2 block truncate text-paso-1 font-semibold text-hueso-70 transition-colors duration-150 ease-sal group-hover:text-hueso">
+  return (
+    // El enlace no envuelve la tarjeta: el botón de quitar quedaría
+    // dentro de un <a>, que es marcado inválido. Enlace estirado y botón
+    // levantado por encima, como en las tarjetas del historial.
+    <li className="group relative">
+      <span className="relative block aspect-2/3 overflow-hidden rounded-radio bg-sala-700 shadow-baja transition-all duration-300 ease-sal group-hover:-translate-y-[4px] group-hover:shadow-alta">
+        {guardada.imagen && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={guardada.imagen}
+            alt=""
+            loading="lazy"
+            className="size-full object-cover"
+          />
+        )}
+      </span>
+
+      <b className="mt-e2 block truncate text-paso-1 font-semibold text-hueso-70 transition-colors duration-150 ease-sal group-hover:text-hueso">
+        <Link
+          href={`/serie/${guardada.animeId}`}
+          className="text-inherit no-underline after:absolute after:inset-0"
+        >
           {guardada.title}
-        </b>
-        <span className="block text-paso-0 text-hueso-45">
-          {haceCuanto(guardada.addedAt)}
-        </span>
-      </Link>
+        </Link>
+      </b>
+      <span className="block text-paso-0 text-hueso-45">
+        {haceCuanto(guardada.addedAt)}
+      </span>
+
+      <div className="absolute top-e2 right-e2 opacity-0 transition-opacity duration-200 ease-sal group-hover:opacity-100 focus-within:opacity-100 [@media(hover:none)]:opacity-100">
+        <BotonQuitar
+          accion={quitar}
+          etiqueta={`Quitar ${guardada.title} de ${
+            lista === 'favoritos' ? 'favoritos' : 'ver después'
+          }`}
+        />
+      </div>
     </li>
   )
 }
 
 function Conjunto({
   entradas,
+  lista,
   vacio,
 }: {
   entradas: ObraGuardada[]
+  lista: 'favoritos' | 'despues'
   vacio: { titulo: string; detalle: string }
 }) {
   if (entradas.length === 0) return <Vacio {...vacio} />
@@ -201,7 +235,7 @@ function Conjunto({
   return (
     <ul className="grid list-none grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-e3">
       {entradas.map((e) => (
-        <Carta key={e.animeId} guardada={e} />
+        <Carta key={e.animeId} guardada={e} lista={lista} />
       ))}
     </ul>
   )
@@ -433,6 +467,7 @@ export default async function MiCuenta({
           {vista === 'favoritos' && (
             <Conjunto
               entradas={favs}
+              lista="favoritos"
               vacio={{
                 titulo: 'Sin favoritos',
                 detalle:
@@ -444,6 +479,7 @@ export default async function MiCuenta({
           {vista === 'despues' && (
             <Conjunto
               entradas={despues}
+              lista="despues"
               vacio={{
                 titulo: 'Nada guardado para después',
                 detalle:

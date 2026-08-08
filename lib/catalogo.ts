@@ -29,6 +29,68 @@ import {
    ============================================================ */
 
 /* ------------------------------------------------------------
+   Solo obras reproducibles
+   El catálogo mezcla proveedores: AnimeFLV devuelve episodios
+   pero con streamLinks vacíos (no publica vídeo con el patrón del
+   scraper). Para que una obra aparezca en una lista hay que
+   comprobar que su primer episodio tiene algún enlace de
+   reproducción; si no, no muestra lugar en la página.
+   ------------------------------------------------------------ */
+
+/** ¿Tiene el primer episodio disponible de «url» al menos un enlace? */
+async function tieneVideo(url: string): Promise<boolean> {
+  try {
+    const info = await apiInfo(url)
+    const episodio = (info.episodes ?? []).find((e) => e.url)
+    if (!episodio?.url) return false
+    const enlaces = await apiEnlacesEpisodio(episodio.url)
+    return (
+      (enlaces.streamLinks?.SUB?.length ?? 0) +
+        (enlaces.streamLinks?.DUB?.length ?? 0) >
+      0
+    )
+  } catch {
+    return false
+  }
+}
+
+/** Cuántas comprobaciones de /anime/episode se lanzan a la vez. */
+const CONCURRENCIA_VERIFICACION = 6
+
+/** Devuelve el subconjunto de URLs cuyo primer episodio se puede
+ *  reproducir. Las peticiones van acotadas para no dormir la API. */
+async function urlsConVideo(urls: string[]): Promise<Set<string>> {
+  const conVideo = new Set<string>()
+  let indice = 0
+  const trabajadores = Array.from(
+    { length: Math.min(CONCURRENCIA_VERIFICACION, urls.length) },
+    async () => {
+      while (indice < urls.length) {
+        const actual = urls[indice++]
+        if (await tieneVideo(actual)) conVideo.add(actual)
+      }
+    },
+  )
+  await Promise.all(trabajadores)
+  return conVideo
+}
+
+/** Filtra una lista de resultados quedándose con los que tienen vídeo. */
+async function conVideo<T>(
+  entradas: T[],
+  urlDe: (e: T) => string | null | undefined,
+): Promise<T[]> {
+  const urls = entradas
+    .map(urlDe)
+    .filter((u): u is string => Boolean(u))
+  const conV = await urlsConVideo(urls)
+  return entradas.filter((e) => {
+    const u = urlDe(e)
+    return !!u && conV.has(u)
+  })
+}
+
+/* ------------------------------------------------------------
    Mapeo de la respuesta a Serie
    ------------------------------------------------------------ */
 
@@ -204,8 +266,9 @@ export async function tendencias(limite = 10): Promise<Serie[]> {
     ...(av1?.results ?? []),
     ...(flv?.results ?? []),
   ])
+  const visibles = await conVideo(dedupe, (d) => d.serie.url)
 
-  const series = dedupe
+  const series = visibles
     .slice(0, limite)
     .map((d) => unirAlternativas(resultadoASerie(d.serie), d.alternativas))
 
@@ -279,7 +342,8 @@ export async function explorar({
     ...(av1?.results ?? []),
     ...(flv?.results ?? []),
   ])
-  const series = dedupe.map((d) =>
+  const visibles = await conVideo(dedupe, (d) => d.serie.url)
+  const series = visibles.map((d) =>
     unirAlternativas(resultadoASerie(d.serie), d.alternativas),
   )
 
@@ -348,7 +412,8 @@ export async function buscarSeries(
 ): Promise<Coincidencia[]> {
   const respuesta = await apiBuscar(consulta)
   const dedupe = deduplicar(respuesta.results)
-  return dedupe
+  const visibles = await conVideo(dedupe, (d) => d.serie.url)
+  return visibles
     .slice(0, limite)
     .map((d) => ({
       serie: unirAlternativas(resultadoASerie(d.serie), d.alternativas),

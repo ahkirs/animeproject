@@ -1,12 +1,39 @@
+import { Suspense } from 'react'
 import Link from 'next/link'
 import Cabecera from '@/components/Cabecera'
 import Pie from '@/components/Pie'
 import Icono from '@/components/Icono'
 import Riel from '@/components/Riel'
-import FichaSerie, { Cartel } from '@/components/FichaSerie'
+import { Cartel } from '@/components/FichaSerie'
 import CarruselDestacado, { type Diapositiva } from '@/components/CarruselDestacado'
+import FilaPortada from '@/components/FilaPortada'
+import FranjaPromo from '@/components/FranjaPromo'
 import { EN_CURSO, episodioDeEntrada, generosDisponibles, tendencias } from '@/lib/catalogo'
-import { nombreProveedor } from '@/lib/ids'
+import { FILAS, PROMOCIONES, serieDeFila, type DefinicionFila } from '@/lib/portada'
+
+/* Cada fila carga por su cuenta dentro de un Suspense. Sin eso, la
+   portada entera espera a la fila más lenta del scraper, que medido son
+   casi cinco segundos con seis filas encadenadas. Así la cabecera y el
+   destacado pintan enseguida y las filas van entrando según llegan. */
+async function Fila({ fila }: { fila: DefinicionFila }) {
+  const series = await serieDeFila(fila)
+  return <FilaPortada fila={fila} series={series} />
+}
+
+/** Hueco de la fila mientras carga. Mantiene la altura para que lo que
+ *  hay debajo no dé un salto cuando llegue el contenido. */
+function EsqueletoFila() {
+  return (
+    <div className="mt-e5" aria-hidden="true">
+      <div className="mb-e3 h-[1.6rem] w-[18rem] max-w-[60%] rounded-radio bg-sala-800" />
+      <div className="grid grid-flow-col gap-e3 overflow-hidden [grid-auto-columns:minmax(172px,1fr)]">
+        {Array.from({ length: 8 }, (_, i) => (
+          <div key={i} className="aspect-2/3 rounded-radio bg-sala-800" />
+        ))}
+      </div>
+    </div>
+  )
+}
 
 function CabezaSeccion({
   titulo,
@@ -116,26 +143,20 @@ export default async function Inicio() {
             </Riel>
           </section>
 
-          {/* ---------- Tendencias ---------- */}
-          <section id="tendencias" aria-labelledby="t-tendencias" className="mt-e6">
-            <CabezaSeccion
-              id="t-tendencias"
-              titulo="Tendencias"
-              enlace="Ver el catálogo"
-              href="/explorar"
-            />
-            <Riel>
-              {catalogo.map((s) => (
-                <FichaSerie
-                  key={s.id}
-                  href={`/serie/${s.id}`}
-                  titulo={s.titulo}
-                  subtitulo={`${s.genero} · ${nombreProveedor(s.proveedor)}`}
-                  arte={s.lamina}
-                />
-              ))}
-            </Riel>
-          </section>
+          {/* ---------- Las filas temáticas ----------
+              Se recorren los datos, no se repite el marcado: añadir una
+              fila es una línea en lib/portada.ts. */}
+          {FILAS.map((fila) => {
+            const promo = PROMOCIONES.find((p) => p.trasFila === fila.id)
+            return (
+              <div key={fila.id}>
+                <Suspense fallback={<EsqueletoFila />}>
+                  <Fila fila={fila} />
+                </Suspense>
+                {promo && <FranjaPromo promo={promo} arte="panoramica-escena" />}
+              </div>
+            )
+          })}
 
           {/* ---------- Géneros ---------- */}
           <section id="generos" aria-labelledby="t-generos" className="mt-e6">

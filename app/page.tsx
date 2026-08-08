@@ -4,7 +4,7 @@ import Pie from '@/components/Pie'
 import Icono from '@/components/Icono'
 import Riel from '@/components/Riel'
 import FichaSerie, { Cartel } from '@/components/FichaSerie'
-import HoraEmision from '@/components/HoraEmision'
+import HoraEmision, { CuentaAtras } from '@/components/HoraEmision'
 import CarruselDestacado, { type Diapositiva } from '@/components/CarruselDestacado'
 import {
   DIAS,
@@ -12,9 +12,9 @@ import {
   HOY,
   SERIES,
   diaJst,
-  fechaJst,
   generosDisponibles,
   horaUtc,
+  parrillaDe,
   proximasEmisiones,
   resolverEmision,
   rutaReproductor,
@@ -88,6 +88,7 @@ function construirDestacados(): Diapositiva[] {
 
 export default function Inicio() {
   const destacados = construirDestacados()
+  const emisionesHoy = parrillaDe(HOY)
 
   return (
     <>
@@ -106,59 +107,62 @@ export default function Inicio() {
 
         <div className="mx-auto max-w-[1600px] px-margen">
           {/* ---------- Parrilla semanal ---------- */}
-          <section id="semana" aria-labelledby="t-semana" className="mt-e6">
+          <section id="hoy" aria-labelledby="t-hoy" className="mt-e6">
             <CabezaSeccion
-              id="t-semana"
-              titulo="Se emite esta semana"
-              enlace="Calendario completo"
+              id="t-hoy"
+              titulo="Se emite hoy"
+              enlace="Toda la semana"
               href="/emision"
             />
-            <div className="border-t border-borde">
-              {proximasEmisiones().map((p) => {
-                const { serie, temporada, episodio } = resolverEmision(p)
-                if (!serie) return null
-                const diaDeLaSemana = diaJst(p)
-                const esHoy = diaDeLaSemana === HOY
-                const dia = DIAS.find((d) => d.n === diaDeLaSemana)
 
-                return (
-                  <Link
-                    key={`${p.serieId}-${p.emitidoUtc}`}
-                    href={rutaReproductor(p.serieId) ?? `/serie/${p.serieId}`}
-                    className="grid grid-cols-[7.5rem_1fr_auto] items-center gap-e3 border-b border-borde py-e3 no-underline transition-all duration-150 ease-sal hover:bg-sala-800 hover:pl-e2 max-[900px]:grid-cols-[4.5rem_1fr]"
-                  >
-                    <span
-                      className={`text-paso-0 font-bold tracking-[0.1em] uppercase tabular-nums ${
-                        esHoy ? 'text-ambar' : 'text-hueso-45'
-                      }`}
+            {emisionesHoy.length > 0 ? (
+              <div className="border-t border-borde">
+                {emisionesHoy.map((p) => {
+                  const { serie, temporada, episodio } = resolverEmision(p)
+                  if (!serie) return null
+
+                  return (
+                    <Link
+                      key={`${p.serieId}-${p.emitidoUtc}`}
+                      href={rutaReproductor(p.serieId) ?? `/serie/${p.serieId}`}
+                      className="grid grid-cols-[7.5rem_1fr_auto] items-center gap-e3 border-b border-borde py-e3 no-underline transition-all duration-150 ease-sal hover:bg-sala-800 hover:pl-e2 max-[900px]:grid-cols-[5.5rem_1fr]"
                     >
-                      {esHoy ? 'Hoy' : dia?.corto}
-                      <strong
-                        className={`mt-[0.2rem] block font-display text-paso-4 leading-none tracking-[-0.02em] max-[900px]:text-paso-3 ${
-                          esHoy ? 'text-ambar' : 'text-hueso'
-                        }`}
-                      >
-                        {fechaJst(p)}
-                      </strong>
-                    </span>
+                      <span className="font-display text-paso-4 leading-none tracking-[-0.02em] text-ambar tabular-nums max-[900px]:text-paso-3">
+                        <HoraEmision iso={p.emitidoUtc} utc={horaUtc(p)} />
+                      </span>
 
-                    <span>
-                      <h3 className="mb-[0.2rem] text-paso-3 font-semibold tracking-[-0.015em]">
-                        {serie.titulo} — T{temporada?.numero} E
-                        {String(p.proximoEpisodio).padStart(2, '0')}
-                      </h3>
-                      {episodio && (
-                        <p className="text-paso-1 text-hueso-45">«{episodio.titulo}»</p>
-                      )}
-                    </span>
+                      <span>
+                        <h3 className="mb-[0.2rem] text-paso-3 font-semibold tracking-[-0.015em]">
+                          {serie.titulo} — T{temporada?.numero} E
+                          {String(p.proximoEpisodio).padStart(2, '0')}
+                        </h3>
+                        {episodio && (
+                          <p className="text-paso-1 text-hueso-45">«{episodio.titulo}»</p>
+                        )}
+                      </span>
 
-                    <span className="flex items-center gap-2 text-paso-1 font-semibold text-hueso-70 tabular-nums max-[900px]:col-start-2 max-[900px]:text-paso-0">
-                      <HoraEmision iso={p.emitidoUtc} utc={horaUtc(p)} />
-                    </span>
-                  </Link>
-                )
-              })}
-            </div>
+                      <span className="text-paso-1 font-semibold text-hueso-70 tabular-nums max-[900px]:col-start-2 max-[900px]:text-paso-0">
+                        <CuentaAtras iso={p.emitidoUtc} />
+                      </span>
+                    </Link>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="rounded-radio border border-dashed border-borde-vivo px-e4 py-e5 text-center">
+                <p className="text-paso-2 font-semibold">Hoy no estrena nada</p>
+                <p className="mt-e2 text-paso-1 text-hueso-45">
+                  Mira la parrilla para ver qué sale el resto de la semana.
+                </p>
+                <Link
+                  href="/emision"
+                  className="mt-e3 inline-flex items-center gap-2 rounded-radio bg-ambar px-[1.35rem] py-3 text-paso-1 font-semibold text-ambar-tinta no-underline transition-colors duration-200 ease-sal hover:bg-ambar-claro"
+                >
+                  <Icono nombre="flecha" tam={16} />
+                  Ver la parrilla
+                </Link>
+              </div>
+            )}
           </section>
 
           {/* ---------- Seguir viendo ---------- */}

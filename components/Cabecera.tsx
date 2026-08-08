@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Icono from './Icono'
+import Buscador from './Buscador'
 
 type Seccion = 'inicio' | 'explorar' | 'emision'
 
@@ -47,15 +48,7 @@ export default function Cabecera({ activa }: { activa?: Seccion }) {
       </nav>
 
       <div className="ml-auto flex items-center gap-e2">
-        <label className="flex items-center gap-2 rounded-full border border-borde bg-sala-700 px-[0.9rem] py-2 transition-colors duration-200 ease-sal focus-within:border-hueso-45 max-[560px]:px-[0.55rem]">
-          <Icono nombre="buscar" tam={17} className="shrink-0 text-hueso-45" />
-          <span className="sr-only">Buscar series</span>
-          <input
-            type="search"
-            placeholder="Buscar…"
-            className="w-[11ch] border-0 bg-transparent text-paso-1 text-hueso outline-none transition-[width] duration-300 ease-sal placeholder:text-hueso-45 focus:w-[18ch] max-[560px]:hidden"
-          />
-        </label>
+        <Buscador />
 
         <button
           type="button"

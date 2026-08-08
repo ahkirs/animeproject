@@ -918,6 +918,69 @@ export function explorar({
 }
 
 /* ------------------------------------------------------------
+   BÚSQUEDA
+   Se resuelve contra el catálogo local. Cuando entre la API, esta
+   función pasa a ser una petición y el resto no se entera.
+   ------------------------------------------------------------ */
+
+/** Minúsculas y sin tildes, para que «kaiju» encuentre «Kaijū». */
+function normalizar(texto: string): string {
+  return texto
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+}
+
+export interface Coincidencia {
+  serie: Serie
+  /** Por qué ha entrado: se muestra bajo el título. */
+  motivo: string
+}
+
+/** Hiragana, katakana y kanji. */
+const CJK = /[\u3040-\u30ff\u4e00-\u9fff]/
+
+/** Cuántos caracteres hacen falta para buscar. En japonés basta con
+ *  uno, porque un solo kanji ya es una palabra; en alfabeto latino
+ *  una sola letra devolvería medio catálogo. */
+export function minimoParaBuscar(consulta: string): number {
+  return CJK.test(consulta) ? 1 : 2
+}
+
+export function buscarSeries(consulta: string, limite = 6): Coincidencia[] {
+  const q = normalizar(consulta)
+  if (q.length < minimoParaBuscar(consulta)) return []
+
+  const marcadas = SERIES.flatMap((serie) => {
+    const titulo = normalizar(serie.titulo)
+    const original = normalizar(
+      `${serie.tituloOriginal ?? ''} ${serie.romaji ?? ''}`,
+    )
+    const generos = serie.generos.find((g) => normalizar(g).includes(q))
+
+    // Menor peso, mejor posición.
+    if (titulo.startsWith(q)) return [{ serie, peso: 0, motivo: serie.genero }]
+    if (titulo.includes(q)) return [{ serie, peso: 1, motivo: serie.genero }]
+    if (original.includes(q))
+      return [
+        {
+          serie,
+          peso: 2,
+          motivo: [serie.tituloOriginal, serie.romaji].filter(Boolean).join(' · '),
+        },
+      ]
+    if (generos) return [{ serie, peso: 3, motivo: `Género: ${generos}` }]
+    return []
+  })
+
+  return marcadas
+    .sort((a, b) => a.peso - b.peso || b.serie.nota - a.serie.nota)
+    .slice(0, limite)
+    .map(({ serie, motivo }) => ({ serie, motivo }))
+}
+
+/* ------------------------------------------------------------
    LISTA DEL USUARIO
    Datos de ejemplo mientras no hay cuentas. Cuando entre la base de
    datos, esto pasa a ser una consulta por usuario; las formas de

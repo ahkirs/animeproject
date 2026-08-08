@@ -1,4 +1,4 @@
-/* Tipos de la respuesta del scraper (https://backend-anime-production-5b68
+/* Tipos de la respuesta del scraper (https://backend-anime-production-7f7c
    .up.railway.app/api/v1). Son los tipos crudos que llegan por red, sin
    interpretar: el mapeo a Serie/Episodio de lib/types.ts vive en
    lib/catalogo.ts. La fuente de verdad es el OpenAPI de /api/docs. */

@@ -1,4 +1,4 @@
-/* Cliente del scraper (https://backend-anime-production-5b68.up.railway.app).
+/* Cliente del scraper (https://backend-anime-production-7f7c.up.railway.app).
    Es el único archivo que habla con la red; el resto del catálogo
    consume las funciones de aquí y no se entera de la API.
 
@@ -17,7 +17,7 @@ import type {
 } from './api-types'
 
 export const API_BASE =
-  process.env.API_BASE ?? 'https://backend-anime-production-5b68.up.railway.app/api/v1'
+  process.env.API_BASE ?? 'https://backend-anime-production-7f7c.up.railway.app/api/v1'
 
 /** Segundos que se conserva en caché una respuesta. */
 export const REVALIDAR_CATALOGO = 60 * 60 // 1 h
@@ -184,4 +184,64 @@ export function servidoresDe(
 ): { server: string; url: string }[] {
   const clave = variante === 'SUB' ? 'sub' : 'dub'
   return episodio.servers?.[clave] ?? episodio.streamLinks[variante] ?? []
+}
+
+/* ------------------------------------------------------------
+   Nombres y orden de los servidores
+   El scraper etiqueta los hosts como «HLS», «UPNShare»,
+   «MP4Upload»… con ortografía variable. Aquí se normalizan y se
+   les da un orden de calidad para que el reproductor muestre
+   primero el que mejor va.
+   ------------------------------------------------------------ */
+
+/** Nombres limpios por patrón. Solo etiqueta el host; no promete nada. */
+const NOMBRES_SERVIDOR: [RegExp, string][] = [
+  [/hls|zilla/i, 'HLS'],
+  [/upn|uns\.bio/i, 'UPNShare'],
+  [/mp4upload/i, 'MP4Upload'],
+  [/youtube|youtu\.be/i, 'YouTube'],
+  [/ok(?:\s|\.)?ru/i, 'OK.ru'],
+  [/vk/i, 'VK'],
+  [/streamtape/i, 'StreamTape'],
+  [/mega/i, 'MEGA'],
+  [/mediafire/i, 'MediaFire'],
+  [/1fichero|1fichier/i, '1Fichier'],
+]
+
+/** Prioridad de cada nombre: menor primero (1 = el que mejor va). */
+const ORDEN_SERVIDOR: Record<string, number> = {
+  HLS: 1,
+  UPNShare: 2,
+  MP4Upload: 3,
+}
+
+/** Nombre legible y constante de un servidor, o el original si es un
+ *  host desconocido. */
+export function nombreDeServidor(server: string): string {
+  const sinEspacios = server.trim()
+  for (const [patron, nombre] of NOMBRES_SERVIDOR) {
+    if (patron.test(sinEspacios)) return nombre
+  }
+  return sinEspacios
+}
+
+/** Ordena los servidores: primero los conocidos y que mejor van, luego
+ *  el resto. Los que no se saben nombrar van al final. */
+export function ordenarServidores(
+  servidores: { server: string; url: string }[],
+): { server: string; url: string }[] {
+  return [...servidores].sort((a, b) => {
+    const prioridadA = ORDEN_SERVIDOR[nombreDeServidor(a.server)] ?? 999
+    const prioridadB = ORDEN_SERVIDOR[nombreDeServidor(b.server)] ?? 999
+    if (prioridadA !== prioridadB) return prioridadA - prioridadB
+    return a.server.localeCompare(b.server)
+  })
+}
+
+/** Lista los servidores de un episodio, normalizada y ordenada. */
+export function servidoresOrdenados(
+  episodio: ApiEnlacesEpisodio,
+  variante: VarianteAudio,
+): { server: string; url: string }[] {
+  return ordenarServidores(servidoresDe(episodio, variante))
 }

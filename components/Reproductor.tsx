@@ -5,7 +5,7 @@ import Lamina from './Lamina'
 import Icono from './Icono'
 import VideoConHls from './VideoConHls'
 import ControlesVideo from './ControlesVideo'
-import { servidoresDe } from '@/lib/api'
+import { servidoresOrdenados, nombreDeServidor } from '@/lib/api'
 import type { ApiEnlacesEpisodio, VarianteAudio } from '@/lib/api-types'
 
 const EXTENSIONES_VIDEO = /\.(mp4|webm|ogv|ogg|mov|m4v|mkv)(\?|#|$)/i
@@ -87,11 +87,11 @@ export default function Reproductor({
   urlSiguiente?: string
 }) {
   const servidoresSub = useMemo(
-    () => (enlaces ? servidoresDe(enlaces, 'SUB').filter((s) => s.url) : []),
+    () => (enlaces ? servidoresOrdenados(enlaces, 'SUB').filter((s) => s.url) : []),
     [enlaces],
   )
   const servidoresDub = useMemo(
-    () => (enlaces ? servidoresDe(enlaces, 'DUB').filter((s) => s.url) : []),
+    () => (enlaces ? servidoresOrdenados(enlaces, 'DUB').filter((s) => s.url) : []),
     [enlaces],
   )
 
@@ -418,79 +418,74 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
         </div>
       )}
 
-      {/* ---------- Selector de servidores ---------- */}
+      {/* ---------- Selector de audio y servidor ---------- */}
       {(servidoresSub.length > 0 || servidoresDub.length > 0) && (
         <div className="flex flex-wrap items-center gap-x-e4 gap-y-e2 border-t border-borde bg-sala-900 px-e3 py-e2">
-          <div
-            role="tablist"
-            aria-label="Audio"
-            className="flex rounded-radio border border-borde-vivo p-[2px]"
-          >
-            {(['SUB', 'DUB'] as const).map((v) => {
-              const activa = variante === v
-              return (
+          {/* Audio */}
+          <div className="flex items-center gap-e2">
+            <span className="text-paso-0 font-bold tracking-[0.11em] text-hueso-45 uppercase">
+              Audio
+            </span>
+            <div
+              role="tablist"
+              aria-label="Audio"
+              className="flex rounded-radio border border-borde-vivo p-[2px]"
+            >
+              {servidoresSub.length > 0 && (
                 <button
-                  key={v}
                   type="button"
                   role="tab"
-                  aria-selected={activa}
-                  onClick={() => cambiarVariante(v)}
-                  className={`cursor-pointer rounded-radio border-0 px-[0.9rem] py-[0.35rem] text-paso-0 font-bold tracking-[0.08em] transition-colors duration-200 ease-sal ${
-                    activa
+                  aria-selected={variante === 'SUB'}
+                  onClick={() => cambiarVariante('SUB')}
+                  className={`cursor-pointer rounded-radio border-0 px-[0.9rem] py-[0.3rem] text-paso-0 font-bold transition-colors duration-200 ease-sal ${
+                    variante === 'SUB'
                       ? 'bg-ambar text-ambar-tinta'
                       : 'bg-transparent text-hueso-70 hover:text-hueso'
                   }`}
                 >
-                  {v === 'SUB' ? 'Subtitulada' : 'Doblada'}
-                  <span
-                    className={`ml-[0.35rem] tabular-nums ${
-                      activa ? 'text-ambar-tinta/60' : 'text-hueso-45'
-                    }`}
-                  >
-                    {(v === 'SUB' ? servidoresSub : servidoresDub).length}
-                  </span>
+                  Subtitulado
                 </button>
-              )
-            })}
+              )}
+              {servidoresDub.length > 0 && (
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={variante === 'DUB'}
+                  onClick={() => cambiarVariante('DUB')}
+                  className={`cursor-pointer rounded-radio border-0 px-[0.9rem] py-[0.3rem] text-paso-0 font-bold transition-colors duration-200 ease-sal ${
+                    variante === 'DUB'
+                      ? 'bg-ambar text-ambar-tinta'
+                      : 'bg-transparent text-hueso-70 hover:text-hueso'
+                  }`}
+                >
+                  Latino
+                </button>
+              )}
+            </div>
           </div>
 
-          {servidores.length > 1 && (
-            <div
-              role="tablist"
-              aria-label="Servidor"
-              className="flex flex-wrap items-center gap-e1"
-            >
-              {servidores.map((s, i) => {
-                const resuelta = resueltas[s.url]
-                const etiqueta = esUrlDirecta(s.url)
-                  ? 'directo'
-                  : resuelta
-                    ? 'resuelto'
-                    : 'embed'
-                return (
-                  <button
-                    key={s.url}
-                    type="button"
-                    role="tab"
-                    aria-selected={i === indice}
-                    onClick={() => elegirServidor(i)}
-                    className={`cursor-pointer rounded-full border px-[0.75rem] py-[0.28rem] text-paso-0 font-semibold capitalize transition-colors duration-200 ease-sal ${
-                      i === indice
-                        ? 'border-ambar text-ambar'
-                        : 'border-borde-vivo text-hueso-70 hover:border-hueso-45 hover:text-hueso'
-                    }`}
-                  >
-                    {s.server}
-                    <span
-                      className={`ml-[0.4rem] text-[0.7rem] font-bold tracking-[0.08em] uppercase ${
-                        i === indice ? 'text-ambar-oscuro' : 'text-hueso-45'
-                      }`}
-                    >
-                      {etiqueta}
-                    </span>
-                  </button>
-                )
-              })}
+          {/* Servidor */}
+          {servidores.length > 0 && (
+            <div className="flex items-center gap-e2">
+              <span className="text-paso-0 font-bold tracking-[0.11em] text-hueso-45 uppercase">
+                Servidor
+              </span>
+              <span
+                className="min-w-[7.5rem] rounded-full border border-borde-vivo bg-sala-800 px-[0.85rem] py-[0.3rem] text-paso-0 font-semibold text-hueso tabular-nums"
+                title={servidores[indice] ? nombreDeServidor(servidores[indice].server) : undefined}
+              >
+                Servidor {indice + 1} de {servidores.length}
+              </span>
+              {servidores.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => elegirServidor((indice + 1) % servidores.length)}
+                  className="inline-flex cursor-pointer items-center gap-[0.4rem] rounded-radio border border-borde-vivo px-[0.8rem] py-[0.3rem] text-paso-0 font-semibold text-hueso-70 transition-colors duration-200 ease-sal hover:border-hueso-45 hover:text-hueso"
+                >
+                  <Icono nombre="cambiar" tam={15} />
+                  Cambiar
+                </button>
+              )}
             </div>
           )}
         </div>

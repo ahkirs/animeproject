@@ -67,6 +67,14 @@ const ICONOS = {
     </g>
   ),
 
+  /* Intercambio: dos flechas en sentido contrario (cambiar de servidor). */
+  cambiar: (
+    <g stroke="currentColor" {...TRAZO}>
+      <path d="M4 8h13M13.5 4.5L17 8l-3.5 3.5" />
+      <path d="M20 16H7M10.5 12.5L7 16l3.5 3.5" />
+    </g>
+  ),
+
   cinta: (
     <g stroke="currentColor" fill="none" strokeWidth={1.8}>
       <rect x="2.5" y="5.5" width="19" height="13" rx="2" />

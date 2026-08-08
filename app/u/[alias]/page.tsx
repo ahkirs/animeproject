@@ -19,9 +19,8 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Cabecera from '@/components/Cabecera'
 import Pie from '@/components/Pie'
-import Lamina from '@/components/Lamina'
 import Icono from '@/components/Icono'
-import { favoritos, perfilPublico, seriesDe, haceCuanto } from '@/lib/perfil'
+import { favoritosPublicos, perfilPublico, haceCuanto } from '@/lib/perfil'
 
 export async function generateMetadata({
   params,
@@ -33,7 +32,7 @@ export async function generateMetadata({
   if (!p) return {}
 
   // Un perfil que no es público no se indexa ni se resume.
-  if (p.visibilidad !== 'publico') {
+  if (p.visibilidad !== 'PUBLIC') {
     return { title: `@${p.username}`, robots: { index: false, follow: false } }
   }
 
@@ -52,9 +51,8 @@ export default async function PerfilPublicoPagina({
   const p = await perfilPublico(alias)
   if (!p) notFound()
 
-  const publico = p.visibilidad === 'publico'
-  const favs = publico ? await favoritos() : []
-  const series = publico ? await seriesDe(favs.map((f) => f.animeId)) : new Map()
+  const publico = p.visibilidad === 'PUBLIC'
+  const favs = publico ? await favoritosPublicos(alias) : []
 
   const desde = new Date(p.createdAt).toLocaleDateString('es-ES', {
     month: 'long',
@@ -62,11 +60,16 @@ export default async function PerfilPublicoPagina({
     timeZone: 'UTC',
   })
 
-  const cifras = [
-    { etiqueta: 'series', valor: String(p.cifras.series) },
-    { etiqueta: 'episodios', valor: p.cifras.episodios.toLocaleString('es-ES') },
-    { etiqueta: 'horas', valor: String(p.cifras.horas) },
-  ]
+  /* `stats` llega nulo cuando el perfil no es público y no eres su
+     dueño. En ese caso no se enseña la tira: un cero no es lo mismo que
+     «no te lo puedo decir». */
+  const cifras = p.cifras
+    ? [
+        { etiqueta: 'series', valor: String(p.cifras.series) },
+        { etiqueta: 'episodios', valor: p.cifras.episodios.toLocaleString('es-ES') },
+        { etiqueta: 'horas', valor: String(p.cifras.horas) },
+      ]
+    : []
 
   return (
     <>
@@ -131,27 +134,32 @@ export default async function PerfilPublicoPagina({
 
             {favs.length > 0 ? (
               <ul className="grid list-none grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-e3">
-                {favs.map((f) => {
-                  const serie = series.get(f.animeId)
-                  return (
-                    <li key={f.animeId}>
-                      <Link
-                        href={`/serie/${f.animeId}`}
-                        className="group block no-underline"
-                      >
-                        <span className="relative block aspect-2/3 overflow-hidden rounded-radio bg-sala-700 shadow-baja transition-all duration-300 ease-sal group-hover:-translate-y-[4px] group-hover:shadow-alta">
-                          {serie && <Lamina arte={serie.lamina} />}
-                        </span>
-                        <b className="mt-e2 block truncate text-paso-1 font-semibold text-hueso-70 transition-colors duration-150 ease-sal group-hover:text-hueso">
-                          {serie?.titulo ?? f.animeId}
-                        </b>
-                        <span className="block text-paso-0 text-hueso-45">
-                          {haceCuanto(f.addedAt)}
-                        </span>
-                      </Link>
-                    </li>
-                  )
-                })}
+                {favs.map((f) => (
+                  <li key={f.animeId}>
+                    <Link
+                      href={`/serie/${f.animeId}`}
+                      className="group block no-underline"
+                    >
+                      <span className="relative block aspect-2/3 overflow-hidden rounded-radio bg-sala-700 shadow-baja transition-all duration-300 ease-sal group-hover:-translate-y-[4px] group-hover:shadow-alta">
+                        {f.imagen && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={f.imagen}
+                            alt=""
+                            loading="lazy"
+                            className="size-full object-cover"
+                          />
+                        )}
+                      </span>
+                      <b className="mt-e2 block truncate text-paso-1 font-semibold text-hueso-70 transition-colors duration-150 ease-sal group-hover:text-hueso">
+                        {f.title}
+                      </b>
+                      <span className="block text-paso-0 text-hueso-45">
+                        {haceCuanto(f.addedAt)}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
               </ul>
             ) : (
               <p className="rounded-radio border border-dashed border-borde-vivo px-e4 py-e5 text-center text-paso-1 text-hueso-45">

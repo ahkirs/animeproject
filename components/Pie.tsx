@@ -1,13 +1,13 @@
-import Link from 'next/link'
-import { Marca } from './Cabecera'
+﻿import Link from 'next/link'
+import Marca from './Marca'
 
 const COLUMNAS: { titulo: string; enlaces: { texto: string; href: string }[] }[] = [
   {
-    titulo: 'Catálogo',
+    titulo: 'CatÃ¡logo',
     enlaces: [
       { texto: 'Explorar', href: '/explorar' },
       { texto: 'Simulcast', href: '/explorar?estado=emision' },
-      { texto: 'Doblaje en español', href: '/explorar' },
+      { texto: 'Doblaje en espaÃ±ol', href: '/explorar' },
     ],
   },
   {
@@ -38,7 +38,7 @@ interface Props {
 }
 
 const AVISO_POR_DEFECTO =
-  'Maqueta de diseño. Todos los títulos, sinopsis, fechas, valoraciones, nombres y carátulas son material sintético creado para esta demostración: ninguna obra, marca ni persona real aparece en la página. Sustituye este contenido por el catálogo real antes de publicar.'
+  'Maqueta de diseÃ±o. Todos los tÃ­tulos, sinopsis, fechas, valoraciones, nombres y carÃ¡tulas son material sintÃ©tico creado para esta demostraciÃ³n: ninguna obra, marca ni persona real aparece en la pÃ¡gina. Sustituye este contenido por el catÃ¡logo real antes de publicar.'
 
 export default function Pie({ aviso = AVISO_POR_DEFECTO, pegado }: Props) {
   return (
@@ -51,7 +51,7 @@ export default function Pie({ aviso = AVISO_POR_DEFECTO, pegado }: Props) {
         <div>
           <Marca />
           <p className="mt-3 max-w-[34ch]">
-            Catálogo de anime con emisión simultánea y subtítulos en cinco idiomas.
+            CatÃ¡logo de anime con emisiÃ³n simultÃ¡nea y subtÃ­tulos en cinco idiomas.
           </p>
         </div>
 

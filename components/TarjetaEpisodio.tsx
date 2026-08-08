@@ -14,23 +14,11 @@
       a él. */
 
 import Link from 'next/link'
-import Lamina from './Lamina'
 import Icono from './Icono'
-import type { Serie } from '@/lib/types'
 import type { VistaEpisodio } from '@/lib/perfil'
 import { haceCuanto } from '@/lib/perfil'
 
-export default function TarjetaEpisodio({
-  vista,
-  serie,
-  nombreDeReserva,
-}: {
-  vista: VistaEpisodio
-  serie?: Serie
-  nombreDeReserva: string
-}) {
-  const titulo = serie?.titulo ?? nombreDeReserva
-
+export default function TarjetaEpisodio({ vista }: { vista: VistaEpisodio }) {
   // Sin duración guardada no se puede decir cuánto queda. Se dice lo que
   // sí se sabe —que está empezado— en lugar de fingir un porcentaje.
   const hayDuracion = typeof vista.duracionSeg === 'number' && vista.duracionSeg > 0
@@ -45,7 +33,15 @@ export default function TarjetaEpisodio({
   return (
     <article className="group relative">
       <div className="relative aspect-video overflow-hidden rounded-radio bg-sala-700 shadow-baja transition-shadow duration-300 ease-sal group-hover:shadow-alta">
-        {serie && <Lamina arte={serie.panoramica ?? serie.lamina} />}
+        {vista.imagen && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={vista.imagen}
+            alt=""
+            loading="lazy"
+            className="size-full object-cover"
+          />
+        )}
 
         <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(11,10,9,0.92)_0%,rgba(11,10,9,0.15)_58%)]" />
 
@@ -87,13 +83,15 @@ export default function TarjetaEpisodio({
           href={`/serie/${vista.animeId}`}
           className="text-hueso-70 no-underline transition-colors duration-150 ease-sal after:absolute after:inset-0 group-hover:text-hueso"
         >
-          <span className="text-hueso-45 tabular-nums">E{vista.episodio}</span>{' '}
-          {vista.episodeTitle}
+          {/* El historial guarda el título del episodio, no su número.
+              Se enseña lo que hay en vez de derivar un «E12» del id, que
+              no siempre lleva el número dentro. */}
+          {vista.episodeTitle || 'Episodio'}
         </Link>
       </h3>
 
       <p className="mt-[0.15rem] flex items-baseline gap-[0.4rem] text-paso-0 text-hueso-45">
-        <span className="min-w-0 truncate">{titulo}</span>
+        <span className="min-w-0 truncate">{vista.animeTitle}</span>
         <span aria-hidden="true" className="shrink-0">
           ·
         </span>

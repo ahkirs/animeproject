@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { Marca } from '@/components/Cabecera'
+import Marca from '@/components/Marca'
 import Pie from '@/components/Pie'
 import Icono from '@/components/Icono'
 import Lamina from '@/components/Lamina'

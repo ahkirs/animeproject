@@ -12,25 +12,23 @@
    pausa» y «abandonada», que la base de datos no puede almacenar. */
 
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import Cabecera from '@/components/Cabecera'
 import Pie from '@/components/Pie'
-import Lamina from '@/components/Lamina'
 import Icono from '@/components/Icono'
 import TarjetaEpisodio from '@/components/TarjetaEpisodio'
-import { USUARIO, resumenLista } from '@/lib/catalogo'
 import {
   favoritos,
   grupoDeDia,
   haceCuanto,
   historial,
   perfil,
-  seriesDe,
   verDespues,
   type ObraGuardada,
+  type PerfilUsuario,
   type VistaEpisodio,
 } from '@/lib/perfil'
-import type { Serie } from '@/lib/types'
 
 export const metadata: Metadata = {
   title: 'Mi cuenta',
@@ -49,16 +47,6 @@ const VISTAS = [
 ] as const
 
 type Vista = (typeof VISTAS)[number]['id']
-
-/** Cuando el catálogo no resuelve un id —el proveedor cambió la URL, o
- *  está caído— la entrada sigue siendo cierta. Se enseña con el nombre
- *  sacado del propio identificador en lugar de desaparecer. */
-function nombreDeReserva(animeId: string): string {
-  const partes = animeId.split('-').slice(1)
-  if (partes.length === 0) return animeId
-  const texto = partes.join(' ')
-  return texto.charAt(0).toUpperCase() + texto.slice(1)
-}
 
 /* ------------------------------------------------------------
    Cabecera de identidad
@@ -99,7 +87,6 @@ function TiraDeCifras({
 
 async function Historial() {
   const pagina = await historial()
-  const series = await seriesDe(pagina.filas.map((f) => f.animeId))
 
   if (pagina.filas.length === 0) {
     return (
@@ -146,12 +133,7 @@ async function Historial() {
           </h3>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-x-e3 gap-y-e4">
             {g.filas.map((f) => (
-              <TarjetaEpisodio
-                key={f.episodeId}
-                vista={f}
-                serie={series.get(f.animeId)}
-                nombreDeReserva={nombreDeReserva(f.animeId)}
-              />
+              <TarjetaEpisodio key={f.episodeId} vista={f} />
             ))}
           </div>
         </section>
@@ -164,7 +146,7 @@ async function Historial() {
         <p className="mt-e5 border-t border-borde pt-e3 text-paso-0 text-hueso-45">
           {sinDuracion} de estos episodios salen como «empezado» y sin barra: el
           historial guarda los segundos vistos pero no la duración del episodio.
-          Añadiendo <code className="text-hueso-70">durationSeconds</code> al upsert de{' '}
+          Mandando <code className="text-hueso-70">duration</code> en el upsert de{' '}
           <code className="text-hueso-70">POST /user/history</code> pasan a mostrar
           cuánto queda.
         </p>
@@ -177,18 +159,27 @@ async function Historial() {
    Conjuntos: favoritos y ver después
    ------------------------------------------------------------ */
 
-function Carta({ guardada, serie }: { guardada: ObraGuardada; serie?: Serie }) {
-  const titulo = serie?.titulo ?? nombreDeReserva(guardada.animeId)
-
+/* El título y la imagen vienen dentro de la propia entrada, así que ya no
+   hace falta resolver cada serie contra el catálogo: eran veinte llamadas
+   por pantalla para datos que la API ya mandaba. */
+function Carta({ guardada }: { guardada: ObraGuardada }) {
   return (
     <li>
       <Link href={`/serie/${guardada.animeId}`} className="group block no-underline">
         <span className="relative block aspect-2/3 overflow-hidden rounded-radio bg-sala-700 shadow-baja transition-all duration-300 ease-sal group-hover:-translate-y-[4px] group-hover:shadow-alta">
-          {serie && <Lamina arte={serie.lamina} />}
+          {guardada.imagen && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={guardada.imagen}
+              alt=""
+              loading="lazy"
+              className="size-full object-cover"
+            />
+          )}
         </span>
 
         <b className="mt-e2 block truncate text-paso-1 font-semibold text-hueso-70 transition-colors duration-150 ease-sal group-hover:text-hueso">
-          {titulo}
+          {guardada.title}
         </b>
         <span className="block text-paso-0 text-hueso-45">
           {haceCuanto(guardada.addedAt)}
@@ -198,7 +189,7 @@ function Carta({ guardada, serie }: { guardada: ObraGuardada; serie?: Serie }) {
   )
 }
 
-async function Conjunto({
+function Conjunto({
   entradas,
   vacio,
 }: {
@@ -207,12 +198,10 @@ async function Conjunto({
 }) {
   if (entradas.length === 0) return <Vacio {...vacio} />
 
-  const series = await seriesDe(entradas.map((e) => e.animeId))
-
   return (
     <ul className="grid list-none grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-e3">
       {entradas.map((e) => (
-        <Carta key={e.animeId} guardada={e} serie={series.get(e.animeId)} />
+        <Carta key={e.animeId} guardada={e} />
       ))}
     </ul>
   )
@@ -222,9 +211,7 @@ async function Conjunto({
    Perfil
    ------------------------------------------------------------ */
 
-async function FichaPerfil() {
-  const p = await perfil()
-
+function FichaPerfil({ p }: { p: PerfilUsuario }) {
   const campos = [
     { k: 'Nombre de usuario', v: p.username },
     { k: 'Correo', v: p.email },
@@ -281,7 +268,7 @@ async function FichaPerfil() {
       </div>
 
       <p className="mt-e3 text-paso-0 text-hueso-45">
-        Los dos botones quedan desactivados hasta que haya sesión. Detrás están
+        Los dos botones todavía no hacen nada. Detrás están
         <code className="mx-[0.3rem] text-hueso-70">PUT /user/profile</code> y
         <code className="mx-[0.3rem] text-hueso-70">PUT /user/change-password</code>.
       </p>
@@ -321,8 +308,11 @@ export default async function MiCuenta({
   const { v } = await searchParams
   const vista: Vista = VISTAS.some((x) => x.id === v) ? (v as Vista) : 'historial'
 
+  // Sin sesión esta página no tiene nada que enseñar. Se manda a entrar
+  // con el destino puesto, para volver aquí después.
   const p = await perfil()
-  const resumen = resumenLista()
+  if (!p) redirect('/acceder?destino=%2Fmi-lista')
+
   const [favs, despues] = await Promise.all([favoritos(), verDespues()])
 
   const cuenta: Record<Vista, number | null> = {
@@ -332,20 +322,19 @@ export default async function MiCuenta({
     perfil: null,
   }
 
+  const alta = new Date(p.createdAt).toLocaleDateString('es-ES', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+
+  /* Las cifras que se pueden sostener con lo que hay guardado. La nota
+     media se cayó: el backend tiene /ratings, pero eso es la nota que le
+     pone esta persona a cada serie, no un resumen suyo. Enseñar una media
+     de eso sería inventarse otra vez el dato. */
   const cifras = [
-    { etiqueta: 'series', valor: String(resumen.series) },
-    { etiqueta: 'episodios', valor: resumen.episodios.toLocaleString('es-ES') },
-    { etiqueta: 'horas', valor: String(resumen.horas) },
-    {
-      etiqueta: 'nota media',
-      valor:
-        resumen.media !== undefined
-          ? resumen.media.toLocaleString('es-ES', {
-              minimumFractionDigits: 1,
-              maximumFractionDigits: 1,
-            })
-          : '—',
-    },
+    { etiqueta: 'favoritos', valor: String(favs.length) },
+    { etiqueta: 'ver después', valor: String(despues.length) },
   ]
 
   return (
@@ -366,17 +355,15 @@ export default async function MiCuenta({
             aria-hidden="true"
             className="grid size-14 shrink-0 place-items-center rounded-full border border-borde-vivo bg-sala-700 font-display text-paso-2 text-hueso-70"
           >
-            {USUARIO.iniciales}
+            {p.username.slice(0, 2).toUpperCase()}
           </span>
 
           <div className="min-w-0">
             <h1 className="font-display text-paso-4 leading-none tracking-[-0.03em]">
-              {USUARIO.nombre}
+              {p.username}
             </h1>
             <p className="mt-[0.35rem] flex flex-wrap items-baseline gap-x-e2 text-paso-1 text-hueso-45">
-              <span>
-                @{p.username} · desde {USUARIO.desde}
-              </span>
+              <span>desde {alta}</span>
               <Link
                 href={`/u/${p.username}`}
                 className="font-semibold text-hueso-70 underline underline-offset-2 transition-colors duration-150 ease-sal hover:text-ambar"
@@ -465,7 +452,7 @@ export default async function MiCuenta({
             />
           )}
 
-          {vista === 'perfil' && <FichaPerfil />}
+          {vista === 'perfil' && <FichaPerfil p={p} />}
         </section>
 
         <p className="mb-e6 text-paso-0 text-hueso-45">

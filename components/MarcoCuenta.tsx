@@ -1,6 +1,6 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import Lamina from './Lamina'
-import { Marca } from './Cabecera'
+import Marca from './Marca'
 
 interface Props {
   titulo: string
@@ -10,7 +10,7 @@ interface Props {
   pie: { texto: string; enlace: string; href: string }
 }
 
-/** Marco compartido por acceder y registro: la lámina panorámica al
+/** Marco compartido por acceder y registro: la lÃ¡mina panorÃ¡mica al
  *  fondo, apagada, y el formulario centrado encima. Es la misma sala a
  *  oscuras del resto del sitio, con el foco en una sola tarea. */
 export default function MarcoCuenta({ titulo, entradilla, children, pie }: Props) {
@@ -45,8 +45,8 @@ export default function MarcoCuenta({ titulo, entradilla, children, pie }: Props
           </p>
 
           <p className="mt-e3 rounded-radio border border-borde bg-sala-800/80 px-e3 py-e2 text-paso-0 text-hueso-45">
-            Pantalla de diseño. El formulario todavía no envía nada: el registro y el
-            inicio de sesión llegan cuando se conecte la base de datos.
+            Pantalla de diseÃ±o. El formulario todavÃ­a no envÃ­a nada: el registro y el
+            inicio de sesiÃ³n llegan cuando se conecte la base de datos.
           </p>
         </div>
       </main>

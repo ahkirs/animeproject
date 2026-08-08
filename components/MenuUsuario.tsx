@@ -12,6 +12,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import Icono, { type NombreIcono } from './Icono'
 
 export interface OpcionMenu {
@@ -33,10 +34,29 @@ export default function MenuUsuario({
 }) {
   const [abierto, setAbierto] = useState(false)
   const [activa, setActiva] = useState(-1)
+  const [saliendo, setSaliendo] = useState(false)
   const envoltorio = useRef<HTMLDivElement>(null)
   const disparador = useRef<HTMLButtonElement>(null)
   const opcionesRef = useRef<(HTMLAnchorElement | null)[]>([])
   const idMenu = useId()
+  const router = useRouter()
+
+  /** Cerrar sesión borra las cookies en el servidor y refresca para que
+   *  los componentes de servidor vuelvan a leerlas. Sin el refresh, la
+   *  cabecera seguiría enseñando el avatar hasta la siguiente recarga. */
+  async function salir() {
+    if (saliendo) return
+    setSaliendo(true)
+    try {
+      await fetch('/api/auth/salir', { method: 'POST' })
+    } catch {
+      // Aunque la llamada falle, se sigue: el servidor borra la cookie
+      // antes de contestar, así que la sesión local ya no vale.
+    }
+    setAbierto(false)
+    router.refresh()
+    router.push('/')
+  }
 
   // Un clic fuera cierra. Se escucha en 'pointerdown' y no en 'click'
   // para que cerrar no cancele el clic que lo cerró.
@@ -155,6 +175,20 @@ export default function MenuUsuario({
               {o.texto}
             </Link>
           ))}
+
+          <button
+            type="button"
+            role="menuitem"
+            tabIndex={-1}
+            onClick={salir}
+            disabled={saliendo}
+            className="mt-[0.3rem] flex w-full cursor-pointer items-center gap-e2 border-0 border-t border-borde bg-transparent px-e3 py-[0.5rem] pt-e2 text-left text-paso-1 text-hueso-45 transition-colors duration-150 ease-sal hover:bg-sala-700 hover:text-hueso focus-visible:bg-sala-700 focus-visible:text-hueso disabled:cursor-wait disabled:opacity-60"
+          >
+            <span className="text-hueso-45">
+              <Icono nombre="atras" tam={16} />
+            </span>
+            {saliendo ? 'Cerrando…' : 'Cerrar sesión'}
+          </button>
         </div>
       )}
     </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import Cabecera from '@/components/Cabecera'
+import Marca from '@/components/Marca'
 import Pie from '@/components/Pie'
 import Icono from '@/components/Icono'
 
@@ -27,7 +27,12 @@ export default function Error({
         Saltar al contenido
       </a>
 
-      <Cabecera />
+      {/* Cabecera reducida: la normal lee la sesión en el servidor, y
+          esto es un componente de cliente por obligación. En una página
+          de error tampoco hace falta el buscador ni el menú. */}
+      <header className="flex items-center px-margen py-e3">
+        <Marca />
+      </header>
 
       <main
         id="principal"

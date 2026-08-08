@@ -19,6 +19,14 @@ import type {
 export const API_BASE =
   process.env.API_BASE ?? 'https://backend-anime-production-7f7c.up.railway.app/api/v1'
 
+/** Base de todo lo que NO es el scraper.
+ *
+ *  Solo el catálogo cuelga de /v1: `/api/v1/anime/*`. La cuenta, la
+ *  autenticación, los perfiles públicos, los comentarios y las notas van
+ *  directos bajo `/api`. Pedirlos con el /v1 delante devuelve 404, y un
+ *  404 no se distingue de «no existe» sin mirarlo con lupa. */
+export const API_CUENTA = API_BASE.replace(/\/v1\/?$/, '')
+
 /** Segundos que se conserva en caché una respuesta. */
 export const REVALIDAR_CATALOGO = 60 * 60 // 1 h
 export const REVALIDAR_EPISODIO = 60 * 15 // 15 min

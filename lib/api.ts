@@ -38,20 +38,50 @@ interface ParametrosConsulta {
   [clave: string]: string | number | undefined
 }
 
-/** Nombre del parámetro que espera /anime/image-proxy.
+/** Origen del backend, sin la parte de la ruta.
  *
- *  Vive en una constante y no incrustado en la plantilla porque lo decide
- *  el backend, no esta parte: si allí se renombra, aquí se cambia una
- *  línea y no hay que buscarlo. Se puede sobrescribir con la variable
- *  API_IMAGE_PARAM para cuadrar los dos lados sin volver a desplegar. */
-const PARAM_IMAGEN = process.env.API_IMAGE_PARAM ?? 'u'
+ *  Hace falta separado de API_BASE porque API_BASE ya termina en
+ *  /api/v1 y las imágenes llegan como rutas que también empiezan por
+ *  /api/v1. Concatenar las dos daría /api/v1/api/v1/... */
+const API_ORIGEN = new URL(API_BASE).origin
 
-/** Construye la URL de /anime/image-proxy para una imagen remota.
- *  Se usa en <img> y en las láminas: evita depender de que el navegador
- *  pueda cargar el dominio del proveedor. */
+/** Parámetro con el que envolver una URL suelta, para los casos en que
+ *  la API devuelva la dirección del CDN en lugar de la ruta ya armada.
+ *  Es `url` y no `u`: `u` espera un token firmado que solo sabe generar
+ *  el backend, así que desde aquí no se puede construir. */
+const PARAM_ENVOLTORIO = process.env.API_IMAGE_PARAM ?? 'url'
+
+/**
+ * Deja lista para un <img> la imagen que devuelve la API.
+ *
+ * No construye la URL del proxy: eso lo hace el backend, que entrega el
+ * campo `image` ya montado con un token opaco —
+ * `/api/v1/anime/image-proxy?u=4S5DFco...`— y ese string se usa tal cual.
+ * Aquí solo se resuelve a absoluta, porque llega relativa y si no el
+ * navegador la buscaría en el dominio de este sitio.
+ *
+ * El tercer caso es de respaldo: si algún proveedor devolviera todavía
+ * la dirección del CDN a pelo, se envuelve para no depender de que ese
+ * dominio permita enlaces desde fuera.
+ */
 export function urlImagenProxy(imagen: string | null | undefined): string | null {
   if (!imagen) return null
-  return `${API_BASE}/anime/image-proxy?${PARAM_IMAGEN}=${encodeURIComponent(imagen)}`
+
+  const texto = imagen.trim()
+  if (texto === '') return null
+
+  // Ya viene del backend, montada y con su token.
+  if (texto.startsWith('/')) return `${API_ORIGEN}${texto}`
+
+  // Absoluta y ya apunta al proxy: se deja intacta.
+  if (texto.includes('/anime/image-proxy')) return texto
+
+  // Dirección suelta de un CDN: se envuelve.
+  if (texto.startsWith('http')) {
+    return `${API_BASE}/anime/image-proxy?${PARAM_ENVOLTORIO}=${encodeURIComponent(texto)}`
+  }
+
+  return null
 }
 
 async function peticion<T>(

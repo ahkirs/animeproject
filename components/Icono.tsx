@@ -53,6 +53,20 @@ const ICONOS = {
     </g>
   ),
 
+  marcador: (
+    <g stroke="currentColor" {...TRAZO}>
+      <path d="M6.5 4.5h11a1 1 0 011 1v14l-6.5-4.4-6.5 4.4v-14a1 1 0 011-1z" />
+    </g>
+  ),
+
+  /* Cheurón de menú. Va más fino que el resto de la familia a propósito:
+     se usa a 12px junto al avatar, y al grosor normal se emborrona. */
+  cheuron: (
+    <g stroke="currentColor" {...TRAZO} strokeWidth={2.2}>
+      <path d="M7 10l5 5 5-5" />
+    </g>
+  ),
+
   cinta: (
     <g stroke="currentColor" fill="none" strokeWidth={1.8}>
       <rect x="2.5" y="5.5" width="19" height="13" rx="2" />

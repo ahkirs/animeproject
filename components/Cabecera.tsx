@@ -1,12 +1,24 @@
 import Link from 'next/link'
 import Icono from './Icono'
 import Buscador from './Buscador'
+import MenuUsuario, { type OpcionMenu } from './MenuUsuario'
+import { USUARIO } from '@/lib/catalogo'
 
 type Seccion = 'inicio' | 'explorar'
 
 const ENLACES: { id: Seccion; texto: string; href: string }[] = [
   { id: 'inicio', texto: 'Inicio', href: '/' },
   { id: 'explorar', texto: 'Explorar', href: '/explorar' },
+]
+
+/* Lo que hay dentro del menú del avatar. Las listas guardadas entran
+   aquí cuando existan, con `separada` si conviene despegarlas. */
+const OPCIONES_CUENTA: OpcionMenu[] = [
+  { href: '/mi-lista', texto: 'Historial', icono: 'cinta' },
+  { href: '/mi-lista?v=favoritos', texto: 'Favoritos', icono: 'check' },
+  { href: '/mi-lista?v=despues', texto: 'Ver después', icono: 'marcador' },
+  { href: `/u/${USUARIO.alias}`, texto: 'Mi perfil público', icono: 'compartir', separada: true },
+  { href: '/mi-lista?v=perfil', texto: 'Ajustes de cuenta', icono: 'ajustes' },
 ]
 
 export function Marca({ className = '' }: { className?: string }) {
@@ -49,21 +61,22 @@ export default function Cabecera({ activa }: { activa?: Seccion }) {
       <div className="ml-auto flex items-center gap-e2">
         <Buscador />
 
-        <button
-          type="button"
-          aria-label="Novedades"
-          className="grid size-11 cursor-pointer place-items-center rounded-full border border-borde-vivo bg-hueso/6 text-hueso transition-colors duration-200 ease-sal hover:border-hueso-45 hover:bg-hueso/14"
-        >
-          <Icono nombre="campana" tam={19} />
-        </button>
-
+        {/* Ver después: acceso directo, sin pasar por el menú. Es lo que
+            más se toca de la cuenta, así que no se esconde dentro. */}
         <Link
-          href="/mi-lista"
-          aria-label="Tu lista y tu cuenta"
-          className="grid size-[34px] shrink-0 place-items-center rounded-full border border-borde-vivo bg-sala-600 text-paso-0 font-bold text-hueso-70 no-underline transition-colors duration-200 ease-sal hover:border-hueso-45 hover:text-hueso"
+          href="/mi-lista?v=despues"
+          aria-label="Ver después"
+          title="Ver después"
+          className="grid size-9 place-items-center rounded-full text-hueso-45 no-underline transition-colors duration-200 ease-sal hover:text-hueso"
         >
-          AR
+          <Icono nombre="marcador" tam={19} />
         </Link>
+
+        <MenuUsuario
+          iniciales={USUARIO.iniciales}
+          alias={USUARIO.alias}
+          opciones={OPCIONES_CUENTA}
+        />
       </div>
     </header>
   )

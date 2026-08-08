@@ -38,12 +38,20 @@ interface ParametrosConsulta {
   [clave: string]: string | number | undefined
 }
 
+/** Nombre del parámetro que espera /anime/image-proxy.
+ *
+ *  Vive en una constante y no incrustado en la plantilla porque lo decide
+ *  el backend, no esta parte: si allí se renombra, aquí se cambia una
+ *  línea y no hay que buscarlo. Se puede sobrescribir con la variable
+ *  API_IMAGE_PARAM para cuadrar los dos lados sin volver a desplegar. */
+const PARAM_IMAGEN = process.env.API_IMAGE_PARAM ?? 'u'
+
 /** Construye la URL de /anime/image-proxy para una imagen remota.
  *  Se usa en <img> y en las láminas: evita depender de que el navegador
  *  pueda cargar el dominio del proveedor. */
 export function urlImagenProxy(imagen: string | null | undefined): string | null {
   if (!imagen) return null
-  return `${API_BASE}/anime/image-proxy?url=${encodeURIComponent(imagen)}`
+  return `${API_BASE}/anime/image-proxy?${PARAM_IMAGEN}=${encodeURIComponent(imagen)}`
 }
 
 async function peticion<T>(

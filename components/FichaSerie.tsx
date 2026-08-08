@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Lamina from './Lamina'
-import type { ClaveLamina } from '@/lib/types'
+import type { Arte } from '@/lib/types'
 
 /** Marco de una carátula: 2:3 por defecto, 16:9 si es panorámica. */
 export function Cartel({
@@ -9,7 +9,7 @@ export function Cartel({
   className = '',
   children,
 }: {
-  arte: ClaveLamina
+  arte: Arte | null | undefined
   ancho?: boolean
   className?: string
   children?: React.ReactNode
@@ -30,7 +30,7 @@ interface Props {
   href: string
   titulo: string
   subtitulo: string
-  arte: ClaveLamina
+  arte: Arte | null | undefined
 }
 
 /** Tarjeta de serie dentro de un riel. */

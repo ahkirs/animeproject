@@ -1,663 +1,152 @@
 import type {
-  DiaSemana,
   EnCurso,
   EntradaLista,
   EstadoLista,
-  Programacion,
   Serie,
   Temporada,
 } from './types'
+import type { ApiAnimeInfo, ApiEnlacesEpisodio, ApiResultado } from './api-types'
+import {
+  apiBuscar,
+  apiCatalogo,
+  apiEnlacesEpisodio,
+  apiInfo,
+  urlImagenProxy,
+} from './api'
+import {
+  deduplicar,
+  idCanonicoDe,
+  nombreProveedor,
+  proveedorDe,
+  urlDeId,
+} from './ids'
 
 /* ============================================================
-   CATÁLOGO SINTÉTICO
-   Todos los títulos, sinopsis, nombres, fechas y valoraciones se
-   crearon para esta maqueta. Ninguna obra, estudio ni persona es
-   real. Este archivo es el punto por el que entrará la API cuando
-   se conecte: sustituir estas constantes por peticiones.
+   COSTURA SOBRE EL SCRAPER
+   lib/api.ts es el único archivo que habla con la red. Aquí se
+   mapea la respuesta a las formas de lib/types.ts y se resuelven
+   los filtros y el orden que la API no hace por nosotros.
    ============================================================ */
 
-export const SERIES: Serie[] = [
-  {
-    id: 'cielo-de-hierro',
-    titulo: 'Cielo de Hierro',
-    tituloOriginal: '鉄の空',
-    romaji: 'Kurogane no Sora',
-    anio: 2026,
-    nota: 8.7,
-    votos: 2418,
-    clasificacion: '+16',
-    duracionMin: 24,
-    genero: 'Mecha',
-    generos: ['Mecha', 'Drama', 'Distopía', 'Aviación', 'Protagonista femenina'],
-    temporadaEtiqueta: 'T2',
-    sinopsisCorta:
-      'Cuando los dirigibles dejaron de volar, la ciudad aprendió a mirar hacia abajo. Rei pilota lo último que queda de una flota que nadie recuerda haber construido.',
-    sinopsis:
-      'Cuando los dirigibles dejaron de volar, la ciudad aprendió a mirar hacia abajo. Rei pilota lo último que queda de una flota que nadie recuerda haber construido, y cada vuelo la acerca menos al cielo y más a la pregunta de quién decidió bajarlo. Segunda temporada en emisión, episodios nuevos cada viernes.',
-    lamina: 'mecha',
-    panoramica: 'panoramica-obra',
-    ficha: {
-      estudio: 'Studio Hanabi',
-      direccion: 'Mizuki Ono',
-      guion: 'Sae Fujimoto',
-      musica: 'Rei Katsuragi',
-      emision: 'Viernes 21:00',
-      origen: 'Manga (2021)',
-      audio: 'Japonés, español',
-      subtitulos: '5 idiomas',
-    },
-    reparto: [
-      { nombre: 'Rei Amano', voz: 'Haru Nishimura', iniciales: 'RA' },
-      { nombre: 'Kenzō Sano', voz: 'Tatsuya Mori', iniciales: 'KS' },
-      { nombre: 'Yuna Ishii', voz: 'Mei Kobayashi', iniciales: 'YI' },
-      { nombre: 'El Cartógrafo', voz: 'Jun Takeda', iniciales: 'DT' },
-    ],
-    temporadas: [
-      {
-        numero: 2,
-        etiqueta: 'Temporada 2 · en emisión',
-        enEmision: true,
-        episodios: [
-          {
-            numero: 6,
-            titulo: 'El peso del aire',
-            sinopsis:
-              'Rei acepta un encargo que la obliga a volar por debajo de la cota mínima. Abajo, la ciudad no se parece a los mapas.',
-            duracionMin: 24,
-            estado: 'visto',
-            progreso: 100,
-            lamina: 'ep-1',
-          },
-          {
-            numero: 7,
-            titulo: 'Lo que pesa el aire',
-            sinopsis:
-              'El taller recibe una pieza que no consta en ningún inventario. Kenzō reconoce la marca del fabricante y no dice nada.',
-            duracionMin: 24,
-            estado: 'en-curso',
-            progreso: 38,
-            lamina: 'ep-2',
-          },
-          {
-            numero: 8,
-            titulo: 'Hangar siete',
-            sinopsis:
-              'Una inspección rutinaria encuentra la puerta abierta. Dentro no falta nada, y eso es exactamente el problema.',
-            duracionMin: 24,
-            estado: 'disponible',
-            disponible: 'Viernes 14',
-            lamina: 'ep-3',
-          },
-          {
-            numero: 9,
-            titulo: 'Sin título todavía',
-            sinopsis:
-              'Se publica el viernes 21 de agosto a las 21:00. Disponible para toda la región al mismo tiempo.',
-            duracionMin: 24,
-            estado: 'bloqueado',
-            disponible: 'En 14 días',
-            lamina: 'ep-4',
-          },
-        ],
-      },
-    ],
-  },
+/* ------------------------------------------------------------
+   Mapeo de la respuesta a Serie
+   ------------------------------------------------------------ */
 
-  {
-    id: 'jardin-de-las-cenizas',
-    titulo: 'El Jardín de las Cenizas',
-    anio: 2026,
-    nota: 8.1,
-    votos: 940,
-    clasificacion: '+12',
-    duracionMin: 24,
-    genero: 'Fantasía',
-    generos: ['Fantasía', 'Drama', 'Botánica'],
-    temporadaEtiqueta: 'T1',
-    sinopsisCorta: 'Fantasía botánica con un ritmo que se toma su tiempo.',
-    sinopsis:
-      'Un jardín que solo florece sobre lo que se ha perdido, y la jardinera que decide no plantar nada nunca más. Primera temporada, lunes.',
-    lamina: 'jardin',
-    ficha: {
-      estudio: 'Estudio Kawara',
-      direccion: 'Aoi Terada',
-      guion: 'Aoi Terada',
-      musica: 'Nao Sugimoto',
-      emision: 'Lunes 20:00',
-      origen: 'Novela ligera (2023)',
-      audio: 'Japonés',
-      subtitulos: '5 idiomas',
-    },
+/** Una serie aún sin episodios cargados: la que trae el catálogo o la
+ *  búsqueda. Para las tarjetas basta; para la ficha hay que pedir info. */
+function resultadoASerie(r: ApiResultado): Serie {
+  const proveedor = proveedorDe(r.provider)
+  return {
+    id: idCanonicoDe(r),
+    titulo: r.title,
+    anio: r.year ? Number(r.year) : null,
+    nota: r.score,
+    votos: null,
+    genero: r.type ?? 'Anime',
+    generos: [],
+    temporadaEtiqueta: r.type ?? 'Serie',
+    sinopsisCorta: '',
+    sinopsis: '',
+    lamina: urlImagenProxy(r.image) ?? 'mecha',
+    panoramica: urlImagenProxy(r.backdrop) ?? undefined,
+    url: r.url ?? '',
+    proveedor,
+    alternativas: [],
+    totalEpisodios: 0,
+  }
+}
+
+function anioDeInfo(info: ApiAnimeInfo): number | null {
+  if (info.year) return Number(info.year)
+  if (info.startDate) return Number(info.startDate.slice(0, 4))
+  return null
+}
+
+/** Primera frase de la sinopsis, para las tarjetas. */
+function sinopsisCortaDe(texto: string | null): string {
+  if (!texto) return ''
+  const llana = texto.trim().replace(/\s+/g, ' ')
+  const punto = llana.indexOf('.')
+  if (punto !== -1 && punto < 180) return llana.slice(0, punto + 1)
+  return llana.length > 180 ? `${llana.slice(0, 180)}…` : llana
+}
+
+/** Ficha completa de una obra, con todos sus episodios. */
+function infoASerie(
+  info: ApiAnimeInfo,
+  proveedor: 'animeav1' | 'animeflv',
+  url: string,
+): Serie {
+  const generos = (info.genres ?? []).map((g) => g.name)
+  const episodios = (info.episodes ?? [])
+    .slice()
+    .sort((a, b) => a.number - b.number)
+    .map((e) => ({
+      numero: e.number,
+      titulo: e.title,
+      estado: 'disponible' as const,
+      lamina: urlImagenProxy(info.backdrop) ?? ('ep-1' as const),
+      url: e.url ?? undefined,
+    }))
+
+  return {
+    id: idCanonicoDe({
+      url,
+      provider: nombreProveedor(proveedor),
+      id: info.id != null ? String(info.id) : null,
+    }),
+    titulo: info.title ?? '',
+    tituloOriginal: info.titleJapanese ?? undefined,
+    anio: anioDeInfo(info),
+    nota: info.score,
+    votos: info.votes,
+    genero: generos[0] ?? info.type ?? 'Anime',
+    generos,
+    temporadaEtiqueta: info.type ?? 'Serie',
+    sinopsisCorta: sinopsisCortaDe(info.description),
+    sinopsis: info.description ?? '',
+    lamina: urlImagenProxy(info.image) ?? 'mecha',
+    panoramica: urlImagenProxy(info.backdrop) ?? 'panoramica-obra',
+    url,
+    proveedor,
+    alternativas: [],
+    totalEpisodios: info.totalEpisodes ?? episodios.length,
     temporadas: [
       {
         numero: 1,
-        etiqueta: 'Temporada 1 · en emisión',
-        enEmision: true,
-        episodios: [
-          {
-            numero: 1,
-            titulo: 'Suelo pobre',
-            sinopsis:
-              'Nadie recuerda quién plantó el primer brote, pero todos recuerdan lo que había antes en ese terreno.',
-            duracionMin: 24,
-            estado: 'visto',
-            progreso: 100,
-            lamina: 'ep-2',
-          },
-          {
-            numero: 2,
-            titulo: 'Injerto',
-            sinopsis:
-              'Una rama de otro jardín prende donde no debería. La jardinera decide no cortarla y esa noche no duerme.',
-            duracionMin: 24,
-            estado: 'visto',
-            progreso: 100,
-            lamina: 'ep-3',
-          },
-          {
-            numero: 3,
-            titulo: 'Ceniza fina',
-            sinopsis:
-              'Llega el viento del sur y con él una capa gris que cubre los senderos. El jardín florece más que nunca.',
-            duracionMin: 24,
-            estado: 'disponible',
-            lamina: 'ep-1',
-          },
-          {
-            numero: 4,
-            titulo: 'Raíz amarga',
-            sinopsis:
-              'Se publica el lunes 10 de agosto a las 20:00, simultáneamente para toda la región.',
-            duracionMin: 24,
-            estado: 'bloqueado',
-            disponible: 'En 3 días',
-            lamina: 'ep-4',
-          },
-        ],
+        etiqueta: 'Episodios',
+        enEmision: info.status === 2,
+        episodios,
       },
     ],
-  },
+  }
+}
 
-  {
-    id: 'kaiju-blues',
-    titulo: 'Kaijū Blues',
-    anio: 2026,
-    nota: 7.9,
-    votos: 1502,
-    clasificacion: '+16',
-    duracionMin: 24,
-    genero: 'Acción',
-    generos: ['Acción', 'Comedia', 'Oficina'],
-    temporadaEtiqueta: 'T1',
-    sinopsisCorta: 'Los monstruos ya no son el problema; el papeleo sí.',
-    sinopsis:
-      'La oficina que tramita los daños causados por kaijū tiene más bajas por agotamiento que por ataque directo. Primera temporada completa.',
-    lamina: 'kaiju',
-    ficha: {
-      estudio: 'Studio Hanabi',
-      direccion: 'Gen Murakami',
-      guion: 'Hana Oda',
-      musica: 'Rei Katsuragi',
-      emision: 'Viernes 19:00',
-      origen: 'Original',
-      audio: 'Japonés, español',
-      subtitulos: '5 idiomas',
-    },
-    temporadas: [
-      {
-        numero: 1,
-        etiqueta: 'Temporada 1 · en emisión',
-        enEmision: true,
-        episodios: [
-          {
-            numero: 1,
-            titulo: 'Formulario 12-B',
-            sinopsis:
-              'Un edificio menos y catorce copias que rellenar. El becario aprende que la parte difícil empieza cuando el monstruo ya se ha ido.',
-            duracionMin: 24,
-            estado: 'visto',
-            progreso: 100,
-            lamina: 'ep-4',
-          },
-          {
-            numero: 2,
-            titulo: 'Cobertura parcial',
-            sinopsis:
-              'La aseguradora alega que el daño fue por pisada y no por coletazo. La diferencia son ocho millones.',
-            duracionMin: 24,
-            estado: 'visto',
-            progreso: 100,
-            lamina: 'ep-1',
-          },
-          {
-            numero: 3,
-            titulo: 'Horas extra',
-            sinopsis:
-              'Nadie quiere el turno de noche desde que el de mantenimiento juró oír pasos en la planta doce.',
-            duracionMin: 24,
-            estado: 'en-curso',
-            progreso: 68,
-            lamina: 'ep-2',
-          },
-          {
-            numero: 4,
-            titulo: 'Reunión de coordinación',
-            sinopsis:
-              'Tres departamentos, un solo kaijū y ninguna intención de asumir la competencia sobre el expediente.',
-            duracionMin: 24,
-            estado: 'disponible',
-            lamina: 'ep-3',
-          },
-        ],
-      },
-    ],
-  },
+/** Une los proveedores alternativos que la búsqueda ya deduplicó. */
+function unirAlternativas(
+  principal: Serie,
+  alternativas: ApiResultado[],
+): Serie {
+  return {
+    ...principal,
+    alternativas: alternativas.map((a) => ({
+      proveedor: proveedorDe(a.provider),
+      nombre: a.provider ?? nombreProveedor(a.provider),
+      url: a.url ?? '',
+    })),
+  }
+}
 
-  {
-    id: 'noctambula',
-    titulo: 'Noctámbula',
-    anio: 2025,
-    nota: 8.4,
-    votos: 3110,
-    clasificacion: '+16',
-    duracionMin: 24,
-    genero: 'Misterio',
-    generos: ['Misterio', 'Sobrenatural'],
-    temporadaEtiqueta: 'T2',
-    sinopsisCorta: 'Alguien recorre la ciudad de noche y nadie recuerda haberla visto.',
-    sinopsis:
-      'Alguien recorre la ciudad de noche y nadie recuerda haberla visto. Ella tampoco recuerda por qué camina. Segunda temporada.',
-    lamina: 'noche',
-    ficha: {
-      estudio: 'Kage Works',
-      direccion: 'Sora Nishikawa',
-      guion: 'Sora Nishikawa',
-      musica: 'Yuu Hasegawa',
-      emision: 'Sábados 00:30',
-      origen: 'Manga (2019)',
-      audio: 'Japonés, español',
-      subtitulos: '5 idiomas',
-    },
-    temporadas: [
-      {
-        numero: 2,
-        etiqueta: 'Temporada 2 · en emisión',
-        enEmision: true,
-        episodios: [
-          {
-            numero: 10,
-            titulo: 'Última parada',
-            sinopsis:
-              'El conductor jura que cerró las puertas. En la cámara aparece bajando alguien que no subió.',
-            duracionMin: 24,
-            estado: 'visto',
-            progreso: 100,
-            lamina: 'ep-3',
-          },
-          {
-            numero: 11,
-            titulo: 'Farola doce',
-            sinopsis:
-              'Doce farolas en la avenida y solo once encendidas, todas las noches, siempre la misma apagada.',
-            duracionMin: 24,
-            estado: 'visto',
-            progreso: 100,
-            lamina: 'ep-4',
-          },
-          {
-            numero: 12,
-            titulo: 'Nadie a estas horas',
-            sinopsis:
-              'La panadería abre a las cuatro. La panadera lleva meses dejando un café de más en el mostrador.',
-            duracionMin: 24,
-            estado: 'en-curso',
-            progreso: 23,
-            lamina: 'ep-2',
-          },
-          {
-            numero: 13,
-            titulo: 'Amanece igual',
-            sinopsis:
-              'Final de temporada. La ciudad despierta y, por primera vez, alguien la reconoce por la calle.',
-            duracionMin: 24,
-            estado: 'disponible',
-            lamina: 'ep-1',
-          },
-        ],
-      },
-    ],
-  },
+/* ------------------------------------------------------------
+   Acceso a una serie
+   ------------------------------------------------------------ */
 
-  {
-    id: 'perros-de-neon',
-    titulo: 'Los Perros de Neón',
-    anio: 2024,
-    nota: 8.9,
-    votos: 5240,
-    clasificacion: '+18',
-    duracionMin: 24,
-    genero: 'Acción',
-    generos: ['Acción', 'Cyberpunk', 'Thriller'],
-    temporadaEtiqueta: 'T3',
-    sinopsisCorta: 'En esta ciudad nadie llama dos veces a la misma puerta.',
-    sinopsis:
-      'Mensajeros que cruzan una ciudad partida en dos por un río de luz. Tercera temporada en emisión, domingos.',
-    lamina: 'noche',
-    ficha: {
-      estudio: 'Kage Works',
-      direccion: 'Ryō Sakamoto',
-      guion: 'Hana Oda',
-      musica: 'Yuu Hasegawa',
-      emision: 'Domingos 23:15',
-      origen: 'Manga (2018)',
-      audio: 'Japonés, español',
-      subtitulos: '5 idiomas',
-    },
-    temporadas: [
-      {
-        numero: 3,
-        etiqueta: 'Temporada 3 · en emisión',
-        enEmision: true,
-        episodios: [
-          {
-            numero: 1,
-            titulo: 'Entrega urgente',
-            sinopsis:
-              'Un paquete que no pesa nada y una dirección que en los mapas oficiales no existe.',
-            duracionMin: 24,
-            estado: 'visto',
-            progreso: 100,
-            lamina: 'ep-2',
-          },
-          {
-            numero: 2,
-            titulo: 'Nadie llama dos veces',
-            sinopsis:
-              'La norma del gremio es clara: si no abren a la primera, el encargo se cancela. Esta noche alguien la rompe.',
-            duracionMin: 24,
-            estado: 'disponible',
-            disponible: 'Domingo 09',
-            lamina: 'ep-3',
-          },
-          {
-            numero: 3,
-            titulo: 'Puente bajo',
-            sinopsis: 'Se publica el domingo 16 de agosto a las 23:15.',
-            duracionMin: 24,
-            estado: 'bloqueado',
-            disponible: 'En 9 días',
-            lamina: 'ep-4',
-          },
-        ],
-      },
-    ],
-  },
-
-  {
-    id: 'tren-de-medianoche',
-    titulo: 'Tren de Medianoche a Sapporo',
-    anio: 2026,
-    nota: 8.6,
-    votos: 1288,
-    clasificacion: '+12',
-    duracionMin: 24,
-    genero: 'Drama',
-    generos: ['Drama', 'Viajes'],
-    temporadaEtiqueta: 'T1',
-    sinopsisCorta: 'Nueve paradas, nueve conversaciones, un solo pasajero que no baja.',
-    sinopsis:
-      'Nueve paradas, nueve conversaciones, y un solo pasajero que en ninguna de ellas se baja del tren. Primera temporada.',
-    lamina: 'tren',
-    ficha: {
-      estudio: 'Estudio Kawara',
-      direccion: 'Mizuki Ono',
-      guion: 'Sae Fujimoto',
-      musica: 'Nao Sugimoto',
-      emision: 'Miércoles 22:45',
-      origen: 'Original',
-      audio: 'Japonés',
-      subtitulos: '5 idiomas',
-    },
-    temporadas: [
-      {
-        numero: 1,
-        etiqueta: 'Temporada 1 · en emisión',
-        enEmision: true,
-        episodios: [
-          {
-            numero: 7,
-            titulo: 'Coche restaurante',
-            sinopsis:
-              'A las dos de la mañana solo quedan dos clientes y una carta que ya no sirve casi nada.',
-            duracionMin: 24,
-            estado: 'visto',
-            progreso: 100,
-            lamina: 'ep-1',
-          },
-          {
-            numero: 8,
-            titulo: 'Литера B',
-            sinopsis:
-              'El billete lleva impresa una letra que no corresponde a ningún vagón de este tren.',
-            duracionMin: 24,
-            estado: 'en-curso',
-            progreso: 91,
-            lamina: 'ep-2',
-          },
-          {
-            numero: 9,
-            titulo: 'Andén cuatro',
-            sinopsis:
-              'Final de temporada. La estación de llegada tiene tres andenes y el altavoz anuncia el cuarto.',
-            duracionMin: 24,
-            estado: 'disponible',
-            disponible: 'Miércoles 12',
-            lamina: 'ep-3',
-          },
-        ],
-      },
-    ],
-  },
-
-  {
-    id: 'la-espada-y-el-rio',
-    titulo: 'La Espada y el Río',
-    anio: 2026,
-    nota: 8.0,
-    votos: 870,
-    clasificacion: '+16',
-    duracionMin: 24,
-    genero: 'Histórico',
-    generos: ['Histórico', 'Drama'],
-    temporadaEtiqueta: 'T1',
-    sinopsisCorta: 'Dos orillas, una promesa y una hoja que nadie quiere desenvainar.',
-    sinopsis:
-      'Dos orillas, una promesa hecha hace cuarenta años y una hoja que ninguno de los dos quiere desenvainar primero.',
-    lamina: 'espada',
-    ficha: {
-      estudio: 'Estudio Kawara',
-      direccion: 'Gen Murakami',
-      guion: 'Aoi Terada',
-      musica: 'Rei Katsuragi',
-      emision: 'Jueves 21:30',
-      origen: 'Novela (2016)',
-      audio: 'Japonés',
-      subtitulos: '5 idiomas',
-    },
-    temporadas: [
-      {
-        numero: 1,
-        etiqueta: 'Temporada 1 · en emisión',
-        enEmision: true,
-        episodios: [
-          {
-            numero: 1,
-            titulo: 'Aguas bajas',
-            sinopsis:
-              'El verano seca el cauce y por primera vez en cuarenta años se puede cruzar a pie.',
-            duracionMin: 24,
-            estado: 'visto',
-            progreso: 100,
-            lamina: 'ep-3',
-          },
-          {
-            numero: 2,
-            titulo: 'La orilla de enfrente',
-            sinopsis:
-              'Alguien ha dejado una ofrenda en la piedra del vado. Nadie de este lado admite haber cruzado.',
-            duracionMin: 24,
-            estado: 'en-curso',
-            progreso: 44,
-            lamina: 'ep-1',
-          },
-          {
-            numero: 3,
-            titulo: 'Filo mellado',
-            sinopsis:
-              'La hoja lleva cuatro décadas envainada y el herrero se niega a tocarla sin saber contra quién.',
-            duracionMin: 24,
-            estado: 'disponible',
-            lamina: 'ep-4',
-          },
-        ],
-      },
-    ],
-  },
-
-  {
-    id: 'ciudad-vertical',
-    titulo: 'Ciudad Vertical',
-    anio: 2026,
-    nota: 7.7,
-    votos: 640,
-    clasificacion: '+12',
-    duracionMin: 24,
-    genero: 'Ciencia ficción',
-    generos: ['Ciencia ficción', 'Misterio'],
-    temporadaEtiqueta: 'T1',
-    sinopsisCorta: 'Cien plantas, cien reglas distintas y un ascensor que no para en todas.',
-    sinopsis:
-      'Cien plantas, cien reglas distintas, y un ascensor que por motivos que nadie explica no para en todas.',
-    lamina: 'mecha',
-    ficha: {
-      estudio: 'Kage Works',
-      direccion: 'Sora Nishikawa',
-      guion: 'Hana Oda',
-      musica: 'Yuu Hasegawa',
-      emision: 'Martes 22:00',
-      origen: 'Original',
-      audio: 'Japonés, español',
-      subtitulos: '5 idiomas',
-    },
-    temporadas: [
-      {
-        numero: 1,
-        etiqueta: 'Temporada 1 · en emisión',
-        enEmision: true,
-        episodios: [
-          {
-            numero: 1,
-            titulo: 'Planta cuarenta',
-            sinopsis:
-              'Aquí el día dura diez horas por decisión administrativa y nadie recuerda quién la tomó.',
-            duracionMin: 24,
-            estado: 'disponible',
-            lamina: 'ep-4',
-          },
-          {
-            numero: 2,
-            titulo: 'Sin parada',
-            sinopsis:
-              'El ascensor pasa de largo por la sesenta y siete. En los planos esa planta no aparece.',
-            duracionMin: 24,
-            estado: 'disponible',
-            lamina: 'ep-2',
-          },
-          {
-            numero: 3,
-            titulo: 'Vecinos de abajo',
-            sinopsis:
-              'Bajar está permitido. Volver a subir requiere un permiso que tarda meses en concederse.',
-            duracionMin: 24,
-            estado: 'disponible',
-            lamina: 'ep-1',
-          },
-        ],
-      },
-    ],
-  },
-
-  {
-    id: 'cafe-yurei',
-    titulo: 'Café Yūrei',
-    anio: 2026,
-    nota: 8.2,
-    votos: 1105,
-    clasificacion: '+7',
-    duracionMin: 24,
-    genero: 'Slice of life',
-    generos: ['Slice of life', 'Sobrenatural', 'Comedia'],
-    temporadaEtiqueta: 'T1',
-    sinopsisCorta: 'Abre a medianoche y la clientela nunca pide la cuenta.',
-    sinopsis:
-      'Un café que abre a medianoche y cuya clientela, por razones evidentes, nunca pide la cuenta. Primera temporada, sábados.',
-    lamina: 'jardin',
-    ficha: {
-      estudio: 'Studio Hanabi',
-      direccion: 'Aoi Terada',
-      guion: 'Aoi Terada',
-      musica: 'Nao Sugimoto',
-      emision: 'Sábados 18:30',
-      origen: 'Manga (2022)',
-      audio: 'Japonés, español',
-      subtitulos: '5 idiomas',
-    },
-    temporadas: [
-      {
-        numero: 1,
-        etiqueta: 'Temporada 1 · en emisión',
-        enEmision: true,
-        episodios: [
-          {
-            numero: 9,
-            titulo: 'Mesa para uno',
-            sinopsis:
-              'El habitual de los jueves lleva tres semanas sin aparecer y su taza sigue puesta.',
-            duracionMin: 24,
-            estado: 'visto',
-            progreso: 100,
-            lamina: 'ep-2',
-          },
-          {
-            numero: 10,
-            titulo: 'Cierre tardío',
-            sinopsis:
-              'Amanece antes de que el último cliente termine, y eso nunca había pasado.',
-            duracionMin: 24,
-            estado: 'visto',
-            progreso: 100,
-            lamina: 'ep-3',
-          },
-          {
-            numero: 11,
-            titulo: 'La cuenta de la casa',
-            sinopsis:
-              'Alguien deja dinero sobre la barra por primera vez desde que el local abrió.',
-            duracionMin: 24,
-            estado: 'disponible',
-            disponible: 'Sábado 08',
-            lamina: 'ep-1',
-          },
-        ],
-      },
-    ],
-  },
-]
-
-export const SERIE_DESTACADA = SERIES[0]
-
-export function obtenerSerie(id: string): Serie | undefined {
-  return SERIES.find((s) => s.id === id)
+/** Ficha completa de una serie desde su id canónico. */
+export async function obtenerSerie(id: string): Promise<Serie | undefined> {
+  const dato = urlDeId(id)
+  if (!dato) return undefined
+  const info = await apiInfo(dato.url)
+  return infoASerie(info, dato.proveedor, dato.url)
 }
 
 export function obtenerTemporada(
@@ -666,180 +155,94 @@ export function obtenerTemporada(
 ): Temporada | undefined {
   if (!serie.temporadas?.length) return undefined
   if (numero === undefined) return serie.temporadas[0]
-  return serie.temporadas.find((t) => t.numero === numero) ?? serie.temporadas[0]
-}
-
-/** Episodio por el que tiene sentido entrar: el que está a medias,
- *  o si no el primero que aún no se ha visto, o si no el primero. */
-export function episodioDeEntrada(serie: Serie) {
-  const temporada = obtenerTemporada(serie)
-  if (!temporada?.episodios.length) return undefined
-  const eps = temporada.episodios
-  const enCurso = eps.find((e) => e.estado === 'en-curso')
-  const pendiente = eps.find((e) => e.estado === 'disponible')
-  return { temporada, episodio: enCurso ?? pendiente ?? eps[0] }
-}
-
-/** Construye una URL de reproductor que sabemos que resuelve.
- *  Evita enlaces escritos a mano que apunten a episodios inexistentes. */
-export function rutaReproductor(serieId: string): string | undefined {
-  const serie = obtenerSerie(serieId)
-  if (!serie) return undefined
-  const entrada = episodioDeEntrada(serie)
-  if (!entrada) return undefined
-  return `/ver/${serie.id}/${entrada.temporada.numero}/${entrada.episodio.numero}`
-}
-
-/* ------------------------------------------------------------
-   PARRILLA DE EMISIÓN
-   Fuente única del calendario: la portada y la página /emision
-   leen de aquí. La semana de referencia de la maqueta es la del
-   viernes 7 de agosto de 2026.
-   ------------------------------------------------------------ */
-
-export const HOY: DiaSemana = 5 // viernes
-
-export const DIAS: { n: DiaSemana; nombre: string; corto: string }[] = [
-  { n: 0, nombre: 'Domingo', corto: 'Dom' },
-  { n: 1, nombre: 'Lunes', corto: 'Lun' },
-  { n: 2, nombre: 'Martes', corto: 'Mar' },
-  { n: 3, nombre: 'Miércoles', corto: 'Mié' },
-  { n: 4, nombre: 'Jueves', corto: 'Jue' },
-  { n: 5, nombre: 'Viernes', corto: 'Vie' },
-  { n: 6, nombre: 'Sábado', corto: 'Sáb' },
-]
-
-/** Desfase de la hora de Japón respecto a UTC. JST no tiene horario
- *  de verano, así que es constante todo el año. */
-const JST_MINUTOS = 9 * 60
-
-/* Los instantes se declaran en UTC. Entre paréntesis, la hora japonesa
-   equivalente, que es como la publica cualquier calendario de anime. */
-export const PARRILLA: Programacion[] = [
-  // viernes 19:00 JST
-  { serieId: 'kaiju-blues', emitidoUtc: '2026-08-07T10:00:00Z', proximoEpisodio: 4 },
-  // viernes 21:00 JST
-  { serieId: 'cielo-de-hierro', emitidoUtc: '2026-08-07T12:00:00Z', proximoEpisodio: 8 },
-  // sábado 00:30 JST — en Europa cae aún en viernes por la noche
-  { serieId: 'noctambula', emitidoUtc: '2026-08-07T15:30:00Z', proximoEpisodio: 13 },
-  // sábado 18:30 JST
-  { serieId: 'cafe-yurei', emitidoUtc: '2026-08-08T09:30:00Z', proximoEpisodio: 11 },
-  // domingo 23:15 JST
-  { serieId: 'perros-de-neon', emitidoUtc: '2026-08-09T14:15:00Z', proximoEpisodio: 2 },
-  // lunes 20:00 JST
-  {
-    serieId: 'jardin-de-las-cenizas',
-    emitidoUtc: '2026-08-10T11:00:00Z',
-    proximoEpisodio: 4,
-  },
-  // martes 22:00 JST
-  { serieId: 'ciudad-vertical', emitidoUtc: '2026-08-11T13:00:00Z', proximoEpisodio: 1 },
-  // miércoles 22:45 JST
-  {
-    serieId: 'tren-de-medianoche',
-    emitidoUtc: '2026-08-12T13:45:00Z',
-    proximoEpisodio: 9,
-  },
-  // jueves 21:30 JST
-  {
-    serieId: 'la-espada-y-el-rio',
-    emitidoUtc: '2026-08-13T12:30:00Z',
-    proximoEpisodio: 3,
-  },
-]
-
-/** El mismo instante desplazado a hora japonesa, para poder leer sus
- *  componentes con los métodos UTC sin depender del reloj del servidor. */
-function enJst(iso: string): Date {
-  return new Date(new Date(iso).getTime() + JST_MINUTOS * 60_000)
-}
-
-function dosDigitos(n: number): string {
-  return String(n).padStart(2, '0')
-}
-
-/** Día de la semana en Japón, que es como se agrupan las parrillas. */
-export function diaJst(p: Programacion): DiaSemana {
-  return enJst(p.emitidoUtc).getUTCDay() as DiaSemana
-}
-
-/** Día del mes en Japón, para la tira de la portada. */
-export function fechaJst(p: Programacion): string {
-  return dosDigitos(enJst(p.emitidoUtc).getUTCDate())
-}
-
-export function horaJst(p: Programacion): string {
-  const d = enJst(p.emitidoUtc)
-  return `${dosDigitos(d.getUTCHours())}:${dosDigitos(d.getUTCMinutes())}`
-}
-
-export function horaUtc(p: Programacion): string {
-  const d = new Date(p.emitidoUtc)
-  return `${dosDigitos(d.getUTCHours())}:${dosDigitos(d.getUTCMinutes())}`
-}
-
-/** Emisiones de un día japonés, ordenadas por hora. */
-export function parrillaDe(dia: DiaSemana): Programacion[] {
-  return PARRILLA.filter((p) => diaJst(p) === dia).sort((a, b) =>
-    a.emitidoUtc.localeCompare(b.emitidoUtc),
+  return (
+    serie.temporadas.find((t) => t.numero === numero) ?? serie.temporadas[0]
   )
 }
 
-/** Datos ya resueltos de una emisión: la serie y el título del episodio. */
-export function resolverEmision(p: Programacion) {
-  const serie = obtenerSerie(p.serieId)
-  const temporada = serie ? obtenerTemporada(serie) : undefined
-  const episodio = temporada?.episodios.find((e) => e.numero === p.proximoEpisodio)
-  return { serie, temporada, episodio }
+/** Episodio por el que tiene sentido entrar: el primero disponible. */
+export function episodioDeEntrada(serie: Serie) {
+  const temporada = obtenerTemporada(serie)
+  if (!temporada?.episodios.length) return undefined
+  return { temporada, episodio: temporada.episodios[0] }
 }
 
-/** Las próximas n emisiones, en orden cronológico. */
-export function proximasEmisiones(n = 5): Programacion[] {
-  return [...PARRILLA]
-    .sort((a, b) => a.emitidoUtc.localeCompare(b.emitidoUtc))
-    .slice(0, n)
+/** URL del reproductor del primer episodio disponible. */
+export async function rutaReproductor(
+  serieId: string,
+): Promise<string | undefined> {
+  const serie = await obtenerSerie(serieId)
+  const entrada = serie ? episodioDeEntrada(serie) : undefined
+  if (!serie || !entrada) return undefined
+  return `/ver/${serie.id}/${entrada.temporada.numero}/${entrada.episodio.numero}`
 }
 
-/** Lo que el usuario dejó a medias. */
-export const EN_CURSO: EnCurso[] = [
-  {
-    serieId: 'kaiju-blues',
-    serieTitulo: 'Kaijū Blues',
-    episodio: 'E03',
-    restanteMin: 9,
-    progreso: 68,
-    lamina: 'ep-4',
-  },
-  {
-    serieId: 'noctambula',
-    serieTitulo: 'Noctámbula',
-    episodio: 'E12',
-    restanteMin: 18,
-    progreso: 23,
-    lamina: 'ep-2',
-  },
-  {
-    serieId: 'tren-de-medianoche',
-    serieTitulo: 'Tren de Medianoche',
-    episodio: 'E08',
-    restanteMin: 2,
-    progreso: 91,
-    lamina: 'ep-1',
-  },
-  {
-    serieId: 'la-espada-y-el-rio',
-    serieTitulo: 'La Espada y el Río',
-    episodio: 'E02',
-    restanteMin: 14,
-    progreso: 44,
-    lamina: 'ep-3',
-  },
-]
+/** Enlaces de reproducción de un episodio, para el reproductor. */
+export async function enlacesDeEpisodio(
+  serie: Serie,
+  numero: number,
+): Promise<ApiEnlacesEpisodio | undefined> {
+  const episodio = serie.temporadas?.[0]?.episodios.find(
+    (e) => e.numero === numero,
+  )
+  if (!episodio?.url) return undefined
+  return apiEnlacesEpisodio(episodio.url)
+}
+
+/* ------------------------------------------------------------
+   Catálogo y tendencias
+   ------------------------------------------------------------ */
+
+/** Unas cuantas obras para las portadas. La API ordena como puede; se
+ *  enriquecen las primeras con la ficha para tener sinopsis y nota. */
+export async function tendencias(limite = 10): Promise<Serie[]> {
+  const [av1, flv] = await Promise.all([
+    apiCatalogo({ proveedor: 'animeav1', pagina: 1 }).catch(() => null),
+    apiCatalogo({ proveedor: 'animeflv', pagina: 1 }).catch(() => null),
+  ])
+  const dedupe = deduplicar([
+    ...(av1?.results ?? []),
+    ...(flv?.results ?? []),
+  ])
+
+  const series = dedupe
+    .slice(0, limite)
+    .map((d) => unirAlternativas(resultadoASerie(d.serie), d.alternativas))
+
+  // Las primeras, con ficha completa, para el destacado.
+  const enriquecidas = await Promise.all(
+    series.slice(0, 4).map(async (s) => {
+      if (!s.url) return s
+      try {
+        const info = await apiInfo(s.url)
+        return {
+          ...infoASerie(info, s.proveedor, s.url),
+          alternativas: s.alternativas,
+        }
+      } catch {
+        return s
+      }
+    }),
+  )
+  return [...enriquecidas, ...series.slice(4)]
+}
+
+export function estaEnEmision(serie: Serie): boolean {
+  return serie.temporadas?.some((t) => t.enEmision) ?? false
+}
+
+export function totalEpisodios(serie: Serie): number {
+  return (
+    serie.totalEpisodios ??
+    serie.temporadas?.reduce((suma, t) => suma + t.episodios.length, 0) ??
+    0
+  )
+}
 
 /* ------------------------------------------------------------
    EXPLORAR
-   Filtros y orden. Todo se deriva del catálogo, así que ningún
-   filtro puede ofrecer una opción que no devuelva resultados.
+   Filtros y orden. El scraper solo filtra por género y por página,
+   así que el orden se aplica aquí con los datos que vengan.
    ------------------------------------------------------------ */
 
 export type EstadoSerie = 'emision' | 'completa'
@@ -857,80 +260,73 @@ export const ESTADOS: { id: EstadoSerie; texto: string }[] = [
   { id: 'completa', texto: 'Completas' },
 ]
 
-export function estaEnEmision(serie: Serie): boolean {
-  return (
-    PARRILLA.some((p) => p.serieId === serie.id) ||
-    (serie.temporadas?.some((t) => t.enEmision) ?? false)
-  )
-}
-
-export function totalEpisodios(serie: Serie): number {
-  return (
-    serie.temporadas?.reduce((suma, t) => suma + t.episodios.length, 0) ?? 0
-  )
-}
-
-/** Géneros presentes en el catálogo, con cuántas series tiene cada uno. */
-export function generosDisponibles(): { nombre: string; cuantas: number }[] {
-  const cuenta = new Map<string, number>()
-  for (const s of SERIES) {
-    for (const g of s.generos) cuenta.set(g, (cuenta.get(g) ?? 0) + 1)
-  }
-  return [...cuenta.entries()]
-    .map(([nombre, cuantas]) => ({ nombre, cuantas }))
-    .sort((a, b) => b.cuantas - a.cuantas || a.nombre.localeCompare(b.nombre))
-}
-
-/** Años presentes en el catálogo, del más reciente al más antiguo. */
-export function aniosDisponibles(): number[] {
-  return [...new Set(SERIES.map((s) => s.anio))].sort((a, b) => b - a)
-}
-
 export interface FiltrosExplorar {
   genero?: string
-  anio?: number
-  estado?: EstadoSerie
   orden?: OrdenSerie
 }
 
-export function explorar({
+/** Páginas del catálogo de un proveedor, como listas de tarjetas. */
+export async function explorar({
   genero,
-  anio,
-  estado,
-  orden = 'nota',
-}: FiltrosExplorar): Serie[] {
-  const resultado = SERIES.filter((s) => {
-    if (genero && !s.generos.includes(genero)) return false
-    if (anio && s.anio !== anio) return false
-    if (estado === 'emision' && !estaEnEmision(s)) return false
-    if (estado === 'completa' && estaEnEmision(s)) return false
-    return true
-  })
+  orden = 'titulo',
+}: FiltrosExplorar): Promise<Serie[]> {
+  const av1 = await apiCatalogo({ proveedor: 'animeav1', genero })
+    .catch(() => null)
+  const flv = await apiCatalogo({ proveedor: 'animeflv', genero })
+    .catch(() => null)
+
+  const dedupe = deduplicar([
+    ...(av1?.results ?? []),
+    ...(flv?.results ?? []),
+  ])
+  const series = dedupe.map((d) =>
+    unirAlternativas(resultadoASerie(d.serie), d.alternativas),
+  )
 
   const comparar: Record<OrdenSerie, (a: Serie, b: Serie) => number> = {
-    nota: (a, b) => b.nota - a.nota,
-    anio: (a, b) => b.anio - a.anio || a.titulo.localeCompare(b.titulo),
+    nota: (a, b) => (b.nota ?? 0) - (a.nota ?? 0),
+    anio: (a, b) => (b.anio ?? 0) - (a.anio ?? 0) || a.titulo.localeCompare(b.titulo),
     titulo: (a, b) => a.titulo.localeCompare(b.titulo, 'es'),
-    episodios: (a, b) => totalEpisodios(b) - totalEpisodios(a),
+    episodios: (a, b) => b.totalEpisodios - a.totalEpisodios,
   }
 
-  return resultado.sort(comparar[orden])
+  return series.sort(comparar[orden])
+}
+
+/** Géneros que acepta el scraper. El filtro lo hace la API, así que
+ *  esta lista es fija (los slugs no se pueden descubrir). */
+export const GENEROS: { nombre: string; slug: string }[] = [
+  { nombre: 'Acción', slug: 'accion' },
+  { nombre: 'Aventura', slug: 'aventura' },
+  { nombre: 'Comedia', slug: 'comedia' },
+  { nombre: 'Drama', slug: 'drama' },
+  { nombre: 'Fantasía', slug: 'fantasia' },
+  { nombre: 'Ciencia ficción', slug: 'ciencia-ficcion' },
+  { nombre: 'Romance', slug: 'romance' },
+  { nombre: 'Slice of life', slug: 'slice-of-life' },
+  { nombre: 'Misterio', slug: 'misterio' },
+  { nombre: 'Terror', slug: 'terror' },
+  { nombre: 'Deportes', slug: 'deportes' },
+  { nombre: 'Música', slug: 'musica' },
+  { nombre: 'Escolares', slug: 'escolares' },
+  { nombre: 'Sobrenatural', slug: 'sobrenatural' },
+  { nombre: 'Seinen', slug: 'seinen' },
+  { nombre: 'Shounen', slug: 'shounen' },
+]
+
+export function generosDisponibles(): { nombre: string; slug: string }[] {
+  return GENEROS
+}
+
+/** El scraper no publica años en el catálogo. */
+export function aniosDisponibles(): number[] {
+  return []
 }
 
 /* ------------------------------------------------------------
    BÚSQUEDA
-   Se resuelve contra el catálogo local. Cuando entre la API, esta
-   función pasa a ser una petición y el resto no se entera.
+   Se resuelve contra la API y se deduplica por título.
    ------------------------------------------------------------ */
-
-/** Minúsculas y sin tildes, para que «kaiju» encuentre «Kaijū». */
-function normalizar(texto: string): string {
-  return texto
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim()
-}
 
 export interface Coincidencia {
   serie: Serie
@@ -941,50 +337,31 @@ export interface Coincidencia {
 /** Hiragana, katakana y kanji. */
 const CJK = /[\u3040-\u30ff\u4e00-\u9fff]/
 
-/** Cuántos caracteres hacen falta para buscar. En japonés basta con
- *  uno, porque un solo kanji ya es una palabra; en alfabeto latino
- *  una sola letra devolvería medio catálogo. */
+/** Cuántos caracteres hacen falta para buscar. */
 export function minimoParaBuscar(consulta: string): number {
   return CJK.test(consulta) ? 1 : 2
 }
 
-export function buscarSeries(consulta: string, limite = 6): Coincidencia[] {
-  const q = normalizar(consulta)
-  if (q.length < minimoParaBuscar(consulta)) return []
-
-  const marcadas = SERIES.flatMap((serie) => {
-    const titulo = normalizar(serie.titulo)
-    const original = normalizar(
-      `${serie.tituloOriginal ?? ''} ${serie.romaji ?? ''}`,
-    )
-    const generos = serie.generos.find((g) => normalizar(g).includes(q))
-
-    // Menor peso, mejor posición.
-    if (titulo.startsWith(q)) return [{ serie, peso: 0, motivo: serie.genero }]
-    if (titulo.includes(q)) return [{ serie, peso: 1, motivo: serie.genero }]
-    if (original.includes(q))
-      return [
-        {
-          serie,
-          peso: 2,
-          motivo: [serie.tituloOriginal, serie.romaji].filter(Boolean).join(' · '),
-        },
-      ]
-    if (generos) return [{ serie, peso: 3, motivo: `Género: ${generos}` }]
-    return []
-  })
-
-  return marcadas
-    .sort((a, b) => a.peso - b.peso || b.serie.nota - a.serie.nota)
+export async function buscarSeries(
+  consulta: string,
+  limite = 6,
+): Promise<Coincidencia[]> {
+  const respuesta = await apiBuscar(consulta)
+  const dedupe = deduplicar(respuesta.results)
+  return dedupe
     .slice(0, limite)
-    .map(({ serie, motivo }) => ({ serie, motivo }))
+    .map((d) => ({
+      serie: unirAlternativas(resultadoASerie(d.serie), d.alternativas),
+      motivo:
+        d.serie.type ??
+        d.alternativas.map((a) => a.provider ?? '').filter(Boolean).join(' · '),
+    }))
 }
 
 /* ------------------------------------------------------------
    LISTA DEL USUARIO
-   Datos de ejemplo mientras no hay cuentas. Cuando entre la base de
-   datos, esto pasa a ser una consulta por usuario; las formas de
-   EntradaLista son el contrato.
+   Datos de ejemplo mientras no hay cuentas. Los ids apuntan a obras
+   reales del scraper para que la página se vea con contenido.
    ------------------------------------------------------------ */
 
 export const ESTADOS_LISTA: {
@@ -1008,63 +385,44 @@ export const USUARIO = {
 
 export const MI_LISTA: EntradaLista[] = [
   {
-    serieId: 'cielo-de-hierro',
+    serieId: 'animeav1-one-piece',
     estado: 'viendo',
-    episodiosVistos: 6,
+    episodiosVistos: 1138,
     puntuacion: 9,
     actualizado: '2026-08-07T12:40:00Z',
   },
   {
-    serieId: 'kaiju-blues',
+    serieId: 'animeav1-jujutsu-kaisen',
     estado: 'viendo',
     episodiosVistos: 2,
     puntuacion: 8,
     actualizado: '2026-08-06T21:10:00Z',
   },
   {
-    serieId: 'noctambula',
+    serieId: 'animeav1-spy-x-family',
     estado: 'viendo',
     episodiosVistos: 11,
     actualizado: '2026-08-05T23:55:00Z',
   },
   {
-    serieId: 'tren-de-medianoche',
+    serieId: 'animeav1-mushoku-tensei-iii-isekai-ittara-honki-dasu',
     estado: 'viendo',
     episodiosVistos: 7,
     puntuacion: 9,
     actualizado: '2026-08-04T19:20:00Z',
   },
   {
-    serieId: 'la-espada-y-el-rio',
-    estado: 'pausada',
-    episodiosVistos: 1,
-    actualizado: '2026-07-28T18:00:00Z',
-  },
-  {
-    serieId: 'perros-de-neon',
-    estado: 'completada',
-    episodiosVistos: 3,
-    puntuacion: 10,
-    actualizado: '2026-07-30T01:15:00Z',
-  },
-  {
-    serieId: 'cafe-yurei',
+    serieId: 'animeav1-sousou-no-frieren-2nd-season',
     estado: 'pendiente',
     episodiosVistos: 0,
     actualizado: '2026-08-02T11:00:00Z',
   },
   {
-    serieId: 'jardin-de-las-cenizas',
-    estado: 'pendiente',
-    episodiosVistos: 0,
+    serieId: 'animeav1-youjo-senki-ii',
+    estado: 'completada',
+    episodiosVistos: 12,
+    puntuacion: 8,
     actualizado: '2026-08-01T09:30:00Z',
-  },
-  {
-    serieId: 'ciudad-vertical',
-    estado: 'abandonada',
-    episodiosVistos: 1,
-    puntuacion: 5,
-    actualizado: '2026-07-19T22:40:00Z',
   },
 ]
 
@@ -1092,21 +450,39 @@ export function resumenLista() {
   return {
     series: MI_LISTA.length,
     episodios,
-    // Cada episodio dura 24 minutos en este catálogo.
     horas: Math.round((episodios * 24) / 60),
     media,
   }
 }
 
-export const GENEROS = [
-  'Mecha',
-  'Slice of life',
-  'Misterio',
-  'Histórico',
-  'Deportes',
-  'Fantasía',
-  'Terror',
-  'Comedia',
-  'Romance',
-  'Ciencia ficción',
+/* ------------------------------------------------------------
+   SEGUIR VIENDO
+   Sin cuentas todavía no hay historial real: se muestra un ejemplo.
+   ------------------------------------------------------------ */
+
+export const EN_CURSO: EnCurso[] = [
+  {
+    serieId: 'animeav1-one-piece',
+    serieTitulo: 'One Piece',
+    episodio: 'E1138',
+    restanteMin: 22,
+    progreso: 8,
+    lamina: 'panoramica-obra',
+  },
+  {
+    serieId: 'animeav1-spy-x-family',
+    serieTitulo: 'Spy x Family',
+    episodio: 'E12',
+    restanteMin: 18,
+    progreso: 23,
+    lamina: 'panoramica-obra',
+  },
+  {
+    serieId: 'animeav1-mushoku-tensei-iii-isekai-ittara-honki-dasu',
+    serieTitulo: 'Mushoku Tensei III',
+    episodio: 'E8',
+    restanteMin: 2,
+    progreso: 91,
+    lamina: 'panoramica-obra',
+  },
 ]

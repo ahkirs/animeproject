@@ -1,7 +1,11 @@
 /* Modelo de datos del catálogo.
-   Todo el contenido es sintético: no hay ninguna obra, marca ni
-   persona real. Cuando se sustituya por una API, estas mismas
-   formas son el contrato al que hay que mapear la respuesta. */
+   El contenido llega del scraper (lib/api.ts); estas formas son el
+   contrato al que lib/catalogo.ts mapea la respuesta de la API. */
+
+import type { Proveedor } from './api-types'
+
+/** Carátula o fotograma: clave de los SVG de Lamina.tsx o una URL. */
+export type Arte = ClaveLamina | string
 
 /** Claves de las láminas SVG dibujadas en components/Lamina.tsx */
 export type ClaveLamina =
@@ -27,14 +31,16 @@ export type EstadoEpisodio = 'visto' | 'en-curso' | 'disponible' | 'bloqueado'
 export interface Episodio {
   numero: number
   titulo: string
-  sinopsis: string
-  duracionMin: number
+  sinopsis?: string
+  duracionMin?: number
   estado: EstadoEpisodio
   /** 0-100. Solo tiene sentido cuando estado es 'en-curso'. */
   progreso?: number
   /** Texto de disponibilidad: «Viernes 14», «En 14 días». */
   disponible?: string
-  lamina: ClaveLamina
+  lamina: Arte
+  /** URL del episodio en el proveedor, para pedir los enlaces. */
+  url?: string
 }
 
 export interface Temporada {
@@ -83,27 +89,75 @@ export interface Programacion {
  *  usando por dentro para agrupar los días, pero no se muestra. */
 export type ZonaHoraria = 'local' | 'utc'
 
+/** Una plataforma con licencia donde ver la obra. Viene de los enlaces
+ *  externos de AniList; es la pieza que hace de esto un agregador. */
+export interface EnlaceOficial {
+  sitio: string
+  url: string
+  idioma?: string
+}
+
+/** Una emisión de la parrilla, con los datos de la obra incrustados.
+ *
+ *  A diferencia de Programacion, no apunta al catálogo del proveedor: el
+ *  calendario viene de AniList y sus obras no tienen por qué estar en él.
+ *  El instante sigue siendo UTC, así que la hora local, la agrupación por
+ *  día y la cuenta atrás se derivan igual que antes. */
+export interface EmisionProgramada {
+  /** Id de AniList. */
+  id: number
+  episodio: number
+  emitidoUtc: string
+  titulo: string
+  tituloNativo?: string
+  formato?: string
+  episodiosTotales: number | null
+  duracionMin: number | null
+  nota: number | null
+  generos: string[]
+  portada: string | null
+  /** Color dominante que AniList extrae de la carátula. */
+  color: string | null
+  donde: EnlaceOficial[]
+}
+
 export interface Serie {
+  /** Id canónico derivado de la URL del proveedor (lib/ids.ts). */
   id: string
   titulo: string
   /** Título en japonés, si lo tiene. */
   tituloOriginal?: string
-  romaji?: string
-  anio: number
-  nota: number
-  votos: number
-  clasificacion: string
-  duracionMin: number
+  anio: number | null
+  nota: number | null
+  votos: number | null
+  clasificacion?: string
+  duracionMin?: number
   genero: string
   generos: string[]
   temporadaEtiqueta: string
   sinopsisCorta: string
   sinopsis: string
-  lamina: ClaveLamina
-  panoramica?: ClaveLamina
+  /** Carátula (poster) o su SVG de reserva. */
+  lamina: Arte
+  /** Fondo panorámico o su SVG de reserva. */
+  panoramica?: Arte
+  /** URL en el proveedor: es la que se pasa para pedir info/episodios. */
+  url: string
+  proveedor: Proveedor
+  /** Otros proveedores donde está la misma obra. */
+  alternativas: SerieAlternativa[]
+  totalEpisodios: number
+  /** El scraper no agrupa por temporada: todos los episodios van en una. */
+  temporadas?: Temporada[]
   ficha?: FichaTecnica
   reparto?: Persona[]
-  temporadas?: Temporada[]
+}
+
+/** Otra copia de la misma obra en un proveedor distinto. */
+export interface SerieAlternativa {
+  proveedor: Proveedor
+  nombre: string
+  url: string
 }
 
 /* ---------------- Lista del usuario ---------------- */
@@ -134,5 +188,5 @@ export interface EnCurso {
   episodio: string
   restanteMin: number
   progreso: number
-  lamina: ClaveLamina
+  lamina: Arte
 }

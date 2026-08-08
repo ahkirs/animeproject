@@ -2,12 +2,11 @@ import Link from 'next/link'
 import Icono from './Icono'
 import Buscador from './Buscador'
 
-type Seccion = 'inicio' | 'explorar' | 'emision'
+type Seccion = 'inicio' | 'explorar'
 
 const ENLACES: { id: Seccion; texto: string; href: string }[] = [
   { id: 'inicio', texto: 'Inicio', href: '/' },
   { id: 'explorar', texto: 'Explorar', href: '/explorar' },
-  { id: 'emision', texto: 'Emisión', href: '/emision' },
 ]
 
 export function Marca({ className = '' }: { className?: string }) {

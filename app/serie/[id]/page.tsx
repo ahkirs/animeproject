@@ -5,15 +5,12 @@ import Cabecera from '@/components/Cabecera'
 import Pie from '@/components/Pie'
 import Icono from '@/components/Icono'
 import Lamina from '@/components/Lamina'
-import Datos, { Clasificacion, Nota } from '@/components/Datos'
+import Datos, { Clasificacion, NotaOpcional } from '@/components/Datos'
 import { CapaVineteado } from '@/components/EfectosSala'
-import Boton, { BotonEnlace, BotonIcono } from '@/components/Boton'
-import { SERIES, episodioDeEntrada, obtenerSerie, rutaReproductor } from '@/lib/catalogo'
+import { BotonEnlace } from '@/components/Boton'
+import { episodioDeEntrada, obtenerSerie, rutaReproductor, tendencias } from '@/lib/catalogo'
+import { nombreProveedor } from '@/lib/ids'
 import type { Episodio } from '@/lib/types'
-
-export function generateStaticParams() {
-  return SERIES.map((s) => ({ id: s.id }))
-}
 
 export async function generateMetadata({
   params,
@@ -21,11 +18,11 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id } = await params
-  const serie = obtenerSerie(id)
+  const serie = await obtenerSerie(id)
   if (!serie) return {}
   return {
     title: serie.titulo,
-    description: serie.sinopsisCorta,
+    description: serie.sinopsisCorta || serie.sinopsis,
   }
 }
 
@@ -38,19 +35,14 @@ function FilaEpisodio({
   serieId: string
   temporada: number
 }) {
-  const bloqueado = ep.estado === 'bloqueado'
+  const clases = `grid grid-cols-[200px_1fr_auto] items-start gap-e3 border-b border-borde py-e3 no-underline transition-colors duration-150 ease-sal max-[900px]:grid-cols-[130px_1fr] max-[560px]:grid-cols-1`
 
-  const clases = `grid grid-cols-[200px_1fr_auto] items-start gap-e3 border-b border-borde py-e3 no-underline transition-colors duration-150 ease-sal max-[900px]:grid-cols-[130px_1fr] max-[560px]:grid-cols-1 ${
-    bloqueado ? 'pointer-events-none opacity-55' : 'hover:bg-sala-800'
-  }`
-
-  const contenido = (
-    <>
-      <div
-        className={`relative aspect-video overflow-hidden rounded-radio bg-sala-700 shadow-baja ${
-          bloqueado ? '[&_svg]:grayscale' : ''
-        }`}
-      >
+  return (
+    <Link
+      href={`/ver/${serieId}/${temporada}/${ep.numero}`}
+      className={`${clases} hover:bg-sala-800`}
+    >
+      <div className="relative aspect-video overflow-hidden rounded-radio bg-sala-700 shadow-baja">
         <Lamina arte={ep.lamina} />
       </div>
 
@@ -61,42 +53,12 @@ function FilaEpisodio({
         <h3 className="mt-[0.2rem] mb-[0.35rem] text-paso-2 font-semibold tracking-[-0.015em]">
           {ep.titulo}
         </h3>
-        <p className="max-w-[58ch] text-paso-1 text-hueso-45">{ep.sinopsis}</p>
-        {ep.progreso !== undefined && (
-          <div className="mt-2 h-[3px] bg-sala-600">
-            <span className="block h-full bg-ambar" style={{ width: `${ep.progreso}%` }} />
-          </div>
-        )}
+        {ep.sinopsis && <p className="max-w-[58ch] text-paso-1 text-hueso-45">{ep.sinopsis}</p>}
       </div>
 
       <div className="text-right text-paso-0 whitespace-nowrap text-hueso-45 tabular-nums max-[900px]:col-start-2 max-[900px]:text-left max-[560px]:col-start-1">
-        {ep.estado === 'visto' && (
-          <span className="inline-flex items-center gap-[0.3rem] font-semibold text-ambar">
-            <Icono nombre="check" tam={14} /> Visto
-          </span>
-        )}
-        {ep.estado === 'en-curso' && (
-          <span className="font-semibold text-ambar">
-            {Math.round((ep.duracionMin * (100 - (ep.progreso ?? 0))) / 100)} min restantes
-          </span>
-        )}
-        {ep.estado === 'disponible' && <span>{ep.disponible}</span>}
-        {bloqueado && (
-          <span className="inline-flex items-center gap-[0.3rem]">
-            <Icono nombre="candado" tam={13} /> {ep.disponible}
-          </span>
-        )}
-        <br />
-        {!bloqueado && <>{ep.duracionMin} min</>}
+        {ep.duracionMin ? `${ep.duracionMin} min` : 'Disponible'}
       </div>
-    </>
-  )
-
-  if (bloqueado) return <div className={clases}>{contenido}</div>
-
-  return (
-    <Link href={`/ver/${serieId}/${temporada}/${ep.numero}`} className={clases}>
-      {contenido}
     </Link>
   )
 }
@@ -107,12 +69,15 @@ export default async function PaginaSerie({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const serie = obtenerSerie(id)
+  const serie = await obtenerSerie(id)
   if (!serie) notFound()
 
   const temporada = serie.temporadas?.[0]
   const entrada = episodioDeEntrada(serie)
-  const relacionadas = SERIES.filter((s) => s.id !== serie.id).slice(0, 3)
+  const ruta = await rutaReproductor(serie.id)
+
+  const relacionadas = await tendencias(10)
+  const relacionadasDeEsta = relacionadas.filter((s) => s.id !== serie.id).slice(0, 3)
 
   return (
     <>
@@ -151,52 +116,61 @@ export default async function PaginaSerie({
               </h1>
 
               {serie.tituloOriginal && (
-                <p className="mb-e3 text-paso-1 text-hueso-45">
-                  {serie.tituloOriginal} · {serie.romaji}
-                </p>
+                <p className="mb-e3 text-paso-1 text-hueso-45">{serie.tituloOriginal}</p>
               )}
 
               <Datos>
-                <Nota valor={serie.nota} />
-                <>de {serie.votos.toLocaleString('es-ES')} votos</>
-                <>{serie.anio}</>
-                <>{serie.temporadas?.length ?? 1} temporadas</>
-                <>{serie.duracionMin} min/ep</>
-                <Clasificacion valor={serie.clasificacion} />
+                <NotaOpcional valor={serie.nota} />
+                {serie.votos != null && (
+                  <>{serie.votos.toLocaleString('es-ES')} votos</>
+                )}
+                {serie.anio != null && <>{serie.anio}</>}
+                {serie.temporadas?.length != null && (
+                  <>{serie.temporadas.length} temporada(s)</>
+                )}
+                {serie.duracionMin != null && <>{serie.duracionMin} min/ep</>}
+                {serie.clasificacion && <Clasificacion valor={serie.clasificacion} />}
               </Datos>
 
-              <p className="mt-e3 mb-e4 max-w-[62ch] text-hueso-70">{serie.sinopsis}</p>
+              {serie.sinopsis && (
+                <p className="mt-e3 mb-e4 max-w-[62ch] text-hueso-70">{serie.sinopsis}</p>
+              )}
 
               <div className="flex flex-wrap items-center gap-e2">
-                <BotonEnlace
-                  href={rutaReproductor(serie.id) ?? '#'}
-                  variante="primario"
-                >
+                <BotonEnlace href={ruta ?? '#'} variante="primario">
                   <Icono nombre="play" tam={17} />
-                  {entrada?.episodio.estado === 'en-curso' ? 'Continuar' : 'Ver'} T
-                  {entrada?.temporada.numero} · E
+                  Ver T{entrada?.temporada.numero ?? 1} · E
                   {String(entrada?.episodio.numero ?? 1).padStart(2, '0')}
                 </BotonEnlace>
-                <Boton type="button">
-                  <Icono nombre="mas" tam={17} />
-                  Mi lista
-                </Boton>
-                <BotonIcono aria-label="Compartir">
-                  <Icono nombre="compartir" tam={18} />
-                </BotonIcono>
               </div>
 
-              <div className="mt-e3 flex flex-wrap gap-[0.4rem]">
-                {serie.generos.map((g) => (
-                  <Link
-                    key={g}
-                    href="#"
-                    className="rounded-full border border-borde-vivo px-[0.7rem] py-[0.25rem] text-paso-0 font-semibold text-hueso-70 no-underline transition-colors duration-200 ease-sal hover:border-hueso-45 hover:text-hueso"
-                  >
-                    {g}
-                  </Link>
-                ))}
-              </div>
+              {serie.alternativas.length > 0 && (
+                <div className="mt-e3 flex flex-wrap items-center gap-[0.4rem] text-paso-0">
+                  <span className="text-hueso-45">También en</span>
+                  {serie.alternativas.map((a) => (
+                    <Link
+                      key={a.url}
+                      href={`/serie/${a.url}`}
+                      className="rounded-full border border-borde-vivo px-[0.7rem] py-[0.25rem] font-semibold text-hueso-70 no-underline transition-colors duration-200 ease-sal hover:border-hueso-45 hover:text-hueso"
+                    >
+                      {nombreProveedor(a.proveedor)}
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {serie.generos.length > 0 && (
+                <div className="mt-e3 flex flex-wrap gap-[0.4rem]">
+                  {serie.generos.map((g) => (
+                    <span
+                      key={g}
+                      className="rounded-full border border-borde-vivo px-[0.7rem] py-[0.25rem] text-paso-0 font-semibold text-hueso-70"
+                    >
+                      {g}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -209,122 +183,85 @@ export default async function PaginaSerie({
               aria-label="Temporadas"
               className="mb-e4 flex gap-e3 overflow-x-auto border-b border-borde"
             >
-              {(serie.temporadas ?? []).map((t, i) => (
-                <button
-                  key={t.numero}
-                  role="tab"
-                  aria-selected={i === 0}
-                  className={`cursor-pointer border-0 border-b-2 bg-transparent pb-e2 text-paso-2 font-semibold whitespace-nowrap transition-colors duration-200 ease-sal ${
-                    i === 0
-                      ? 'border-ambar text-hueso'
-                      : 'border-transparent text-hueso-45 hover:text-hueso'
-                  }`}
-                >
-                  {t.etiqueta}
-                </button>
-              ))}
-              <button
+              <span
                 role="tab"
-                aria-selected={false}
-                className="cursor-pointer border-0 border-b-2 border-transparent bg-transparent pb-e2 text-paso-2 font-semibold whitespace-nowrap text-hueso-45 hover:text-hueso"
+                aria-selected="true"
+                className="border-b-2 border-ambar pb-e2 text-paso-2 font-semibold whitespace-nowrap text-hueso"
               >
-                Especiales
-              </button>
+                {temporada?.etiqueta ?? 'Episodios'}
+              </span>
             </div>
 
             <div role="tabpanel">
-              {(temporada?.episodios ?? []).map((ep) => (
-                <FilaEpisodio
-                  key={ep.numero}
-                  ep={ep}
-                  serieId={serie.id}
-                  temporada={temporada?.numero ?? 1}
-                />
-              ))}
+              {(temporada?.episodios ?? []).length > 0 ? (
+                (temporada?.episodios ?? []).map((ep) => (
+                  <FilaEpisodio
+                    key={ep.numero}
+                    ep={ep}
+                    serieId={serie.id}
+                    temporada={temporada?.numero ?? 1}
+                  />
+                ))
+              ) : (
+                <p className="py-e4 text-hueso-45">
+                  Todavía no hay episodios cargados para esta obra.
+                </p>
+              )}
             </div>
           </div>
 
           {/* ---------- Lateral ---------- */}
           <aside>
-            {serie.ficha && (
-              <section>
-                <h2 className="mb-e3 border-b border-borde pb-e2 text-paso-0 font-bold tracking-[0.11em] text-hueso-45 uppercase">
-                  Ficha técnica
-                </h2>
-                <dl className="grid gap-[0.65rem] text-paso-1">
-                  {(
-                    [
-                      ['Estudio', serie.ficha.estudio],
-                      ['Dirección', serie.ficha.direccion],
-                      ['Guion', serie.ficha.guion],
-                      ['Música', serie.ficha.musica],
-                      ['Emisión', serie.ficha.emision],
-                      ['Origen', serie.ficha.origen],
-                      ['Audio', serie.ficha.audio],
-                      ['Subtítulos', serie.ficha.subtitulos],
-                    ] as const
-                  ).map(([k, v]) => (
-                    <div
-                      key={k}
-                      className="grid grid-cols-[8.5rem_1fr] gap-e2 max-[560px]:grid-cols-1 max-[560px]:gap-0"
-                    >
-                      <dt className="text-hueso-45">{k}</dt>
-                      <dd className="m-0 text-hueso">{v}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </section>
-            )}
-
-            {serie.reparto && (
-              <section className="mt-e5">
-                <h2 className="mb-e3 border-b border-borde pb-e2 text-paso-0 font-bold tracking-[0.11em] text-hueso-45 uppercase">
-                  Reparto principal
-                </h2>
-                <div className="grid gap-e3">
-                  {serie.reparto.map((p) => (
-                    <div key={p.nombre} className="flex items-center gap-e2">
-                      <span
-                        aria-hidden="true"
-                        className="grid size-11 shrink-0 place-items-center rounded-full border border-borde-vivo bg-sala-600 font-display text-paso-1 text-hueso-70"
-                      >
-                        {p.iniciales}
-                      </span>
-                      <span>
-                        <b className="block text-paso-1 font-semibold">{p.nombre}</b>
-                        <span className="text-paso-0 text-hueso-45">Voz: {p.voz}</span>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+            <section>
+              <h2 className="mb-e3 border-b border-borde pb-e2 text-paso-0 font-bold tracking-[0.11em] text-hueso-45 uppercase">
+                Datos
+              </h2>
+              <dl className="grid gap-[0.65rem] text-paso-1">
+                {[
+                  ['Proveedor', nombreProveedor(serie.proveedor)],
+                  ['Tipo', serie.temporadaEtiqueta],
+                  ['Género', serie.genero],
+                ].map(([k, v]) => (
+                  <div
+                    key={k}
+                    className="grid grid-cols-[8.5rem_1fr] gap-e2 max-[560px]:grid-cols-1 max-[560px]:gap-0"
+                  >
+                    <dt className="text-hueso-45">{k}</dt>
+                    <dd className="m-0 text-hueso">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
 
             <section className="mt-e5">
               <h2 className="mb-e3 border-b border-borde pb-e2 text-paso-0 font-bold tracking-[0.11em] text-hueso-45 uppercase">
                 Si te gustó esta
               </h2>
               <div className="grid gap-e3">
-                {relacionadas.map((r) => (
-                  <Link
-                    key={r.id}
-                    href={`/serie/${r.id}`}
-                    className="flex items-center gap-e2 no-underline"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="grid size-11 shrink-0 place-items-center rounded-full border border-borde-vivo bg-sala-600 font-display text-paso-1 text-hueso-70"
+                {relacionadasDeEsta.length > 0 ? (
+                  relacionadasDeEsta.map((r) => (
+                    <Link
+                      key={r.id}
+                      href={`/serie/${r.id}`}
+                      className="flex items-center gap-e2 no-underline"
                     >
-                      {r.titulo.slice(0, 2).toUpperCase()}
-                    </span>
-                    <span>
-                      <b className="block text-paso-1 font-semibold">{r.titulo}</b>
-                      <span className="text-paso-0 text-hueso-45">
-                        {r.genero} · {r.temporadaEtiqueta}
+                      <span
+                        aria-hidden="true"
+                        className="grid size-11 shrink-0 place-items-center rounded-full border border-borde-vivo bg-sala-600 font-display text-paso-1 text-hueso-70"
+                      >
+                        {r.titulo.slice(0, 2).toUpperCase()}
                       </span>
-                    </span>
-                  </Link>
-                ))}
+                      <span>
+                        <b className="block text-paso-1 font-semibold">{r.titulo}</b>
+                        <span className="text-paso-0 text-hueso-45">
+                          {r.genero} · {r.temporadaEtiqueta}
+                        </span>
+                      </span>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-paso-0 text-hueso-45">Sin sugerencias por ahora.</p>
+                )}
               </div>
             </section>
           </aside>

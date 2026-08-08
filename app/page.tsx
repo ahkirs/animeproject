@@ -4,21 +4,9 @@ import Pie from '@/components/Pie'
 import Icono from '@/components/Icono'
 import Riel from '@/components/Riel'
 import FichaSerie, { Cartel } from '@/components/FichaSerie'
-import HoraEmision, { CuentaAtras } from '@/components/HoraEmision'
 import CarruselDestacado, { type Diapositiva } from '@/components/CarruselDestacado'
-import {
-  DIAS,
-  EN_CURSO,
-  HOY,
-  SERIES,
-  diaJst,
-  generosDisponibles,
-  horaUtc,
-  parrillaDe,
-  proximasEmisiones,
-  resolverEmision,
-  rutaReproductor,
-} from '@/lib/catalogo'
+import { EN_CURSO, episodioDeEntrada, generosDisponibles, tendencias } from '@/lib/catalogo'
+import { nombreProveedor } from '@/lib/ids'
 
 function CabezaSeccion({
   titulo,
@@ -53,42 +41,30 @@ function CabezaSeccion({
   )
 }
 
-/** Las próximas emisiones convertidas en diapositivas del destacado.
- *  Cada una lleva su propia etiqueta según cuándo se emite. */
-function construirDestacados(): Diapositiva[] {
-  return proximasEmisiones(4).flatMap((p) => {
-    const { serie, temporada, episodio } = resolverEmision(p)
-    if (!serie || !temporada || !episodio) return []
+export default async function Inicio() {
+  const catalogo = await tendencias(10)
+  const destacadas = catalogo.slice(0, 4)
 
-    const dia = DIAS.find((d) => d.n === diaJst(p))
-    const etiqueta =
-      diaJst(p) === HOY
-        ? 'Episodio nuevo esta noche'
-        : `Nuevo episodio el ${dia?.nombre.toLowerCase() ?? 'próximo día'}`
-
-    return [
-      {
-        id: serie.id,
-        titulo: serie.titulo,
-        sinopsis: serie.sinopsisCorta,
-        nota: serie.nota,
-        anio: serie.anio,
-        clasificacion: serie.clasificacion,
-        lamina: serie.panoramica ?? 'panoramica-escena',
-        etiqueta,
-        temporada: temporada.numero,
-        episodio: episodio.numero,
-        episodiosTotales: temporada.episodios.length,
-        hrefVer: `/ver/${serie.id}/${temporada.numero}/${episodio.numero}`,
-        hrefFicha: `/serie/${serie.id}`,
-      },
-    ]
+  const diapositivas: Diapositiva[] = destacadas.map((serie) => {
+    const entrada = episodioDeEntrada(serie)
+    return {
+      id: serie.id,
+      titulo: serie.titulo,
+      sinopsis: serie.sinopsisCorta || serie.sinopsis,
+      nota: serie.nota,
+      anio: serie.anio,
+      clasificacion: serie.clasificacion,
+      lamina: serie.panoramica ?? serie.lamina,
+      etiqueta: serie.genero || 'Tendencias',
+      temporada: entrada?.temporada.numero,
+      episodio: entrada?.episodio.numero,
+      episodiosTotales: serie.totalEpisodios || undefined,
+      hrefVer: entrada
+        ? `/ver/${serie.id}/${entrada.temporada.numero}/${entrada.episodio.numero}`
+        : `/serie/${serie.id}`,
+      hrefFicha: `/serie/${serie.id}`,
+    }
   })
-}
-
-export default function Inicio() {
-  const destacados = construirDestacados()
-  const emisionesHoy = parrillaDe(HOY)
 
   return (
     <>
@@ -103,68 +79,9 @@ export default function Inicio() {
 
       <main id="principal">
         {/* ---------- Destacado ---------- */}
-        <CarruselDestacado slides={destacados} />
+        <CarruselDestacado slides={diapositivas} />
 
         <div className="mx-auto max-w-[1600px] px-margen">
-          {/* ---------- Parrilla semanal ---------- */}
-          <section id="hoy" aria-labelledby="t-hoy" className="mt-e6">
-            <CabezaSeccion
-              id="t-hoy"
-              titulo="Se emite hoy"
-              enlace="Toda la semana"
-              href="/emision"
-            />
-
-            {emisionesHoy.length > 0 ? (
-              <div className="border-t border-borde">
-                {emisionesHoy.map((p) => {
-                  const { serie, temporada, episodio } = resolverEmision(p)
-                  if (!serie) return null
-
-                  return (
-                    <Link
-                      key={`${p.serieId}-${p.emitidoUtc}`}
-                      href={rutaReproductor(p.serieId) ?? `/serie/${p.serieId}`}
-                      className="grid grid-cols-[7.5rem_1fr_auto] items-center gap-e3 border-b border-borde py-e3 no-underline transition-all duration-150 ease-sal hover:bg-sala-800 hover:pl-e2 max-[900px]:grid-cols-[5.5rem_1fr]"
-                    >
-                      <span className="font-display text-paso-4 leading-none tracking-[-0.02em] text-ambar tabular-nums max-[900px]:text-paso-3">
-                        <HoraEmision iso={p.emitidoUtc} utc={horaUtc(p)} />
-                      </span>
-
-                      <span>
-                        <h3 className="mb-[0.2rem] text-paso-3 font-semibold tracking-[-0.015em]">
-                          {serie.titulo} — T{temporada?.numero} E
-                          {String(p.proximoEpisodio).padStart(2, '0')}
-                        </h3>
-                        {episodio && (
-                          <p className="text-paso-1 text-hueso-45">«{episodio.titulo}»</p>
-                        )}
-                      </span>
-
-                      <span className="text-paso-1 font-semibold text-hueso-70 tabular-nums max-[900px]:col-start-2 max-[900px]:text-paso-0">
-                        <CuentaAtras iso={p.emitidoUtc} />
-                      </span>
-                    </Link>
-                  )
-                })}
-              </div>
-            ) : (
-              <div className="rounded-radio border border-dashed border-borde-vivo px-e4 py-e5 text-center">
-                <p className="text-paso-2 font-semibold">Hoy no estrena nada</p>
-                <p className="mt-e2 text-paso-1 text-hueso-45">
-                  Mira la parrilla para ver qué sale el resto de la semana.
-                </p>
-                <Link
-                  href="/emision"
-                  className="mt-e3 inline-flex items-center gap-2 rounded-radio bg-ambar px-[1.35rem] py-3 text-paso-1 font-semibold text-ambar-tinta no-underline transition-colors duration-200 ease-sal hover:bg-ambar-claro"
-                >
-                  <Icono nombre="flecha" tam={16} />
-                  Ver la parrilla
-                </Link>
-              </div>
-            )}
-          </section>
-
           {/* ---------- Seguir viendo ---------- */}
           <section aria-labelledby="t-reanudar" className="mt-e6">
             <CabezaSeccion id="t-reanudar" titulo="Seguir viendo" enlace="Tu historial" />
@@ -172,7 +89,7 @@ export default function Inicio() {
               {EN_CURSO.map((c) => (
                 <Link
                   key={c.serieId}
-                  href={rutaReproductor(c.serieId) ?? `/serie/${c.serieId}`}
+                  href={`/serie/${c.serieId}`}
                   className="group block no-underline"
                 >
                   <Cartel arte={c.lamina} ancho>
@@ -199,20 +116,21 @@ export default function Inicio() {
             </Riel>
           </section>
 
-          {/* ---------- Estrenos ---------- */}
-          <section id="estrenos" aria-labelledby="t-estrenos" className="mt-e6">
+          {/* ---------- Tendencias ---------- */}
+          <section id="tendencias" aria-labelledby="t-tendencias" className="mt-e6">
             <CabezaSeccion
-              id="t-estrenos"
-              titulo="Estrenos de temporada"
-              enlace="Ver los 42"
+              id="t-tendencias"
+              titulo="Tendencias"
+              enlace="Ver el catálogo"
+              href="/explorar"
             />
             <Riel>
-              {SERIES.map((s) => (
+              {catalogo.map((s) => (
                 <FichaSerie
                   key={s.id}
                   href={`/serie/${s.id}`}
                   titulo={s.titulo}
-                  subtitulo={`${s.genero} · ${s.temporadaEtiqueta}`}
+                  subtitulo={`${s.genero} · ${nombreProveedor(s.proveedor)}`}
                   arte={s.lamina}
                 />
               ))}
@@ -228,8 +146,8 @@ export default function Inicio() {
             >
               {generosDisponibles().map((g) => (
                 <Link
-                  key={g.nombre}
-                  href={`/explorar?genero=${encodeURIComponent(g.nombre)}`}
+                  key={g.slug}
+                  href={`/explorar?genero=${g.slug}`}
                   className="font-display text-[clamp(1.5rem,3.4vw,2.5rem)] tracking-[-0.035em] text-sala-500 no-underline transition-colors duration-200 ease-sal hover:text-hueso"
                 >
                   {g.nombre}

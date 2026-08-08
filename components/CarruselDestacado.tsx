@@ -6,21 +6,21 @@ import Lamina from './Lamina'
 import Icono from './Icono'
 import Datos, { Clasificacion, Nota } from './Datos'
 import { CapaVineteado } from './EfectosSala'
-import type { ClaveLamina } from '@/lib/types'
+import type { Arte } from '@/lib/types'
 
 export interface Diapositiva {
   id: string
   titulo: string
   sinopsis: string
-  nota: number
-  anio: number
-  clasificacion: string
-  lamina: ClaveLamina
+  nota: number | null
+  anio: number | null
+  clasificacion?: string
+  lamina: Arte
   /** «Episodio nuevo esta noche», «Nuevo episodio el lunes»… */
   etiqueta: string
-  temporada: number
-  episodio: number
-  episodiosTotales: number
+  temporada?: number
+  episodio?: number
+  episodiosTotales?: number
   hrefVer: string
   hrefFicha: string
 }
@@ -105,11 +105,11 @@ export default function CarruselDestacado({ slides }: { slides: Diapositiva[] })
                   </h1>
 
                   <Datos>
-                    <Nota valor={s.nota} />
-                    <>{s.anio}</>
-                    <>Temporada {s.temporada}</>
-                    <>{s.episodiosTotales} episodios</>
-                    <Clasificacion valor={s.clasificacion} />
+                    {s.nota != null && <Nota valor={s.nota} />}
+                    {s.anio != null && <>{s.anio}</>}
+                    {s.temporada != null && <>Temporada {s.temporada}</>}
+                    {s.episodiosTotales != null && <>{s.episodiosTotales} episodios</>}
+                    {s.clasificacion && <Clasificacion valor={s.clasificacion} />}
                   </Datos>
 
                   <p className="mt-e3 mb-e4 max-w-[46ch] text-hueso-70">{s.sinopsis}</p>
@@ -120,7 +120,9 @@ export default function CarruselDestacado({ slides }: { slides: Diapositiva[] })
                       className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-radio border border-transparent bg-ambar px-[1.35rem] py-3 text-paso-1 font-semibold whitespace-nowrap text-ambar-tinta no-underline transition-all duration-200 ease-sal hover:bg-ambar-claro active:translate-y-px"
                     >
                       <Icono nombre="play" tam={17} />
-                      Ver T{s.temporada} · E{String(s.episodio).padStart(2, '0')}
+                      {s.temporada != null && s.episodio != null
+                        ? `Ver T${s.temporada} · E${String(s.episodio).padStart(2, '0')}`
+                        : 'Ver ahora'}
                     </Link>
 
                     <Link

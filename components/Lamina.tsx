@@ -1,10 +1,10 @@
 import type { JSX } from 'react'
-import type { ClaveLamina } from '@/lib/types'
+import type { Arte, ClaveLamina } from '@/lib/types'
 
 /* Carátulas y fotogramas.
    Son ilustraciones vectoriales planas creadas para esta maqueta,
-   no imágenes de terceros. Antes estaban duplicadas como <symbol>
-   en los tres archivos HTML; aquí se declaran una sola vez. */
+   no imágenes de terceros. Cuando el catálogo manda una URL (lo hace
+   desde que se conectó el scraper), se pinta un <img> en su lugar. */
 
 interface Dibujo {
   viewBox: string
@@ -301,12 +301,25 @@ const LAMINAS = {
 } satisfies Record<ClaveLamina, Dibujo>
 
 interface Props {
-  arte: ClaveLamina
+  arte: Arte | null | undefined
   className?: string
 }
 
 export default function Lamina({ arte, className }: Props) {
-  const { viewBox, contenido } = LAMINAS[arte]
+  if (typeof arte === 'string' && arte.startsWith('http')) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={arte}
+        alt=""
+        aria-hidden="true"
+        className={`object-cover ${className ?? 'h-full w-full'}`}
+      />
+    )
+  }
+
+  const clave = (arte ?? 'mecha') as ClaveLamina
+  const { viewBox, contenido } = LAMINAS[clave]
   return (
     <svg
       viewBox={viewBox}

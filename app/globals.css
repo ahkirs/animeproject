@@ -156,6 +156,24 @@
   }
 }
 
+/* Respiración de los esqueletos de carga: muy tenue, sin parpadeo.
+   Ajustada a prefers-reduced-motion como el resto del sitio. */
+@keyframes respirar {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .esqueleto {
+    animation: respirar 1.6s var(--ease-sal) infinite;
+  }
+}
+
 /* ============================================================
    Grano de proyección
    Una sola capa fija sobre todo el documento. El ruido se genera
@@ -172,6 +190,71 @@ body::after {
   opacity: 0.045;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   Reproductor personalizado
+   Estilos que no se pueden expresar solo con utilidades Tailwind:
+   el input range del volumen y el spinner de carga.
+   ============================================================ */
+
+.reproductor-rango {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(
+    to right,
+    var(--color-ambar) 0%,
+    var(--color-ambar) var(--valor, 100%),
+    rgb(244 239 230 / 0.2) var(--valor, 100%),
+    rgb(244 239 230 / 0.2) 100%
+  );
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.reproductor-rango::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--color-ambar);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
+}
+
+.reproductor-rango::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--color-ambar);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
+}
+
+.reproductor-rango::-moz-range-track {
+  height: 4px;
+  background: transparent;
+  border-radius: 2px;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.reproductor-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgb(244 239 230 / 0.15);
+  border-top-color: var(--color-ambar);
+  border-radius: 50%;
+  animation: girar 0.8s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

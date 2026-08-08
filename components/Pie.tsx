@@ -6,7 +6,6 @@ const COLUMNAS: { titulo: string; enlaces: { texto: string; href: string }[] }[]
     titulo: 'Catálogo',
     enlaces: [
       { texto: 'Explorar', href: '/explorar' },
-      { texto: 'Emisión', href: '/emision' },
       { texto: 'Simulcast', href: '/explorar?estado=emision' },
       { texto: 'Doblaje en español', href: '/explorar' },
     ],

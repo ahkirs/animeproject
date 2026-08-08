@@ -25,6 +25,12 @@ export function Nota({ valor }: { valor: number }) {
   )
 }
 
+/** Nota que puede no existir: se oculta en lugar de pintar un hueco. */
+export function NotaOpcional({ valor }: { valor: number | null | undefined }) {
+  if (valor == null) return null
+  return <Nota valor={valor} />
+}
+
 export function Clasificacion({ valor }: { valor: string }) {
   return (
     <span className="rounded-[2px] border border-borde-vivo px-[0.35rem] py-[0.05rem] text-xs font-bold tracking-[0.04em] text-hueso-70">

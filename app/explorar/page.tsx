@@ -7,7 +7,6 @@ import Icono from '@/components/Icono'
 import {
   ESTADOS,
   ORDENES,
-  aniosDisponibles,
   estaEnEmision,
   explorar,
   generosDisponibles,
@@ -20,12 +19,11 @@ import type { Serie } from '@/lib/types'
 export const metadata: Metadata = {
   title: 'Explorar',
   description:
-    'Recorre el catálogo completo filtrando por género, año y estado de emisión.',
+    'Recorre el catálogo completo filtrando por género y orden de emisión.',
 }
 
 type Busqueda = {
   genero?: string
-  anio?: string
   estado?: string
   orden?: string
 }
@@ -103,20 +101,22 @@ function Tarjeta({ serie }: { serie: Serie }) {
       </h3>
 
       <p className="mt-[0.15rem] flex flex-wrap items-center gap-x-[0.4rem] text-paso-0 text-hueso-45 tabular-nums">
-        <span className="font-bold text-ambar">
-          {serie.nota.toLocaleString('es-ES', { minimumFractionDigits: 1 })}
-        </span>
-        <span aria-hidden="true">·</span>
-        <span>{serie.anio}</span>
-        {episodios > 0 && (
+        {serie.nota != null && (
           <>
+            <span className="font-bold text-ambar">
+              {serie.nota.toLocaleString('es-ES', { minimumFractionDigits: 1 })}
+            </span>
             <span aria-hidden="true">·</span>
-            <span>{episodios} ep</span>
           </>
         )}
+        {serie.anio != null && (
+          <>
+            <span>{serie.anio}</span>
+            <span aria-hidden="true">·</span>
+          </>
+        )}
+        <span>{episodios > 0 ? `${episodios} ep` : serie.genero}</span>
       </p>
-
-      <p className="mt-[0.1rem] truncate text-paso-0 text-hueso-45">{serie.genero}</p>
     </Link>
   )
 }
@@ -128,30 +128,32 @@ export default async function Explorar({
 }) {
   const sp = await searchParams
 
-  // Se validan contra las listas conocidas: un parámetro inventado en la
-  // URL se ignora en lugar de romper la página.
-  const genero = generosDisponibles().some((g) => g.nombre === sp.genero)
+  const genero = generosDisponibles().some((g) => g.slug === sp.genero)
     ? sp.genero
-    : undefined
-  const anio = aniosDisponibles().includes(Number(sp.anio))
-    ? Number(sp.anio)
     : undefined
   const estado = ESTADOS.some((e) => e.id === sp.estado)
     ? (sp.estado as EstadoSerie)
     : undefined
   const orden = ORDENES.some((o) => o.id === sp.orden)
     ? (sp.orden as OrdenSerie)
-    : 'nota'
+    : 'titulo'
 
   const actual: Busqueda = {
     ...(genero && { genero }),
-    ...(anio && { anio: String(anio) }),
     ...(estado && { estado }),
-    ...(orden !== 'nota' && { orden }),
+    ...(orden !== 'titulo' && { orden }),
   }
 
-  const resultados = explorar({ genero, anio, estado, orden })
-  const hayFiltros = Boolean(genero || anio || estado)
+  const resultados = await explorar({ genero, orden })
+  const hayFiltros = Boolean(genero || estado)
+
+  const visibles = estado
+    ? resultados.filter((s) =>
+        estado === 'emision'
+          ? estaEnEmision(s)
+          : !estaEnEmision(s),
+      )
+    : resultados
 
   return (
     <>
@@ -168,7 +170,7 @@ export default async function Explorar({
         <div className="pt-e4 pb-e3">
           <h1 className="font-display text-paso-5 tracking-[-0.035em]">Explorar</h1>
           <p className="mt-e2 max-w-[60ch] text-hueso-70">
-            Todo el catálogo, filtrado por género, año y estado de emisión.
+            Todo el catálogo, filtrado por género y orden de emisión.
           </p>
         </div>
 
@@ -180,31 +182,11 @@ export default async function Explorar({
             </Pastilla>
             {generosDisponibles().map((g) => (
               <Pastilla
-                key={g.nombre}
-                href={conFiltro(actual, { genero: g.nombre })}
-                activa={genero === g.nombre}
+                key={g.slug}
+                href={conFiltro(actual, { genero: g.slug })}
+                activa={genero === g.slug}
               >
                 {g.nombre}
-                <span
-                  className={genero === g.nombre ? 'text-ambar-tinta/60' : 'text-hueso-45'}
-                >
-                  {g.cuantas}
-                </span>
-              </Pastilla>
-            ))}
-          </GrupoFiltro>
-
-          <GrupoFiltro titulo="Año">
-            <Pastilla href={conFiltro(actual, { anio: null })} activa={!anio}>
-              Cualquiera
-            </Pastilla>
-            {aniosDisponibles().map((a) => (
-              <Pastilla
-                key={a}
-                href={conFiltro(actual, { anio: String(a) })}
-                activa={anio === a}
-              >
-                {a}
               </Pastilla>
             ))}
           </GrupoFiltro>
@@ -228,7 +210,7 @@ export default async function Explorar({
             {ORDENES.map((o) => (
               <Pastilla
                 key={o.id}
-                href={conFiltro(actual, { orden: o.id === 'nota' ? null : o.id })}
+                href={conFiltro(actual, { orden: o.id === 'titulo' ? null : o.id })}
                 activa={orden === o.id}
               >
                 {o.texto}
@@ -240,9 +222,9 @@ export default async function Explorar({
         {/* ---------- Resultados ---------- */}
         <div className="mt-e4 mb-e4 flex flex-wrap items-baseline justify-between gap-e2">
           <p className="text-paso-1 text-hueso-70 tabular-nums">
-            {resultados.length === 1
+            {visibles.length === 1
               ? '1 serie'
-              : `${resultados.length} series`}
+              : `${visibles.length} series`}
             {hayFiltros && ' con estos filtros'}
           </p>
 
@@ -256,9 +238,9 @@ export default async function Explorar({
           )}
         </div>
 
-        {resultados.length > 0 ? (
+        {visibles.length > 0 ? (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-e3">
-            {resultados.map((s) => (
+            {visibles.map((s) => (
               <Tarjeta key={s.id} serie={s} />
             ))}
           </div>
@@ -266,7 +248,7 @@ export default async function Explorar({
           <div className="rounded-radio border border-dashed border-borde-vivo px-e4 py-e6 text-center">
             <p className="text-paso-3 font-semibold">Ninguna serie con estos filtros</p>
             <p className="mt-e2 text-paso-1 text-hueso-45">
-              Prueba a quitar alguno. El catálogo todavía es pequeño.
+              Prueba a quitar alguno. El catálogo se actualiza desde el proveedor.
             </p>
             <Link
               href="/explorar"

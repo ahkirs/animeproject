@@ -30,13 +30,13 @@ const ETIQUETA: Record<EstadoLista, string> = {
   abandonada: 'Abandonada',
 }
 
-function Fila({ entrada }: { entrada: EntradaLista }) {
-  const serie = obtenerSerie(entrada.serieId)
+async function Fila({ entrada }: { entrada: EntradaLista }) {
+  const serie = await obtenerSerie(entrada.serieId)
   if (!serie) return null
 
   const total = totalEpisodios(serie)
   const porcentaje = total > 0 ? Math.round((entrada.episodiosVistos / total) * 100) : 0
-  const destino = rutaReproductor(serie.id) ?? `/serie/${serie.id}`
+  const destino = (await rutaReproductor(serie.id)) ?? `/serie/${serie.id}`
 
   return (
     <div className="grid grid-cols-[72px_minmax(0,1fr)_auto] items-center gap-e3 border-b border-borde py-e3 transition-colors duration-150 ease-sal hover:bg-sala-800 max-[640px]:grid-cols-[56px_minmax(0,1fr)]">
@@ -54,7 +54,8 @@ function Fila({ entrada }: { entrada: EntradaLista }) {
         </Link>
 
         <p className="mt-[0.15rem] text-paso-0 text-hueso-45">
-          {serie.genero} · {serie.anio}
+          {serie.genero}
+          {serie.anio != null && <> · {serie.anio}</>}
         </p>
 
         <div className="mt-e2 flex items-center gap-e2">

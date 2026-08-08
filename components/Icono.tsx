@@ -117,6 +117,13 @@ const ICONOS = {
     </g>
   ),
 
+  silencio: (
+    <g stroke="currentColor" fill="none" strokeWidth={1.8} strokeLinejoin="round">
+      <path d="M4 9.5h4L13 5v14L8 14.5H4z" fill="currentColor" />
+      <path d="M17 9.5l5 5M22 9.5l-5 5" strokeLinecap="round" />
+    </g>
+  ),
+
   cc: (
     <g stroke="currentColor" fill="none" strokeWidth={1.7}>
       <rect x="2.5" y="5" width="19" height="14" rx="2.5" />
@@ -147,6 +154,48 @@ const ICONOS = {
     <g stroke="currentColor" {...TRAZO}>
       <path d="M3 19.5h.01M3 15a4.5 4.5 0 014.5 4.5M3 10.5a9 9 0 019 9" />
       <path d="M3 7.5v-2a1.5 1.5 0 011.5-1.5h15A1.5 1.5 0 0121 5.5v13a1.5 1.5 0 01-1.5 1.5H14" />
+    </g>
+  ),
+
+  pip: (
+    <g stroke="currentColor" fill="none" strokeWidth={1.8} strokeLinejoin="round">
+      <rect x="2.5" y="4.5" width="19" height="15" rx="2" />
+      <rect x="12" y="11" width="8" height="7" rx="1" fill="currentColor" stroke="none" />
+    </g>
+  ),
+
+  teclado: (
+    <g stroke="currentColor" {...TRAZO}>
+      <rect x="1.8" y="5.5" width="20.4" height="13" rx="2.2" />
+      <path d="M5.6 9.3h.01M9 9.3h.01M12.4 9.3h.01M15.8 9.3h.01M18.4 9.3h.01M5.6 12.4h.01M9 12.4h.01M12.4 12.4h.01M15.8 12.4h.01M18.4 12.4h.01M8 15.4h8" />
+    </g>
+  ),
+
+  velocidad: (
+    <g stroke="currentColor" {...TRAZO} strokeLinecap="round">
+      <path d="M12 20a8 8 0 108-8" />
+      <path d="M12 12l4.5-4" />
+      <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" />
+    </g>
+  ),
+
+  calidad: (
+    <g stroke="currentColor" {...TRAZO} strokeLinejoin="round">
+      <rect x="2.5" y="5" width="19" height="14" rx="2.5" />
+      <path d="M7 9.5v5M7 12h3.2M10.2 9.5v5" strokeLinecap="round" />
+      <path d="M14 9.5v5h1.6a2.4 2.4 0 000-5H14z" strokeLinecap="round" />
+    </g>
+  ),
+
+  cerrar: (
+    <g stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+      <path d="M6 6l12 12M18 6L6 18" />
+    </g>
+  ),
+
+  'salir-pantalla': (
+    <g stroke="currentColor" {...TRAZO} strokeWidth={1.9}>
+      <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
     </g>
   ),
 } satisfies Record<string, JSX.Element>

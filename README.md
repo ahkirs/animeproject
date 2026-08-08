@@ -1,12 +1,12 @@
 # animeproject
 
-Maqueta de una plataforma de streaming de anime, construida con Next.js, TypeScript y
-Tailwind CSS.
+Un catálogo de anime construido como **agregador**, con Next.js, TypeScript y Tailwind CSS.
+Los datos —títulos, sinopsis, carátulas, valoraciones y enlaces de reproducción— vienen de
+una API de scraper (Railway); la interfaz no tiene datos propios.
 
-La dirección de arte es **Sala Oscura**: la interfaz se comporta como una sala a oscuras y
-una parrilla de emisión, en lugar de como una cuadrícula uniforme de carátulas. Negro cálido,
-tipografía Archivo Black, filetes de 1px y un solo ámbar de proyector usado siempre como
-campo sólido, nunca como resplandor.
+La dirección de arte es **Sala Oscura**: la interfaz se comporta como una sala a oscuras.
+Negro cálido, tipografía Archivo Black, filetes de 1px y un solo ámbar de proyector usado
+siempre como campo sólido, nunca como resplandor.
 
 > **La marca todavía no está decidida.** La interfaz usa `KUROBA` como nombre provisional.
 > Vive en `components/Cabecera.tsx` y en el `title` de `app/layout.tsx`.
@@ -19,6 +19,7 @@ campo sólido, nunca como resplandor.
 | React | 19 |
 | TypeScript | estricto |
 | Tailwind CSS | 4, configuración en CSS con `@theme` |
+| Datos | API de scraper en Railway, configurable con `API_BASE` |
 
 ## Empezar
 
@@ -30,10 +31,23 @@ npm run dev        # http://localhost:3000
 Otros comandos:
 
 ```bash
-npm run build      # comprueba tipos y compila para producción
-npm run preview    # sirve la compilación de producción
+npm run build      # compila para producción
+npm run start      # sirve la compilación de producción
 npm run typecheck  # solo comprobación de tipos
 ```
+
+## Documentación
+
+La guía completa está en [`docs/`](docs/README.md):
+
+| Documento | Qué responde |
+|---|---|
+| [arquitectura.md](docs/arquitectura.md) | Stack, rutas y cómo se renderiza cada página |
+| [sistema-visual.md](docs/sistema-visual.md) | Sala Oscura: tokens, tipografía y reglas |
+| [datos.md](docs/datos.md) | La API del scraper y la costura que la une al modelo |
+| [componentes.md](docs/componentes.md) | Qué hace cada componente |
+| [decisiones.md](docs/decisiones.md) | Registro de decisiones, incluidas las descartadas |
+| [estado.md](docs/estado.md) | Qué funciona, qué es maqueta y qué falta |
 
 ## Estructura
 
@@ -42,19 +56,25 @@ app/
   layout.tsx                              raíz, fuentes y metadatos
   globals.css                             tokens del sistema visual y capa base
   page.tsx                                portada
+  explorar/page.tsx                       catálogo con filtros
   serie/[id]/page.tsx                     ficha de serie
   ver/[id]/[temporada]/[episodio]/page.tsx  reproductor
+  mi-lista/page.tsx                       lista del usuario
+  api/buscar/route.ts                     proxy de búsqueda para el cliente
 
 components/                               piezas compartidas
-  Cabecera · Pie · Boton · Datos · Riel · FichaSerie
+  Cabecera · Pie · Boton · Datos · Riel · FichaSerie · Reproductor · Esqueleto
   Icono.tsx                               familia de iconos, un solo grosor de trazo
-  Lamina.tsx                              carátulas y fotogramas en SVG
+  Lamina.tsx                              carátulas y fotogramas SVG de reserva
 
 lib/
-  types.ts                                modelo de datos del catálogo
-  catalogo.ts                             datos sintéticos; punto de entrada de la API
+  api-types.ts                            tipos crudos de la API del scraper
+  api.ts                                  cliente de la API (única red)
+  ids.ts                                  ids canónicos y deduplicación
+  types.ts                                modelo de datos propio
+  catalogo.ts                             costura: API → modelo, punto de entrada
 
-docs/                                     trabajo de dirección de arte previo
+docs/                                     documentación y dirección de arte previa
 ```
 
 ## El sistema visual
@@ -70,25 +90,20 @@ diseño y no deben tratarse como detalles prescindibles.
 
 ## Estado
 
-Es una maqueta funcional de la interfaz, todavía no una aplicación:
+El catálogo es real y funciona de punta a punta (portada, ficha, explorar, búsqueda y
+reproductor). Siguen siendo maqueta:
 
-- El reproductor no reproduce vídeo. Es la interfaz completa sobre un fotograma estático.
-- No hay backend, autenticación ni persistencia. El catálogo es un archivo de datos local.
-- Las pestañas de temporada y los controles del reproductor están maquetados y son accesibles
-  por teclado, pero no llevan lógica.
+- Las cuentas y «Mi lista» (no hay backend ni persistencia).
+- La parrilla de emisión, oculta a la espera de una fuente de horarios (AniList/MAL).
 
-Siguiente paso previsto: sustituir `lib/catalogo.ts` por una API real manteniendo las formas
-definidas en `lib/types.ts`, y después cuentas de usuario y listas.
+El reproductor usa un `<video>` propio para los servidores que se pueden resolver a URL
+directa (mp4upload, UPNShare y el HLS de Zilla, reproducido con hls.js) y un `<iframe>` del
+proveedor para el resto; no aloja ni descarga vídeo.
 
-## Contenido sintético
+## Contenido
 
-**Todo el catálogo es inventado para esta demostración.** Los títulos, sinopsis, episodios,
-nombres de estudios y personas, fechas, horarios y valoraciones se crearon para la maqueta. No
-aparece ninguna obra, marca, estudio ni persona real, y las carátulas son ilustraciones
-vectoriales propias hechas en SVG, no imágenes de terceros.
-
-Sustituye este contenido por el catálogo real antes de publicar cualquier versión de cara al
-público.
+Los títulos, sinopsis, carátulas y valoraciones vienen del scraper. Las láminas SVG de
+`components/Lamina.tsx` quedan como reserva cuando el proveedor no tiene imagen.
 
 ## docs/
 

@@ -91,31 +91,6 @@ async function conVideo<T>(
   })
 }
 
-/** Como conVideo, pero verificando solo lo que hace falta: comprueba el
- *  vídeo por tandas y se detiene en cuanto tiene las «cuantas» que se
- *  quieren enseñar. Las primeras entradas son las de la primera página,
- *  que es la más relevante, así que no comprobar el lote entero no
- *  cambia lo que se ve: solo ahorra peticiones al catálogo. */
-async function conVideoSuficientes<T>(
-  entradas: T[],
-  urlDe: (e: T) => string | null | undefined,
-  cuantas: number,
-): Promise<T[]> {
-  const conVideo: T[] = []
-  const pendientes = [...entradas]
-  while (conVideo.length < cuantas && pendientes.length > 0) {
-    const tanda = pendientes.splice(0, CONCURRENCIA_VERIFICACION * 4)
-    const conV = await urlsConVideo(
-      tanda.map(urlDe).filter((u): u is string => Boolean(u)),
-    )
-    for (const entrada of tanda) {
-      const u = urlDe(entrada)
-      if (u && conV.has(u)) conVideo.push(entrada)
-    }
-  }
-  return conVideo
-}
-
 /* ------------------------------------------------------------
    Mapeo de la respuesta a Serie
    ------------------------------------------------------------ */
@@ -282,42 +257,80 @@ export async function enlacesDeEpisodio(
    ------------------------------------------------------------ */
 
 /* De los proveedores que publica la API, solo animeav1 sirve vídeo
-   reproducible: animeflv llega con streamLinks vacíos y se descarta en
-   conVideo, y jkanime, tioanime y monoschinos devuelven las mismas URLs
-   que animeav1 con otra etiqueta. Por eso las listas se nutren solo de
-   animeav1, paginado: cada página trae veinte títulos y todas tienen
-   vídeo, así que cuantas más se mezclen más llena queda la fila. */
+   reproducible: animeflv llega con streamLinks vacíos y jkanime,
+   tioanime y monoschinos devuelven las mismas URLs que animeav1 con otra
+   etiqueta. Por eso las listas se nutren solo de animeav1, paginado:
+   cada página trae veinte títulos y todas tienen vídeo (se comprobó en
+   producción: 11 de 11). Como es fiable, no se pide el vídeo obra por
+   obra antes de enseñarla; si una obra fallara en la reproducción, se
+   vería ahí y no en el listado. */
 
-/** Cuántas páginas del catálogo de animeav1 se consultan para llenar
- *  una lista. La primera ya da veinte con vídeo; juntar varias da
- *  variedad para no repetir las mismas carátulas en toda la portada. */
-const PAGINAS_ANIMEAV1 = 3
+/** Cuántas páginas del catálogo de animeav1 se consultan para una fila
+ *  de la portada. Las filas piden entre 10 y 16 obras; con tres páginas
+ *  (60 títulos) hay de sobra y la página no tarda. */
+const PAGINAS_FILA = 3
 
-/** Une varias páginas del catálogo de animeav1. Si una falla se ignora y
- *  se sigue con el resto: nunca rompe la lista por una página caída. */
+/** Cuántas páginas del catálogo de animeav1 se piden a la vez. Con el
+ *  catálogo entero detrás (Explorar), cincuenta páginas una a una
+ *  tardarían demasiado; en tandas de diez se va en cinco viajes. */
+const TANDA_PAGINAS = 10
+
+/** Une páginas del catálogo de animeav1.
+ *
+ *  «paginas»: cuántas como máximo. Un número corta ahí; «todas» recorre
+ *  el catálogo entero hasta que una página viene vacía o falla, y las
+ *  pide en tandas paralelas para no ir de una en una.
+ *
+ *  Una página que falla se ignora y se sigue con la siguiente: nunca
+ *  rompe la lista por una página caída. */
 async function catalogarAnimeav1(
   genero?: string,
-  paginas = PAGINAS_ANIMEAV1,
+  paginas: number | 'todas' = PAGINAS_FILA,
 ): Promise<ApiResultado[]> {
-  const lotes = await Promise.all(
-    Array.from({ length: paginas }, (_, i) =>
-      apiCatalogo({
-        proveedor: 'animeav1',
-        genero,
-        pagina: i + 1,
-      }).catch(() => null),
-    ),
-  )
-  return lotes.flatMap((lote) => lote?.results ?? [])
+  const resultados: ApiResultado[] = []
+
+  // Número fijo: se piden todas a la vez, como antes.
+  if (paginas !== 'todas') {
+    const lotes = await Promise.all(
+      Array.from({ length: paginas }, (_, i) =>
+        apiCatalogo({ proveedor: 'animeav1', genero, pagina: i + 1 }).catch(
+          () => null,
+        ),
+      ),
+    )
+    return lotes.flatMap((lote) => lote?.results ?? [])
+  }
+
+  // Catálogo entero: en tandas paralelas hasta que una página venga
+  // vacía o falle. Eso marca el final sin saber cuántas páginas hay.
+  let pagina = 1
+  for (;;) {
+    const lotes = await Promise.all(
+      Array.from({ length: TANDA_PAGINAS }, (_, i) =>
+        apiCatalogo({
+          proveedor: 'animeav1',
+          genero,
+          pagina: pagina + i,
+        }).catch(() => null),
+      ),
+    )
+    let huboDatos = false
+    for (const lote of lotes) {
+      if (!lote || lote.results.length === 0) return resultados
+      resultados.push(...lote.results)
+      huboDatos = true
+    }
+    if (!huboDatos) return resultados
+    pagina += TANDA_PAGINAS
+  }
 }
 
 /** Unas cuantas obras para las portadas. La API ordena como puede; se
  *  enriquecen las primeras con la ficha para tener sinopsis y nota. */
 export async function tendencias(limite = 10): Promise<Serie[]> {
-  const dedupe = deduplicar(await catalogarAnimeav1())
-  const visibles = await conVideoSuficientes(dedupe, (d) => d.serie.url, limite)
+  const dedupe = deduplicar(await catalogarAnimeav1(undefined, PAGINAS_FILA))
 
-  const series = visibles
+  const series = dedupe
     .slice(0, limite)
     .map((d) => unirAlternativas(resultadoASerie(d.serie), d.alternativas))
 
@@ -376,7 +389,8 @@ export interface FiltrosExplorar {
   genero?: string
   orden?: OrdenSerie
   /** Cuántas se quieren como mínimo. La portada pasa el ancho de la
-   *  fila; sin valor, se muestran todas las que se verifiquen. */
+   *  fila y se queda con las primeras; sin valor, se muestra el
+   *  catálogo entero de animeav1. */
   limite?: number
 }
 
@@ -386,11 +400,10 @@ export async function explorar({
   orden = 'titulo',
   limite,
 }: FiltrosExplorar): Promise<Serie[]> {
-  const dedupe = deduplicar(await catalogarAnimeav1(genero))
-  const visibles = limite
-    ? await conVideoSuficientes(dedupe, (d) => d.serie.url, limite)
-    : await conVideo(dedupe, (d) => d.serie.url)
-  const series = visibles.map((d) =>
+  const dedupe = deduplicar(
+    await catalogarAnimeav1(genero, limite ? limite : 'todas'),
+  )
+  const series = dedupe.map((d) =>
     unirAlternativas(resultadoASerie(d.serie), d.alternativas),
   )
 

@@ -128,7 +128,9 @@ export default async function Explorar({
 }) {
   const sp = await searchParams
 
-  const genero = generosDisponibles().some((g) => g.slug === sp.genero)
+  const generos = await generosDisponibles()
+
+  const genero = generos.some((g) => g.slug === sp.genero)
     ? sp.genero
     : undefined
   const estado = ESTADOS.some((e) => e.id === sp.estado)
@@ -180,7 +182,7 @@ export default async function Explorar({
             <Pastilla href={conFiltro(actual, { genero: null })} activa={!genero}>
               Todos
             </Pastilla>
-            {generosDisponibles().map((g) => (
+            {generos.map((g) => (
               <Pastilla
                 key={g.slug}
                 href={conFiltro(actual, { genero: g.slug })}

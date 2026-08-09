@@ -174,6 +174,22 @@ export function apiCatalogo({
   )
 }
 
+export interface GeneroApi {
+  slug: string
+  name: string
+}
+
+/** Los géneros que el scraper sabe filtrar, con su slug real. Esta lista
+ *  es la que debe gobernar los filtros de Explorar: los slugs no se
+ *  inventan, se leen de aquí. */
+export function apiGeneros(): Promise<GeneroApi[]> {
+  return peticion<GeneroApi[]>(
+    '/anime/genres',
+    {},
+    { revalidate: REVALIDAR_CATALOGO },
+  )
+}
+
 /** Intenta resolver un enlace de servidor a una URL reproducible. Muchos
  *  hosts no se pueden resolver; el reproductor debe estar preparado. */
 export async function apiResolver(url: string): Promise<{ url: string }> {

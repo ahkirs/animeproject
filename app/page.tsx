@@ -71,6 +71,7 @@ function CabezaSeccion({
 export default async function Inicio() {
   const catalogo = await tendencias(10)
   const destacadas = catalogo.slice(0, 4)
+  const generos = await generosDisponibles()
 
   const diapositivas: Diapositiva[] = destacadas.map((serie) => {
     const entrada = episodioDeEntrada(serie)
@@ -165,7 +166,7 @@ export default async function Inicio() {
               aria-label="Géneros"
               className="flex flex-wrap gap-x-e4 gap-y-e2 border-t border-borde pt-e4"
             >
-              {generosDisponibles().map((g) => (
+              {generos.map((g) => (
                 <Link
                   key={g.slug}
                   href={`/explorar?genero=${g.slug}`}

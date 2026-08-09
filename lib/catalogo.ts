@@ -10,6 +10,7 @@ import {
   apiBuscar,
   apiCatalogo,
   apiEnlacesEpisodio,
+  apiGeneros,
   apiInfo,
   urlImagenProxy,
 } from './api'
@@ -403,9 +404,20 @@ export async function explorar({
   return series.sort(comparar[orden])
 }
 
-/** Géneros que acepta el scraper. El filtro lo hace la API, así que
- *  esta lista es fija (los slugs no se pueden descubrir). */
-export const GENEROS: { nombre: string; slug: string }[] = [
+/** Géneros que no se enseñan: contenido adulto o sugerente. */
+const GENEROS_ADULTOS = new Set([
+  'ecchi',
+  'harem',
+  'yaoi',
+  'yuri',
+  'shounen-ai',
+  'shoujo-ai',
+])
+
+/** Respaldo por si la API de géneros no responde: los que el scraper
+ *  filtra hoy, con sus slugs reales. Solo se usa en el primer render o
+ *  si /anime/genres falla; no debe editarse a mano. */
+const GENEROS_RESERVA: { nombre: string; slug: string }[] = [
   { nombre: 'Acción', slug: 'accion' },
   { nombre: 'Aventura', slug: 'aventura' },
   { nombre: 'Comedia', slug: 'comedia' },
@@ -413,7 +425,7 @@ export const GENEROS: { nombre: string; slug: string }[] = [
   { nombre: 'Fantasía', slug: 'fantasia' },
   { nombre: 'Ciencia ficción', slug: 'ciencia-ficcion' },
   { nombre: 'Romance', slug: 'romance' },
-  { nombre: 'Slice of life', slug: 'slice-of-life' },
+  { nombre: 'Recuentos de la Vida', slug: 'recuentos-de-la-vida' },
   { nombre: 'Misterio', slug: 'misterio' },
   { nombre: 'Terror', slug: 'terror' },
   { nombre: 'Deportes', slug: 'deportes' },
@@ -424,8 +436,20 @@ export const GENEROS: { nombre: string; slug: string }[] = [
   { nombre: 'Shounen', slug: 'shounen' },
 ]
 
-export function generosDisponibles(): { nombre: string; slug: string }[] {
-  return GENEROS
+/** Los géneros que filtra el scraper, tal y como los publica la API y
+ *  sin los de contenido adulto. Son los slugs que el catálogo entiende
+ *  de verdad, no una lista inventada. */
+export async function generosDisponibles(): Promise<
+  { nombre: string; slug: string }[]
+> {
+  try {
+    const generos = await apiGeneros()
+    return generos
+      .filter((g) => !GENEROS_ADULTOS.has(g.slug))
+      .map((g) => ({ nombre: g.name, slug: g.slug }))
+  } catch {
+    return GENEROS_RESERVA
+  }
 }
 
 /** El scraper no publica años en el catálogo. */

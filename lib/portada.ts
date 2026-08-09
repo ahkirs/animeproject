@@ -52,7 +52,7 @@ export const FILAS: DefinicionFila[] = [
   { id: 'fantasia', titulo: 'Mundos que no existen', forma: 'normal', genero: 'fantasia', href: '/explorar?genero=fantasia' },
   { id: 'comedia', titulo: 'Media hora sin pensar en nada', forma: 'normal', genero: 'comedia', href: '/explorar?genero=comedia' },
   { id: 'ciencia', titulo: 'El futuro, según los noventa', forma: 'destacada', genero: 'ciencia-ficcion', href: '/explorar?genero=ciencia-ficcion' },
-  { id: 'slice', titulo: 'No pasa nada, y está bien', forma: 'normal', genero: 'slice-of-life', href: '/explorar?genero=slice-of-life' },
+  { id: 'slice', titulo: 'No pasa nada, y está bien', forma: 'normal', genero: 'recuentos-de-la-vida', href: '/explorar?genero=recuentos-de-la-vida' },
 ]
 
 /** Carga una fila. Devuelve lista vacía si el proveedor falla: una fila

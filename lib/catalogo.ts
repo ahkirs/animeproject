@@ -90,6 +90,31 @@ async function conVideo<T>(
   })
 }
 
+/** Como conVideo, pero verificando solo lo que hace falta: comprueba el
+ *  vídeo por tandas y se detiene en cuanto tiene las «cuantas» que se
+ *  quieren enseñar. Las primeras entradas son las de la primera página,
+ *  que es la más relevante, así que no comprobar el lote entero no
+ *  cambia lo que se ve: solo ahorra peticiones al catálogo. */
+async function conVideoSuficientes<T>(
+  entradas: T[],
+  urlDe: (e: T) => string | null | undefined,
+  cuantas: number,
+): Promise<T[]> {
+  const conVideo: T[] = []
+  const pendientes = [...entradas]
+  while (conVideo.length < cuantas && pendientes.length > 0) {
+    const tanda = pendientes.splice(0, CONCURRENCIA_VERIFICACION * 4)
+    const conV = await urlsConVideo(
+      tanda.map(urlDe).filter((u): u is string => Boolean(u)),
+    )
+    for (const entrada of tanda) {
+      const u = urlDe(entrada)
+      if (u && conV.has(u)) conVideo.push(entrada)
+    }
+  }
+  return conVideo
+}
+
 /* ------------------------------------------------------------
    Mapeo de la respuesta a Serie
    ------------------------------------------------------------ */
@@ -255,18 +280,41 @@ export async function enlacesDeEpisodio(
    Catálogo y tendencias
    ------------------------------------------------------------ */
 
+/* De los proveedores que publica la API, solo animeav1 sirve vídeo
+   reproducible: animeflv llega con streamLinks vacíos y se descarta en
+   conVideo, y jkanime, tioanime y monoschinos devuelven las mismas URLs
+   que animeav1 con otra etiqueta. Por eso las listas se nutren solo de
+   animeav1, paginado: cada página trae veinte títulos y todas tienen
+   vídeo, así que cuantas más se mezclen más llena queda la fila. */
+
+/** Cuántas páginas del catálogo de animeav1 se consultan para llenar
+ *  una lista. La primera ya da veinte con vídeo; juntar varias da
+ *  variedad para no repetir las mismas carátulas en toda la portada. */
+const PAGINAS_ANIMEAV1 = 3
+
+/** Une varias páginas del catálogo de animeav1. Si una falla se ignora y
+ *  se sigue con el resto: nunca rompe la lista por una página caída. */
+async function catalogarAnimeav1(
+  genero?: string,
+  paginas = PAGINAS_ANIMEAV1,
+): Promise<ApiResultado[]> {
+  const lotes = await Promise.all(
+    Array.from({ length: paginas }, (_, i) =>
+      apiCatalogo({
+        proveedor: 'animeav1',
+        genero,
+        pagina: i + 1,
+      }).catch(() => null),
+    ),
+  )
+  return lotes.flatMap((lote) => lote?.results ?? [])
+}
+
 /** Unas cuantas obras para las portadas. La API ordena como puede; se
  *  enriquecen las primeras con la ficha para tener sinopsis y nota. */
 export async function tendencias(limite = 10): Promise<Serie[]> {
-  const [av1, flv] = await Promise.all([
-    apiCatalogo({ proveedor: 'animeav1', pagina: 1 }).catch(() => null),
-    apiCatalogo({ proveedor: 'animeflv', pagina: 1 }).catch(() => null),
-  ])
-  const dedupe = deduplicar([
-    ...(av1?.results ?? []),
-    ...(flv?.results ?? []),
-  ])
-  const visibles = await conVideo(dedupe, (d) => d.serie.url)
+  const dedupe = deduplicar(await catalogarAnimeav1())
+  const visibles = await conVideoSuficientes(dedupe, (d) => d.serie.url, limite)
 
   const series = visibles
     .slice(0, limite)
@@ -326,26 +374,21 @@ export const ESTADOS: { id: EstadoSerie; texto: string }[] = [
 export interface FiltrosExplorar {
   genero?: string
   orden?: OrdenSerie
+  /** Cuántas se quieren como mínimo. La portada pasa el ancho de la
+   *  fila; sin valor, se muestran todas las que se verifiquen. */
+  limite?: number
 }
 
 /** Páginas del catálogo de un proveedor, como listas de tarjetas. */
 export async function explorar({
   genero,
   orden = 'titulo',
+  limite,
 }: FiltrosExplorar): Promise<Serie[]> {
-  // En paralelo, no encadenados: son dos proveedores independientes y
-  // esperar al primero para pedir el segundo duplicaba el tiempo de la
-  // fila. Medido contra producción: 986 ms en serie, 365 ms así.
-  const [av1, flv] = await Promise.all([
-    apiCatalogo({ proveedor: 'animeav1', genero }).catch(() => null),
-    apiCatalogo({ proveedor: 'animeflv', genero }).catch(() => null),
-  ])
-
-  const dedupe = deduplicar([
-    ...(av1?.results ?? []),
-    ...(flv?.results ?? []),
-  ])
-  const visibles = await conVideo(dedupe, (d) => d.serie.url)
+  const dedupe = deduplicar(await catalogarAnimeav1(genero))
+  const visibles = limite
+    ? await conVideoSuficientes(dedupe, (d) => d.serie.url, limite)
+    : await conVideo(dedupe, (d) => d.serie.url)
   const series = visibles.map((d) =>
     unirAlternativas(resultadoASerie(d.serie), d.alternativas),
   )

@@ -62,7 +62,7 @@ export async function serieDeFila(fila: DefinicionFila): Promise<Serie[]> {
 
   try {
     const series = fila.genero
-      ? await explorar({ genero: fila.genero, orden: 'nota' })
+      ? await explorar({ genero: fila.genero, orden: 'nota', limite })
       : await tendencias(limite)
     return series.slice(0, limite)
   } catch {

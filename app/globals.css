@@ -1,76 +1,91 @@
 @import 'tailwindcss';
 
 /* ============================================================
-   SALA OSCURA — sistema visual
-   Los valores son los mismos que tenía theme.css en el commit
-   6ef6db2. Aquí van declarados como tokens de Tailwind 4, que
-   genera las utilidades a partir de ellos: --color-sala-900 se
-   convierte en bg-sala-900, --spacing-e4 en p-e4, y así.
+   KUROBA — sistema visual
+
+   La tesis del sistema anterior («Sala Oscura») era una sala de cine:
+   negro cálido, grano de proyección, un granate de butaca. Esta es otra:
+   una aplicación, no una sala. Gris neutro frío, un solo acento cálido, y
+   —la decisión que lo gobierna todo— **la profundidad la da la
+   luminosidad, nunca una sombra**. No hay una sola sombra de elevación en
+   el sistema. Tres escalones de gris, bordes casi invisibles, y ya.
+
+   Tailwind 4 genera las utilidades a partir de estos tokens:
+   --color-lienzo se convierte en bg-lienzo, --radius-radio en
+   rounded-radio, --spacing-bleed en px-bleed.
    ============================================================ */
 
 @theme {
-  /* Fondo: no es negro puro, es el negro cálido de una sala */
-  --color-sala-900: #0b0a09;
-  --color-sala-800: #141210;
-  --color-sala-700: #1e1b18;
-  --color-sala-600: #2b2723;
-  --color-sala-500: #3d3833;
+  /* --- Superficies ---
+     Tres escalones y uno de apoyo. El orden importa: `fondo` es el marco
+     exterior (riel y barra), `lienzo` es el panel de contenido y va un
+     punto por debajo, y `tarjeta` sube otra vez para despegarse del
+     lienzo. Esa inversión —el marco más claro que el contenido— es lo que
+     hace que el panel parezca hundido sin tener que dibujarle un borde. */
+  --color-fondo: #1c1c1e;
+  --color-lienzo: #191919;
+  --color-tarjeta: #212124;
+  --color-apagado: #2e2e33;
 
-  /* Tinta: hueso, nunca blanco puro sobre negro */
-  --color-hueso: #f4efe6;
-  --color-hueso-70: #b8b0a4;
-  --color-hueso-45: #8a8278;
+  /* --- Tinta --- */
+  --color-tinta: #fafafa;
+  --color-tinta-apagada: #a1a1aa;
+  --color-tinta-tenue: #71717a;
 
-  /* Acento único: la lámpara del proyector.
-     Campo sólido, jamás halo. */
-  --color-ambar: #ffb03a;
-  --color-ambar-claro: #ffc061;
-  --color-ambar-oscuro: #c4801f;
-  --color-ambar-tinta: #2a1c06;
+  /* --- Bordes ---
+     Blanco a muy baja opacidad, no un gris opaco. Sobre cualquiera de las
+     tres superficies da el mismo resultado óptico, y sobre una imagen se
+     comporta como un filo de luz en vez de como una caja. */
+  --color-borde: rgb(255 255 255 / 0.06);
+  --color-borde-vivo: rgb(255 255 255 / 0.14);
 
-  --color-rojo: #e0453a;
+  /* --- Acento único ---
+     Naranja cálido, y es lo único saturado del sistema. Va SIEMPRE como
+     campo con tinta oscura encima (9:1), o como texto pequeño sobre el
+     lienzo (8:1). Las dos lecturas son seguras; lo que no vale es naranja
+     sobre naranja ni un halo naranja a offset cero. */
+  --color-acento: #f59e42;
+  --color-acento-tinta: #1c1c1e;
+  --color-acento-tenue: rgb(245 158 66 / 0.12);
 
-  --color-borde: #292522;
-  --color-borde-vivo: #3f3934;
+  /* Estado. Verde solo para «en emisión», rojo solo para destructivo. */
+  --color-exito: #4ade80;
+  --color-error: #f87171;
 
-  /* Tipografía. Las variables las inyecta next/font desde
-     app/layout.tsx, que autoaloja las fuentes. */
-  --font-display: var(--fuente-display), 'Arial Black', sans-serif;
+  /* --- Tipografía ---
+     Las variables las inyecta next/font desde app/layout.tsx, que
+     autoaloja las dos familias. Karla es variable (200–800): los títulos
+     van a 800 y es lo que les da el peso sin recurrir a una display. */
+  --font-titulo: var(--fuente-titulo), system-ui, sans-serif;
   --font-texto: var(--fuente-texto), system-ui, sans-serif;
 
-  /* Escala tipográfica */
-  --text-paso-0: 0.8125rem;
-  --text-paso-1: 0.9375rem;
-  --text-paso-2: 1.0625rem;
-  --text-paso-3: 1.375rem;
-  --text-paso-4: 2rem;
-  --text-paso-5: clamp(2.5rem, 6vw, 4.5rem);
-  --text-paso-6: clamp(3.5rem, 11vw, 5.75rem);
+  /* --- Formas ---
+     6px es deliberadamente poco: a este radio una carátula sigue
+     leyéndose como una carátula. El grande es solo para superficies
+     amplias (diálogos, el marco del reproductor). */
+  --radius-radio: 6px;
+  --radius-radio-lg: 12px;
 
-  /* Ritmo espacial único */
-  --spacing-e1: 0.375rem;
-  --spacing-e2: 0.75rem;
-  --spacing-e3: 1.25rem;
-  --spacing-e4: 2rem;
-  --spacing-e5: 3.25rem;
-  --spacing-e6: 5.5rem;
-  --spacing-margen: clamp(1.25rem, 4vw, 4rem);
+  /* --- Medidas del marco ---
+     El riel y la barra miden lo mismo a propósito: la esquina superior
+     izquierda queda cuadrada y ahí se apoya la marca. */
+  --alto-barra: 3rem;
+  --ancho-riel: 3rem;
 
-  --radius-radio: 3px;
+  /* Margen lateral de página. Un solo token para que todas las secciones
+     arranquen en la misma vertical; los rieles lo usan en negativo para
+     sangrar hasta el borde. */
+  --spacing-bleed: clamp(1rem, 4vw, 4rem);
 
-  /* Sombra con desplazamiento y desenfoque real.
-     Nunca un halo de color a offset cero. */
-  --shadow-baja: 0 2px 8px rgb(0 0 0 / 0.55);
-  --shadow-alta: 0 18px 44px rgb(0 0 0 / 0.7);
-
-  --ease-sal: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Curva única. Sale rápido y frena largo: es la que hace que un panel
+     parezca que se posa en vez de que llega. */
+  --ease-sal: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 /* ============================================================
    Capa base
-   Lo que no es una utilidad: superficies del navegador que
-   también son del diseño, y los pocos restablecimientos que
-   Preflight no cubre igual que el CSS original.
+   Lo que no es una utilidad: las superficies del navegador, que
+   también son del diseño.
    ============================================================ */
 
 @layer base {
@@ -79,15 +94,18 @@
   }
 
   body {
-    background: var(--color-sala-900);
-    color: var(--color-hueso);
+    background: var(--color-fondo);
+    color: var(--color-tinta);
     font-family: var(--font-texto);
-    font-size: var(--text-paso-2);
+    font-size: 0.9375rem;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    /* El marco de la aplicación se encarga de su propio alto y de su
+       propio scroll. Aquí solo se impide la barra horizontal, que es lo
+       que aparece cuando un riel se sangra mal. */
+    overflow-x: hidden;
   }
 
-  /* Preflight pone display:block en svg pero no limita su ancho */
   svg {
     max-width: 100%;
   }
@@ -95,7 +113,7 @@
   h1,
   h2,
   h3 {
-    font-weight: 400;
+    font-family: var(--font-titulo);
     text-wrap: balance;
   }
 
@@ -108,56 +126,105 @@
   /* --- Superficies del navegador: también son del diseño --- */
 
   ::selection {
-    background: var(--color-ambar);
-    color: var(--color-ambar-tinta);
+    background: var(--color-acento);
+    color: var(--color-acento-tinta);
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-sala-500) var(--color-sala-900);
+    scrollbar-color: var(--color-apagado) transparent;
   }
 
   *::-webkit-scrollbar {
-    width: 11px;
-    height: 11px;
+    width: 10px;
+    height: 10px;
   }
 
   *::-webkit-scrollbar-track {
-    background: var(--color-sala-900);
+    background: transparent;
   }
 
   *::-webkit-scrollbar-thumb {
-    background: var(--color-sala-500);
-    border: 3px solid var(--color-sala-900);
+    background: var(--color-apagado);
+    border: 3px solid transparent;
+    background-clip: padding-box;
     border-radius: 99px;
   }
 
   *::-webkit-scrollbar-thumb:hover {
-    background: var(--color-hueso-45);
+    background: var(--color-tinta-tenue);
+    background-clip: padding-box;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-ambar);
-    outline-offset: 3px;
-    border-radius: 2px;
+    outline: 2px solid var(--color-acento);
+    outline-offset: 2px;
+    border-radius: 3px;
   }
 }
 
-/* Entrada del texto al cambiar de diapositiva en el destacado.
-   Muy corta y solo hacia arriba: el fundido lo hace la lámina. */
-@keyframes aparecer {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
+/* ============================================================
+   Utilidades propias
+   Las cuatro cosas que Tailwind no trae y que este diseño usa
+   constantemente.
+   ============================================================ */
+
+/* Carril que se desplaza sin enseñar barra. Es la base de todos los
+   rieles: la barra la sustituyen las flechas al pasar por encima. */
+.sin-barra {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sin-barra::-webkit-scrollbar {
+  display: none;
+}
+
+/* Difuminados de borde. El sistema no tapa el contenido que se sale con
+   un degradado pintado encima —eso obliga a acertar el color de fondo—,
+   sino que recorta el propio elemento con una máscara. Así funciona sobre
+   cualquiera de las tres superficies sin tocarlo. */
+.velo-derecha {
+  mask-image: linear-gradient(to right, #000 88%, transparent 100%);
+}
+
+.velo-abajo {
+  mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+}
+
+/* La máscara del héroe: se desvanece hacia abajo para que el contenido
+   entre sin costura, y hacia la izquierda en pantallas anchas para que el
+   texto se apoye sobre fondo limpio en vez de sobre la imagen. */
+.velo-heroe {
+  mask-image: linear-gradient(to bottom, #000 45%, transparent 96%);
+}
+
+@media (width >= 64rem) {
+  .velo-heroe {
+    mask-image:
+      linear-gradient(to bottom, #000 45%, transparent 96%),
+      linear-gradient(to right, transparent 0%, #000 55%);
+    mask-composite: intersect;
   }
 }
 
-/* Respiración de los esqueletos de carga: muy tenue, sin parpadeo.
-   Ajustada a prefers-reduced-motion como el resto del sitio. */
+/* Tinta apagada que se ilumina con el color de la obra al pasar por
+   encima. El color lo inyecta cada tarjeta en --color-obra
+   (ver lib/color.ts). */
+.tinte-obra {
+  transition: color 200ms var(--ease-sal);
+}
+
+.group\/ficha:hover .tinte-obra {
+  color: var(--color-obra, var(--color-tinta));
+}
+
+/* ============================================================
+   Animaciones
+   Todas van envueltas en prefers-reduced-motion salvo el spinner
+   del reproductor, que informa de un estado y no puede callarse.
+   ============================================================ */
+
 @keyframes respirar {
   0%,
   100% {
@@ -168,34 +235,59 @@
   }
 }
 
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes entrar-abajo {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .esqueleto {
     animation: respirar 1.6s var(--ease-sal) infinite;
   }
+
+  .animar-entrada {
+    animation: entrar 0.5s var(--ease-sal) both;
+  }
+
+  .animar-fundido {
+    animation: aparecer 0.4s ease-out both;
+  }
 }
 
 /* ============================================================
-   Grano de proyección
-   Una sola capa fija sobre todo el documento. El ruido se genera
-   con un filtro SVG embebido, así que no cuesta ni una petición.
-   Muy bajo a propósito: si se nota, está mal calibrado.
-   ============================================================ */
-
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0.045;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)'/%3E%3C/svg%3E");
-}
-
-/* ============================================================
-   Reproductor personalizado
-   Estilos que no se pueden expresar solo con utilidades Tailwind:
-   el input range del volumen y el spinner de carga.
+   Reproductor
+   Lo que no se puede expresar con utilidades: el control de
+   volumen y el indicador de carga.
    ============================================================ */
 
 .reproductor-rango {
@@ -205,10 +297,10 @@ body::after {
   height: 4px;
   background: linear-gradient(
     to right,
-    var(--color-ambar) 0%,
-    var(--color-ambar) var(--valor, 100%),
-    rgb(244 239 230 / 0.2) var(--valor, 100%),
-    rgb(244 239 230 / 0.2) 100%
+    var(--color-acento) 0%,
+    var(--color-acento) var(--valor, 100%),
+    rgb(255 255 255 / 0.2) var(--valor, 100%),
+    rgb(255 255 255 / 0.2) 100%
   );
   border-radius: 2px;
   outline: none;
@@ -220,20 +312,18 @@ body::after {
   appearance: none;
   width: 12px;
   height: 12px;
-  background: var(--color-ambar);
+  background: var(--color-acento);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
 }
 
 .reproductor-rango::-moz-range-thumb {
   width: 12px;
   height: 12px;
-  background: var(--color-ambar);
+  background: var(--color-acento);
   border-radius: 50%;
   cursor: pointer;
   border: none;
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
 }
 
 .reproductor-rango::-moz-range-track {
@@ -242,17 +332,11 @@ body::after {
   border-radius: 2px;
 }
 
-@keyframes girar {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .reproductor-spinner {
-  width: 48px;
-  height: 48px;
-  border: 3px solid rgb(244 239 230 / 0.15);
-  border-top-color: var(--color-ambar);
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgb(255 255 255 / 0.15);
+  border-top-color: var(--color-acento);
   border-radius: 50%;
   animation: girar 0.8s linear infinite;
 }

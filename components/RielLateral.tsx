@@ -60,8 +60,16 @@ export default function RielLateral({
       <ul className="m-0 flex list-none flex-col items-center gap-1 p-0 pt-2">
         {destinos.map((d) => {
           const activo = esActivo(d.href, ruta)
+          /* El separado ocupa todo el ancho para poder trazar la línea, y por
+             eso tiene que centrar lo suyo por su cuenta: el `items-center` del
+             ul solo centra a los que se encogen. */
           return (
-            <li key={d.href} className={d.separado ? 'mt-2 w-full pt-2' : ''}>
+            <li
+              key={d.href}
+              className={
+                d.separado ? 'mt-2 flex w-full flex-col items-center pt-2' : ''
+              }
+            >
               {d.separado && (
                 <span
                   aria-hidden="true"

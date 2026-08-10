@@ -91,9 +91,12 @@ const ICONOS = {
     </g>
   ),
 
+  /* Marcador. La caja va a 14×16 y no más estrecha: al resto de la familia
+     del riel le cabe un cuadrado de 16, y un marcador de 13 se lee como si
+     estuviera a un tamaño menor que sus vecinos. */
   marcador: (
     <g stroke="currentColor" {...TRAZO}>
-      <path d="M6.5 4.5h11a1 1 0 011 1v14l-6.5-4.4-6.5 4.4v-14a1 1 0 011-1z" />
+      <path d="M6.5 4h11a1.5 1.5 0 011.5 1.5v14.5l-7-4.8-7 4.8V5.5A1.5 1.5 0 016.5 4z" />
     </g>
   ),
 

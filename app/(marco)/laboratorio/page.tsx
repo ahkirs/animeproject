@@ -54,6 +54,8 @@ const TINTAS = [
 ]
 
 const ACENTOS = [
+  { token: 'primario', clase: 'bg-primario' },
+  { token: 'primario-tinta', clase: 'bg-primario-tinta' },
   { token: 'acento', clase: 'bg-acento' },
   { token: 'acento-tenue', clase: 'bg-acento-tenue' },
   { token: 'exito', clase: 'bg-exito' },

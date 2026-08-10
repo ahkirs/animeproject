@@ -205,7 +205,7 @@ export default function CarruselDestacado({ slides }: { slides: Diapositiva[] })
         <div className="mt-6 flex items-center gap-2">
           <Link
             href={actual.hrefVer}
-            className="inline-flex h-10 items-center gap-2 rounded-full bg-acento px-6 text-sm font-semibold text-acento-tinta no-underline transition-opacity duration-200 ease-sal hover:opacity-85"
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-primario px-6 text-sm font-semibold text-primario-tinta no-underline transition-opacity duration-200 ease-sal hover:opacity-85"
           >
             <Icono nombre="play" tam={16} />
             Ver ahora

@@ -29,10 +29,14 @@ Cuatro tokens, y el orden importa.
 
 | Token | Valor | Dónde |
 |---|---|---|
-| `fondo` | `#1c1c1e` | El marco exterior: riel lateral y barra superior |
-| `lienzo` | `#191919` | El panel de contenido |
-| `tarjeta` | `#212124` | Tarjetas, campos, píldoras, diálogos |
-| `apagado` | `#2e2e33` | Superficie tenue: pistas de progreso, separadores |
+| `fondo` | `oklch(18% 0 285.99)` | El marco exterior: riel lateral y barra superior |
+| `lienzo` | `oklch(16% 0 285.99)` | El panel de contenido |
+| `tarjeta` | `oklch(21% .006 285.885)` | Tarjetas, campos, píldoras, diálogos |
+| `apagado` | `oklch(27.4% .006 286.033)` | Superficie tenue: pistas de progreso, separadores |
+
+Van en oklch y no en hexadecimal porque la luminosidad es el primer número:
+los cuatro escalones se leen en columna (18 → 16 → 21 → 27,4) sin descifrar
+pares hexadecimales. El croma ronda cero, así que el gris es neutro de verdad.
 
 La jugada está en que **el marco es más claro que el contenido**. Esa inversión —`fondo`
 por encima de `lienzo`— es lo que hace que el panel parezca hundido sin necesidad de
@@ -41,29 +45,43 @@ su arquitectura.
 
 ## Tinta
 
-`tinta` (`#fafafa`) para lo que se lee, `tinta-apagada` (`#a1a1aa`) para lo secundario,
-`tinta-tenue` (`#71717a`) para los datos de apoyo. Los tres pasan de sobra sobre las
+`tinta` a `oklch(98.5% 0 0)` para lo que se lee, `tinta-apagada` a
+`oklch(70.5% .015 286.067)` para lo secundario, `tinta-tenue` a
+`oklch(55.2% .016 285.938)` para los datos de apoyo. Los tres pasan de sobra sobre las
 cuatro superficies.
 
 ## Bordes
 
-`borde` es blanco al 6 %, `borde-vivo` al 14 %. **Blanco a baja opacidad, no un gris
+`borde` es blanco al 3 %, `borde-vivo` al 10 %. **Blanco a baja opacidad, no un gris
 opaco**: sobre cualquiera de las cuatro superficies da el mismo resultado óptico, y sobre
 una imagen se comporta como un filo de luz en vez de como una caja. Un gris fijo se ve
 como una línea sucia en cuanto lo que hay detrás cambia.
 
-## Acento
+El 3 % es muy poco a propósito: dentro del panel las cosas se separan por luminosidad,
+no por línea. El 10 % queda para el filo del marco, que sí tiene que recortarse contra
+el contenido.
 
-Uno solo: `acento` (`#f59e42`), naranja cálido. Es lo único saturado del sistema.
+## Llamada a la acción y acento
 
-Dos lecturas, las dos seguras:
+Son dos tokens distintos y conviene no confundirlos, porque de esto depende cómo se lee
+la página entera.
 
-- **Como campo**, con `acento-tinta` (`#1c1c1e`) encima. Ronda 9:1.
-- **Como texto pequeño** sobre `lienzo` o `fondo`. Ronda 8:1.
+`primario` es `oklch(85.31% .004 286.32)` —un gris casi blanco— con `primario-tinta`
+oscura encima, y **es el botón**. Ronda 15:1. Va sin color a propósito: en una página que
+es toda carátulas, el campo claro es lo único que no compite con el arte.
 
-Lo que no vale: naranja sobre naranja, y un halo naranja a desplazamiento cero. `exito`
-(verde) es solo para «en emisión»; `error` (rojo) es solo para lo destructivo. Ninguno de
-los dos es un acento: no se usan para llamar la atención, se usan para decir un estado.
+`acento` es `oklch(70.68% .1556 64.04)`, naranja cálido, lo único saturado del sistema, y
+**no es un botón**. Se usa como tinte (`acento-tenue`), como filo, como texto pequeño y
+para lo que informa de una magnitud o un estado activo: la barra de progreso del
+reproductor, el punto de no leídas, la nota que has puesto, el filtro seleccionado.
+
+El detalle que obliga a esa separación: a 70 % de luminosidad, un campo naranja con tinta
+blanca encima se queda en 2:1. Si alguna vez hay que rellenar con acento, la tinta va
+oscura (`acento-tinta`), nunca clara.
+
+`exito` (verde) es solo para «en emisión»; `error` (rojo) es solo para lo destructivo.
+Ninguno de los dos es un acento: no se usan para llamar la atención, se usan para decir
+un estado.
 
 ## Color de la obra
 
@@ -134,9 +152,35 @@ elemento y funciona sobre cualquiera de las cuatro superficies sin tocarla.
 
 ---
 
+## Movimiento
+
+Lo que no lleva duración ni curva escritas cae en el reglaje por defecto: **150 ms** con
+`cubic-bezier(.4, 0, .2, 1)`. Es corto a propósito. A esa duración un cambio de color o
+de fondo se percibe como respuesta, no como animación, y eso es lo que se quiere en algo
+que se pulsa cien veces por sesión.
+
+Para lo que sí se anima hay dos curvas con nombre:
+
+- **`ease-sal`** — `cubic-bezier(.32, .72, 0, 1)`. Arranca de golpe y frena muy largo,
+  así que lo que entra parece que se posa en vez de que llega. Es la de los paneles: el
+  diálogo de búsqueda, el menú de usuario, los desplegables.
+- **La escala completa** (`ease-salida-cubica`, `ease-vaiven-quart`, `ease-vaiven-expo`…)
+  para cuando hace falta una salida más seca o una ida y vuelta simétrica.
+
+Tres animaciones con nombre, y las tres dicen algo:
+
+| Token | Qué hace | Por qué |
+|---|---|---|
+| `respirar` | Opacidad de 0,4 a 0,98 | El esqueleto de carga. No llega a opacidad plena en ningún fotograma, así que nunca se confunde con contenido ya cargado |
+| `animate-progreso` | Barra que cruza de lado a lado | Carga indeterminada: no se sabe cuánto queda, y una barra que avanza hasta el final mentiría |
+| `animate-paralaje` | 1,5px en vertical, ida y vuelta | El fondo del destacado. Pixel y medio es casi nada, y ese es el punto: se nota que está vivo sin que nadie sepa decir qué se movió |
+
+Todo esto se apaga entero con `prefers-reduced-motion`.
+
 ## Las reglas
 
-1. **Un solo acento.** Verde y rojo dicen estados, no llaman la atención.
+1. **El botón es claro, el acento no es un botón.** `primario` para lo que se pulsa,
+   `acento` para lo que informa. Verde y rojo dicen estados, no llaman la atención.
 2. **Ninguna sombra de elevación.** Si algo tiene que despegarse, se sube un escalón de
    luminosidad o se le pone un borde.
 3. **El color de una chapa sale de la obra**, vía `colorDeObra()`.

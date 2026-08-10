@@ -14,13 +14,15 @@ import type { ComponentProps, ReactNode } from 'react'
 const BASE =
   'inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border text-sm font-semibold no-underline transition-colors duration-200 ease-sal disabled:pointer-events-none disabled:opacity-50'
 
-/* El primario es campo de acento con tinta oscura encima: es lo único
-   saturado de la página y por eso no hace falta que sea grande.
+/* El primario es campo claro con tinta oscura encima, no naranja. En una
+   página que es toda carátulas, el gris casi blanco es lo único que no
+   compite con el arte, y a 15:1 no hay duda de dónde se pulsa. El acento
+   se reserva para tintes, filos y texto pequeño.
    El secundario es una superficie más, con su filete casi invisible.
    El fantasma no tiene campo: para lo que acompaña, no para lo que
    se quiere que se pulse. */
 const VARIANTES = {
-  primario: 'border-transparent bg-acento text-acento-tinta hover:opacity-85',
+  primario: 'border-transparent bg-primario text-primario-tinta hover:opacity-85',
   secundario: 'border-borde bg-tarjeta text-tinta hover:border-borde-vivo hover:bg-apagado',
   fantasma: 'border-transparent bg-transparent text-tinta-apagada hover:bg-tinta/10 hover:text-tinta',
 } as const

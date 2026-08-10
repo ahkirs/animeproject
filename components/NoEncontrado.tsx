@@ -37,7 +37,7 @@ export default function NoEncontrado({ conMarco }: { conMarco?: boolean }) {
       <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
         <Link
           href="/explorar"
-          className="inline-flex h-10 items-center gap-2 rounded-full bg-acento px-5 text-sm font-semibold text-acento-tinta no-underline transition-opacity duration-200 ease-sal hover:opacity-85"
+          className="inline-flex h-10 items-center gap-2 rounded-full bg-primario px-5 text-sm font-semibold text-primario-tinta no-underline transition-opacity duration-200 ease-sal hover:opacity-85"
         >
           <Icono nombre="brujula" tam={16} />
           Explorar el catálogo

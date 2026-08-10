@@ -84,7 +84,7 @@ export default async function MarcoLayout({ children }: { children: ReactNode })
         >
           <a
             href="#principal"
-            className="absolute top-2 left-2 z-100 -translate-y-[200%] rounded-radio bg-acento px-4 py-2 font-semibold text-acento-tinta no-underline transition-transform duration-200 ease-sal focus:translate-y-0"
+            className="absolute top-2 left-2 z-100 -translate-y-[200%] rounded-radio bg-primario px-4 py-2 font-semibold text-primario-tinta no-underline transition-transform duration-200 ease-sal focus:translate-y-0"
           >
             Saltar al contenido
           </a>

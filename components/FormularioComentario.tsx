@@ -106,7 +106,7 @@ export default function FormularioComentario({
           <button
             type="submit"
             disabled={pendiente || !texto.trim()}
-            className="cursor-pointer rounded-full border-0 bg-acento px-4 py-1.5 text-xs font-semibold text-acento-tinta transition-opacity duration-200 ease-sal hover:opacity-85 disabled:pointer-events-none disabled:opacity-40"
+            className="cursor-pointer rounded-full border-0 bg-primario px-4 py-1.5 text-xs font-semibold text-primario-tinta transition-opacity duration-200 ease-sal hover:opacity-85 disabled:pointer-events-none disabled:opacity-40"
           >
             {pendiente ? 'Publicando…' : parentId ? 'Responder' : 'Publicar'}
           </button>

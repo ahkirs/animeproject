@@ -21,36 +21,52 @@
      exterior (riel y barra), `lienzo` es el panel de contenido y va un
      punto por debajo, y `tarjeta` sube otra vez para despegarse del
      lienzo. Esa inversión —el marco más claro que el contenido— es lo que
-     hace que el panel parezca hundido sin tener que dibujarle un borde. */
-  --color-fondo: #1c1c1e;
-  --color-lienzo: #191919;
-  --color-tarjeta: #212124;
-  --color-apagado: #2e2e33;
+     hace que el panel parezca hundido sin tener que dibujarle un borde.
+
+     Van en oklch y no en hexadecimal porque la luminosidad es el primer
+     número: los escalones se leen de un vistazo (18 → 16 → 21 → 27,4) en
+     vez de haber que descifrar tres pares hexadecimales. El croma es casi
+     cero, así que es gris neutro de verdad y no un gris frío. */
+  --color-fondo: oklch(18% 0 285.99);
+  --color-lienzo: oklch(16% 0 285.99);
+  --color-tarjeta: oklch(21% 0.006 285.885);
+  --color-apagado: oklch(27.4% 0.006 286.033);
 
   /* --- Tinta --- */
-  --color-tinta: #fafafa;
-  --color-tinta-apagada: #a1a1aa;
-  --color-tinta-tenue: #71717a;
+  --color-tinta: oklch(98.5% 0 0);
+  --color-tinta-apagada: oklch(70.5% 0.015 286.067);
+  --color-tinta-tenue: oklch(55.2% 0.016 285.938);
 
   /* --- Bordes ---
      Blanco a muy baja opacidad, no un gris opaco. Sobre cualquiera de las
      tres superficies da el mismo resultado óptico, y sobre una imagen se
-     comporta como un filo de luz en vez de como una caja. */
-  --color-borde: rgb(255 255 255 / 0.06);
-  --color-borde-vivo: rgb(255 255 255 / 0.14);
+     comporta como un filo de luz en vez de como una caja.
 
-  /* --- Acento único ---
-     Naranja cálido, y es lo único saturado del sistema. Va SIEMPRE como
-     campo con tinta oscura encima (9:1), o como texto pequeño sobre el
-     lienzo (8:1). Las dos lecturas son seguras; lo que no vale es naranja
-     sobre naranja ni un halo naranja a offset cero. */
-  --color-acento: #f59e42;
-  --color-acento-tinta: #1c1c1e;
-  --color-acento-tenue: rgb(245 158 66 / 0.12);
+     El general va al 3 % y el del marco al 10 %: el riel y la barra se
+     recortan contra el panel con una línea que sí se ve, y todo lo de
+     dentro se separa con uno que apenas está. */
+  --color-borde: oklch(100% 0 0 / 0.03);
+  --color-borde-vivo: oklch(100% 0 0 / 0.1);
+
+  /* --- Llamada a la acción ---
+     Un gris casi blanco con tinta oscura encima. Es el botón principal, y
+     va sin color a propósito: en una página que es toda carátulas, el
+     campo claro es lo único que no compite con el arte. Ronda 15:1. */
+  --color-primario: oklch(85.31% 0.004 286.32);
+  --color-primario-tinta: oklch(21% 0.006 285.885);
+
+  /* --- Acento ---
+     Naranja cálido, lo único saturado del sistema, y NO es el botón: se usa
+     como tinte, como filo y como texto pequeño. A 70 % de luminosidad, un
+     campo naranja con tinta blanca encima se queda en 2:1, así que cuando
+     haga falta rellenar con él, la tinta va oscura. */
+  --color-acento: oklch(70.68% 0.1556 64.04);
+  --color-acento-tinta: oklch(18% 0 285.99);
+  --color-acento-tenue: oklch(70.68% 0.1556 64.04 / 0.12);
 
   /* Estado. Verde solo para «en emisión», rojo solo para destructivo. */
-  --color-exito: #4ade80;
-  --color-error: #f87171;
+  --color-exito: oklch(79.2% 0.209 151.711);
+  --color-error: oklch(70.4% 0.191 22.216);
 
   /* --- Tipografía ---
      Las variables las inyecta next/font desde app/layout.tsx, que
@@ -77,9 +93,54 @@
      sangrar hasta el borde. */
   --spacing-bleed: clamp(1rem, 4vw, 4rem);
 
-  /* Curva única. Sale rápido y frena largo: es la que hace que un panel
-     parezca que se posa en vez de que llega. */
-  --ease-sal: cubic-bezier(0.23, 1, 0.32, 1);
+  /* --- Movimiento ---
+     Lo que Tailwind aplica cuando una transición no dice ni cuánto ni cómo.
+     150 ms es corto a propósito: a esa duración el cambio se percibe como
+     respuesta y no como animación, que es lo que se quiere en algo que se
+     pulsa cien veces por sesión. */
+  --default-transition-duration: 0.15s;
+  --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* La curva de los paneles: arranca de golpe y frena muy largo, así que lo
+     que entra parece que se posa en vez de llegar. Es la que llevan el
+     diálogo de búsqueda, los desplegables y el menú de usuario. */
+  --ease-sal: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* La escala de curvas al completo, por si hace falta una salida más seca
+     (quart, expo) o una ida y vuelta simétrica (circ). Tailwind las expone
+     como ease-salida-cubica, ease-vaiven-quart y demás. */
+  --ease-salida-cubica: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --ease-salida-circ: cubic-bezier(0.075, 0.82, 0.165, 1);
+  --ease-vaiven-cubico: cubic-bezier(0.645, 0.045, 0.355, 1);
+  --ease-vaiven-quart: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-vaiven-quint: cubic-bezier(0.86, 0, 0.07, 1);
+  --ease-vaiven-circ: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+  --ease-vaiven-expo: cubic-bezier(1, 0, 0, 1);
+
+  /* Fotogramas. `progreso` es la barra indeterminada de carga, `respiro` el
+     pulso de opacidad de un esqueleto —de 0,4 a 0,98, no a 1, para que no
+     llegue a parecer contenido cargado— y `paralaje` el desplazamiento de
+     pixel y medio del fondo del destacado. */
+  --animate-progreso: progreso 1.4s var(--ease-vaiven-cubico) infinite;
+  --animate-paralaje: paralaje 7s var(--ease-vaiven-cubico) infinite alternate;
+}
+
+@keyframes progreso {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes paralaje {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-1.5px);
+  }
 }
 
 /* ============================================================
@@ -225,13 +286,15 @@
    del reproductor, que informa de un estado y no puede callarse.
    ============================================================ */
 
+/* De 0,4 a 0,98, no de 1 a 0,55: el esqueleto nunca llega a opacidad plena,
+   así que en ningún fotograma se puede confundir con contenido ya cargado. */
 @keyframes respirar {
   0%,
   100% {
-    opacity: 1;
+    opacity: 0.4;
   }
   50% {
-    opacity: 0.55;
+    opacity: 0.98;
   }
 }
 

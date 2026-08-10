@@ -64,7 +64,7 @@ function TarjetaEpisodio({
           aria-hidden="true"
           className="absolute inset-0 grid place-items-center bg-fondo/50 opacity-0 transition-opacity duration-200 ease-sal group-hover:opacity-100"
         >
-          <span className="grid size-9 place-items-center rounded-full bg-acento text-acento-tinta transition-transform duration-200 ease-sal group-hover:scale-110">
+          <span className="grid size-9 place-items-center rounded-full bg-primario text-primario-tinta transition-transform duration-200 ease-sal group-hover:scale-110">
             <Icono nombre="play" tam={16} />
           </span>
         </span>

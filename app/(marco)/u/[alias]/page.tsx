@@ -116,7 +116,7 @@ export default async function PerfilPublicoPagina({
           </h2>
 
           {favs.length > 0 ? (
-            <ul className="grid list-none grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-x-4 gap-y-6 p-0">
+            <ul className="grid list-none grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-x-2 gap-y-6 p-0">
               {favs.map((f) => (
                 <li key={f.animeId}>
                   <Link
@@ -130,13 +130,9 @@ export default async function PerfilPublicoPagina({
                           src={f.imagen}
                           alt=""
                           loading="lazy"
-                          className="size-full object-cover"
+                          className="size-full object-cover transition-all duration-200 ease-out group-hover:opacity-75 group-hover:brightness-[0.7]"
                         />
                       )}
-                      <span
-                        aria-hidden="true"
-                        className="absolute inset-0 bg-black/0 transition-colors duration-200 ease-sal group-hover:bg-black/25"
-                      />
                     </span>
                     <b className="mt-2 block truncate text-sm font-semibold text-tinta">
                       {f.title}

@@ -69,7 +69,7 @@ function idDeVideo(trailer: string | null | undefined): string | null {
 /** Una píldora de las que van bajo el título. */
 function Pastilla({ children }: { children: ReactNode }) {
   return (
-    <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs backdrop-blur-sm">
+    <span className="rounded-full border border-primario/15 bg-primario/10 px-3 py-1 text-xs backdrop-blur-sm">
       {children}
     </span>
   )

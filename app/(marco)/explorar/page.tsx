@@ -194,7 +194,7 @@ export default async function Explorar({
       </div>
 
       {visibles.length > 0 ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-x-4 gap-y-6 px-bleed py-5 lg:grid-cols-[repeat(auto-fill,minmax(170px,1fr))]">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-x-2 gap-y-6 px-bleed py-5 lg:grid-cols-[repeat(auto-fill,minmax(180px,1fr))]">
           {visibles.map((s) => (
             <FichaSerie
               key={s.id}

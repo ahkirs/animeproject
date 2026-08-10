@@ -85,7 +85,7 @@ export default function RielLateral({
                     activo ? 'bg-tinta/10 text-tinta' : 'text-tinta-apagada'
                   }`}
                 >
-                  <Icono nombre={d.icono} tam={19} />
+                  <Icono nombre={d.icono} tam={20} />
                 </Link>
               </Consejo>
             </li>

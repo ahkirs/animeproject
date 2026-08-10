@@ -127,8 +127,8 @@ Toda cifra lleva `tabular-nums`. Sin eso, un contador que sube da saltos de anch
 
 ## Formas
 
-`rounded-radio` son 6px, `rounded-radio-lg` 12px. El pequeño es deliberadamente poco: a
-ese radio una carátula se sigue leyendo como una carátula.
+`rounded-radio` son `0.4rem` (6,4px), `rounded-radio-lg` 12px. El pequeño es
+deliberadamente poco: a ese radio una carátula se sigue leyendo como una carátula.
 
 **Los botones son la excepción**: van redondeados del todo. En una página cubierta de
 rectángulos —carátulas, tarjetas, píldoras— la única forma que hay que distinguir de un

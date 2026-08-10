@@ -40,7 +40,7 @@ function EsqueletoFila() {
         {Array.from({ length: 8 }, (_, i) => (
           <div
             key={i}
-            className="esqueleto aspect-2/3 w-[140px] shrink-0 rounded-radio bg-tarjeta sm:w-[160px] lg:w-[180px]"
+            className="esqueleto h-[200px] w-[140px] shrink-0 rounded-radio bg-tarjeta xs:h-[220px] xs:w-[160px] lg:h-[260px] lg:w-[180px]"
           />
         ))}
       </div>

@@ -155,19 +155,17 @@ function Carta({
     // levantado por encima.
     <li className="group relative">
       <span className="relative block aspect-2/3 overflow-hidden rounded-radio bg-tarjeta">
-        {guardada.imagen && (
+        {guardada.imagen ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={guardada.imagen}
             alt=""
             loading="lazy"
-            className="size-full object-cover"
+            className="size-full object-cover transition-all duration-200 ease-out group-hover:opacity-75 group-hover:brightness-[0.7]"
           />
+        ) : (
+          <span className="block size-full bg-tarjeta" />
         )}
-        <span
-          aria-hidden="true"
-          className="absolute inset-0 bg-black/0 transition-colors duration-200 ease-sal group-hover:bg-black/25"
-        />
       </span>
 
       <b className="mt-2 block truncate text-sm font-semibold text-tinta">
@@ -206,7 +204,7 @@ function Conjunto({
   if (entradas.length === 0) return <Vacio {...vacio} />
 
   return (
-    <ul className="grid list-none grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-x-4 gap-y-6 p-0">
+    <ul className="grid list-none grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-x-2 gap-y-6 p-0">
       {entradas.map((e) => (
         <Carta key={e.animeId} guardada={e} lista={lista} />
       ))}

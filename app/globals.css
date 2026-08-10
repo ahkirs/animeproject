@@ -83,11 +83,16 @@
   --font-texto: var(--fuente-texto), system-ui, sans-serif;
 
   /* --- Formas ---
-     6px es deliberadamente poco: a este radio una carátula sigue
-     leyéndose como una carátula. El grande es solo para superficies
-     amplias (diálogos, el marco del reproductor). */
-  --radius-radio: 6px;
+     0,4rem son 6,4px, el valor de la referencia. Es deliberadamente poco:
+     a este radio una carátula sigue leyéndose como una carátula. El grande
+     es solo para superficies amplias (diálogos, el marco del reproductor). */
+  --radius-radio: 0.4rem;
   --radius-radio-lg: 12px;
+
+  /* Breakpoint intermedio de la referencia: la tarjeta de catálogo
+     crece de 140 a 160px antes del salto grande a 180px. Tailwind 4 lo
+     genera como utilidad `xs:`. */
+  --breakpoint-xs: 30rem;
 
   /* --- Medidas del marco ---
      El riel y la barra miden lo mismo a propósito: la esquina superior
@@ -301,6 +306,18 @@
 
 .group\/ficha:hover .tinte-obra {
   color: var(--color-obra, var(--color-tinta));
+}
+
+/* Píldora de etiqueta que al pasar por encima tiñe su fondo con el color
+   de la obra, como hace la referencia (color-mix al 10%). Sin CSS que la
+   apoya, la píldora queda con su color neutro y nunca apunta a nada: es
+   el mismo gesto que .tinte-obra, pero en campo en vez de en texto. */
+.pill-obra {
+  transition: background-color 200ms var(--ease-sal);
+}
+
+.group\/ficha:hover .pill-obra {
+  background-color: color-mix(in srgb, var(--color-obra, var(--color-tinta)) 10%, transparent);
 }
 
 /* ============================================================

@@ -33,10 +33,9 @@ function FichaNumerada({ serie, puesto }: { serie: Serie; puesto: number }) {
         </span>
 
         <div className="relative aspect-2/3 min-w-0 flex-1 overflow-hidden rounded-radio bg-tarjeta">
-          <Lamina arte={serie.lamina} />
-          <span
-            aria-hidden="true"
-            className="absolute inset-0 bg-black/0 transition-colors duration-200 ease-sal group-hover/ficha:bg-black/25"
+          <Lamina
+            arte={serie.lamina}
+            className="size-full object-cover transition-all duration-200 ease-out group-hover/ficha:opacity-75 group-hover/ficha:brightness-[0.7]"
           />
         </div>
       </div>

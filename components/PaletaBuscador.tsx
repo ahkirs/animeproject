@@ -149,7 +149,7 @@ export default function PaletaBuscador() {
         ref={disparador}
         type="button"
         onClick={() => setAbierta(true)}
-        className="group flex h-8 w-full max-w-sm min-w-0 cursor-pointer items-center justify-between gap-1 rounded-radio border border-borde bg-lienzo px-1 py-1 text-tinta-apagada transition-colors duration-200 ease-sal hover:border-borde-vivo hover:text-tinta"
+        className="group flex h-8 w-full max-w-sm min-w-0 cursor-pointer items-center justify-between gap-1 rounded-radio border border-buscador-borde bg-buscador px-1 py-1 text-tinta-apagada transition-colors duration-200 ease-sal hover:border-borde-vivo hover:text-tinta"
       >
         <span className="ml-1 flex min-w-0 items-center gap-2">
           <Icono nombre="buscar" tam={14} className="shrink-0" />

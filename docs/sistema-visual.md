@@ -33,13 +33,16 @@ Cuatro tokens, y el orden importa.
 | `lienzo` | `oklch(16% 0 285.99)` | El panel de contenido |
 | `tarjeta` | `oklch(21% .006 285.885)` | Tarjetas, campos, píldoras, diálogos |
 | `apagado` | `oklch(27.4% .006 286.033)` | Superficie tenue: pistas de progreso, separadores |
-| `barra` | `#121212` | La barra superior, solo cuando coge campo al bajar |
-| `barra-borde` | `#2e2e2e` | Su filete inferior |
+| `buscador` | `#121212` | El campo del buscador de la barra |
+| `buscador-borde` | `#2e2e2e` | Su filete |
 
-La barra es el único sitio con un gris opaco en vez de blanco a baja opacidad, y es a
-propósito: por debajo de ella pasa lo que traiga la página —una carátula, un fondo
-claro—, así que un borde al 3 % desaparecería justo cuando hace falta. Va también más
-oscura que el marco, para separarse de él en vez de fundirse.
+El buscador es el único control con un gris opaco en vez de blanco a baja opacidad, y es
+a propósito: vive centrado en la barra, que encima de un destacado es transparente, así
+que por detrás le pasa lo que traiga la página. Un borde al 3 % se lo tragaría una
+carátula clara justo cuando hace falta distinguir dónde se escribe.
+
+Ojo con confundirlo con `lienzo`, que es `#0d0d0d` en sRGB: son dos grises muy próximos
+y el campo tiene que quedar por encima del panel, no fundido con él.
 
 Van en oklch y no en hexadecimal porque la luminosidad es el primer número:
 los cuatro escalones se leen en columna (18 → 16 → 21 → 27,4) sin descifrar

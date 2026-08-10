@@ -39,8 +39,14 @@
   --color-buscador: #121212;
   --color-buscador-borde: #2e2e2e;
 
-  /* --- Tinta --- */
+  /* --- Tinta ---
+     El hallazgo que más cambia la página: el cuerpo del texto NO va en
+     blanco. La referencia reserva el 98,5 % para títulos y para lo que
+     enfatiza, y todo lo demás lo escribe a 85,3 %, que es lo que pone en el
+     `color` del body. Blanco puro sobre un fondo casi negro es un contraste
+     que cansa a los dos párrafos. */
   --color-tinta: oklch(98.5% 0 0);
+  --color-tinta-cuerpo: oklch(85.31% 0.0001 271.152);
   --color-tinta-apagada: oklch(70.5% 0.015 286.067);
   --color-tinta-tenue: oklch(55.2% 0.016 285.938);
 
@@ -54,6 +60,10 @@
      dentro se separa con uno que apenas está. */
   --color-borde: oklch(100% 0 0 / 0.03);
   --color-borde-vivo: oklch(100% 0 0 / 0.1);
+
+  /* El de los campos va mucho más alto, al 15 %. Un campo tiene que decir
+     dónde se escribe antes de que nadie lo toque, y al 3 % no lo dice. */
+  --color-campo-borde: oklch(100% 0 0 / 0.15);
 
   /* --- Llamada a la acción ---
      Un gris casi blanco con tinta oscura encima. Es el botón principal, y
@@ -92,7 +102,7 @@
   /* Breakpoint intermedio de la referencia: la tarjeta de catálogo
      crece de 140 a 160px antes del salto grande a 180px. Tailwind 4 lo
      genera como utilidad `xs:`. */
-  --breakpoint-xs: 30rem;
+  --breakpoint-xs: 425px;
 
   /* --- Medidas del marco ---
      El riel y la barra miden lo mismo a propósito: la esquina superior
@@ -121,7 +131,11 @@
   /* La escala de curvas al completo, por si hace falta una salida más seca
      (quart, expo) o una ida y vuelta simétrica (circ). Tailwind las expone
      como ease-salida-cubica, ease-vaiven-quart y demás. */
+  --ease-salida-cuad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ease-salida-cubica: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --ease-salida-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --ease-salida-quint: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-salida-expo: cubic-bezier(0.19, 1, 0.22, 1);
   --ease-salida-circ: cubic-bezier(0.075, 0.82, 0.165, 1);
   --ease-vaiven-cubico: cubic-bezier(0.645, 0.045, 0.355, 1);
   --ease-vaiven-quart: cubic-bezier(0.77, 0, 0.175, 1);
@@ -199,7 +213,9 @@
 
   body {
     background: var(--color-fondo);
-    color: var(--color-tinta);
+    /* 85,3 %, no blanco. `text-tinta` sigue disponible para lo que tenga que
+       destacar sobre este cuerpo; si todo va en blanco, nada destaca. */
+    color: var(--color-tinta-cuerpo);
     font-family: var(--font-texto);
     font-size: 0.9375rem;
     line-height: 1.6;
@@ -241,9 +257,12 @@
 
   /* --- Superficies del navegador: también son del diseño --- */
 
+  /* La selección va en primario y no en acento. Es coherente con el reparto:
+     el naranja informa de algo, y seleccionar texto no informa de nada —es un
+     gesto tuyo, no un estado de la página. */
   ::selection {
-    background: var(--color-acento);
-    color: var(--color-acento-tinta);
+    background: var(--color-primario);
+    color: var(--color-primario-tinta);
   }
 
   * {
@@ -317,6 +336,65 @@
    entradas de menú, enlaces de una lista. */
 .realce-texto:hover {
   color: var(--color-acento);
+}
+
+/* Tarjeta que se puede pulsar entera: la de un comentario, la de una nota.
+   Tres duraciones distintas a propósito —la deformación en 120 ms, el filo y
+   el borde en 180— para que al pulsar la respuesta llegue antes que el
+   adorno.
+
+   El `box-shadow` es un anillo a desplazamiento cero, no una sombra de
+   elevación: no despega la tarjeta del plano, le engorda el filo. La regla
+   de «ninguna sombra» sigue en pie. */
+.tarjeta-interactiva {
+  transition:
+    transform 120ms var(--ease-salida-cubica),
+    box-shadow 180ms var(--ease-salida-cubica),
+    border-color 180ms var(--ease-salida-cubica);
+  will-change: transform;
+}
+
+.tarjeta-interactiva:hover {
+  border-color: color-mix(in oklab, var(--color-acento) 28%, var(--color-borde));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-acento) 45%, transparent);
+}
+
+.tarjeta-interactiva:active {
+  transform: scale(0.99);
+}
+
+.tarjeta-interactiva:focus-visible {
+  outline: 1px solid color-mix(in oklab, var(--color-acento) 45%, transparent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta-interactiva {
+    transition: none;
+    will-change: auto;
+  }
+
+  .tarjeta-interactiva:active {
+    transform: none;
+  }
+}
+
+/* Filo interior de un pelo sobre una imagen. Va por dentro y no como borde
+   porque un borde de verdad ocuparía sitio y desplazaría la imagen; esto se
+   apoya en el canto sin mover nada. Sirve para que una carátula clara no
+   termine en un corte a cuchillo contra el panel. */
+.filo-interior {
+  position: relative;
+}
+
+.filo-interior::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px oklch(100% 0 0 / 0.1);
 }
 
 /* Sinopsis que se destapa al pasar por encima. La máscara mide cuatro veces

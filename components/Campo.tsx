@@ -22,7 +22,7 @@ export default function Campo({ etiqueta, ayuda, error, id, ...props }: Props) {
         aria-describedby={apoyoId}
         aria-invalid={error ? true : undefined}
         className={`w-full rounded-radio border bg-fondo px-3 py-2.5 text-base text-tinta transition-colors duration-200 ease-sal outline-none placeholder:text-tinta-tenue focus:border-acento ${
-          error ? 'border-error' : 'border-borde'
+          error ? 'border-error' : 'border-campo-borde'
         }`}
         {...props}
       />

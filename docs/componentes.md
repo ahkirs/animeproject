@@ -1,84 +1,121 @@
 # Componentes
 
-Los componentes en `components/`. Los que llevan **cliente** envían JavaScript al
-navegador; el resto se renderiza en el servidor.
+Los de `components/`. Los marcados **cliente** envían JavaScript al navegador; el resto se
+renderiza en el servidor.
 
-## Estructura de página
+Para verlos pintados: **`/laboratorio`**.
 
-**`Cabecera.tsx`** — Cabecera pegajosa con degradado hacia el fondo, navegación (Inicio,
-Explorar), buscador y avatar que lleva a la lista. Recibe `activa` para marcar la sección
-actual. Exporta también `Marca`, el logotipo, reutilizado en el pie y en el reproductor.
+## El marco
 
-**`Pie.tsx`** — Tres columnas de enlaces y el aviso legal. El aviso se puede cambiar con la
-prop `aviso`, que usa el reproductor para explicar que incrusta el vídeo del proveedor.
+Lo monta `app/(marco)/layout.tsx` una sola vez, y todas las páginas del grupo van dentro.
+La consecuencia que hay que tener presente todo el rato: **la ventana no se desplaza**. El
+contenedor exterior mide el alto de la pantalla y recorta; el que se desplaza es `#panel`.
+Cualquier cosa que lea la posición del scroll tiene que mirar ese elemento, no `window`.
 
-**`MarcoCuenta.tsx`** — Marco compartido por `/acceder` y `/registro`: lámina panorámica
-apagada al fondo y formulario centrado. Se sale del esqueleto de catálogo a propósito,
-porque son pantallas de una sola tarea.
+**`RielLateral.tsx`** — *cliente*. La columna de 48px de la izquierda. Cliente solo por
+`usePathname`, para marcar el destino activo; la sesión se la pasa el layout ya resuelta.
+Desaparece por debajo de 768px. **No puede llevar `overflow: hidden`**: las etiquetas
+emergentes salen fuera de sus 48px.
 
-## Piezas de catálogo
+**`BarraSuperior.tsx`** — *cliente*. Tres zonas de ancho fijo para que el buscador quede
+centrado respecto a la ventana y no respecto a lo que le dejen los vecinos. Lleva los dos
+cheurones de historial y la campana con su punto de no leídas.
 
-**`Lamina.tsx`** — Carátulas y fotogramas SVG de reserva: seis carteles verticales, tres
-panorámicas y cuatro miniaturas de episodio. Antes eran el único arte del proyecto; ahora
-son el respaldo cuando el proveedor no tiene imagen.
+**`BarraInferior.tsx`** — *cliente*. La navegación en móvil. Recibe la misma lista de
+destinos que el riel: dos navegaciones que no coincidan son dos navegaciones que mantener.
 
-**`FichaSerie.tsx`** — Tarjeta de serie para los rieles. Exporta también `Cartel`, el marco
-de una carátula, que acepta proporción 2:3 o panorámica.
+**`PaletaBuscador.tsx`** — *cliente*. El buscador, ahora como diálogo con `Ctrl/⌘+K` y `/`.
+Conserva la lógica del campo anterior: espera de 300 ms, `/api/buscar`, flechas y Enter.
 
-**`Riel.tsx`** — Carrusel horizontal con anclaje de desplazamiento. Sangra hasta el borde
-de la ventana para que las tarjetas puedan salirse del margen al desplazarse.
+**`Consejo.tsx`** — Etiqueta emergente en CSS puro, sin estado ni portal. No sustituye al
+`aria-label` del elemento que envuelve: por eso va `aria-hidden`.
 
-**`Datos.tsx`** — La línea de metadatos separada por puntos: nota, año, episodios,
-clasificación. Exporta `Nota`, `NotaOpcional` (oculta si no hay valor) y `Clasificacion`
-como piezas sueltas.
+**`Marca.tsx`** — El logotipo. Con `soloIcono` cabe en el riel.
 
-**`Esqueleto.tsx`** — Esqueletos de carga de las rutas con datos: `EsqueletoPortada`,
-`EsqueletoExplorar`, `EsqueletoFicha` y `EsqueletoReproductor`. Bloques con la clase
-`esqueleto`, que respira con la animación `respirar` y se apaga bajo
-`prefers-reduced-motion`.
+**`MenuUsuario.tsx`** — *cliente*. El avatar y su menú, con teclado resuelto (Escape,
+flechas, Inicio/Fin). `direccion` decide hacia dónde se despliega: al pie del riel sale
+hacia arriba y a la derecha.
 
-## Controles
+**`Pie.tsx`** — Va al final del panel con scroll, así que sale en todas las páginas del
+grupo sin que ninguna lo monte.
 
-**`Boton.tsx`** — Dos variantes, primario ámbar y fantasma. Exporta `Boton` para acciones,
-`BotonEnlace` para navegación y `BotonIcono` para los circulares de 44px.
+**`MarcoCuenta.tsx`** — Marco de `/acceder` y `/registro`, que quedan **fuera** del grupo:
+a sangre y sin navegación, porque en ellas no hay nada más que hacer que entrar.
 
-**`Campo.tsx`** — Campo de formulario con etiqueta y texto de ayuda opcional, conectado por
-`aria-describedby`.
+## Catálogo
 
-**`Icono.tsx`** — Los veinte iconos del sistema, dibujados con un solo grosor de trazo. Se
-usan como `<Icono nombre="play" />`. El tipo `NombreIcono` hace que un nombre inventado sea
-un error de compilación, no un hueco en blanco.
+**`Lamina.tsx`** — Carátulas y fotogramas SVG de reserva. Si `arte` empieza por `http` pinta
+la imagen; si no, una de las trece láminas dibujadas.
 
-## Interactivos
+**`FichaSerie.tsx`** — La tarjeta de una obra. **Ancho fijo** (140 / 160 / 180px), no
+fluido: en un riel, las columnas elásticas hacen que cada fila tenga tarjetas de un tamaño
+distinto según cuántas quepan. Exporta también `Cartel`, el marco suelto de una carátula.
 
-**`Buscador.tsx`** — *cliente*. Resultados mientras se escribe, hasta seis, con carátula,
-motivo de la coincidencia y nota. Se maneja con flechas, Enter y Escape, cierra al pulsar
-fuera, y sigue el patrón de combobox accesible con `aria-activedescendant`. Pide resultados
-a `/api/buscar`, el proxy que evita el CORS del scraper.
+**`Riel.tsx`** — *cliente*. El carril horizontal. Cliente por las flechas, que existen
+porque la barra de desplazamiento está oculta; se esconden solas cuando no queda nada hacia
+ese lado, así que nunca hay un botón que no haga nada.
 
-**`CarruselDestacado.tsx`** — *cliente*. El destacado de la portada, con las tendencias del
-catálogo. Avanza solo cada siete segundos, **se detiene al pasar el ratón o al recibir el
-foco** —si no, es imposible leerlo o pulsar un botón—, responde a las flechas del teclado y
-se desactiva del todo bajo `prefers-reduced-motion`.
+**`FilaPortada.tsx`** — Una fila entera. La forma la decide `lib/portada.ts`, no el
+componente. Incluye la variante numerada.
 
-**`Reproductor.tsx`** — *cliente*. El reproductor de `/ver/...`. Recibe los enlaces del
-episodio y agrupa los servidores por variante de audio (subtitulada / doblada); los hosts
-que se resuelven a URL directa se reproducen en un `<video>` propio (mp4 nativo, HLS con
-`VideoConHls`) y el resto se incrusta en un `<iframe>`. Sin servidores, muestra un fallback
-con enlace al proveedor.
+**`CarruselDestacado.tsx`** — *cliente*. El destacado. Carga el tráiler con retraso y solo
+si la obra lo tiene: primero entra la imagen, que es instantánea. Con
+`prefers-reduced-motion` no se carga nunca y no hay avance automático.
 
-**`VideoConHls.tsx`** — *cliente*. `<video>` con soporte HLS automático: para `.m3u8` usa
-hls.js en Chrome/Firefox y el HLS nativo en Safari; para el resto de archivos, reproducción
-nativa. Acepta `esHls` explícito para los m3u8 servidos por nuestro proxy (cuya URL no
-termina en `.m3u8`).
+**`TituloSeccion.tsx`**, **`FranjaPromo.tsx`**, **`Datos.tsx`**, **`Esqueleto.tsx`** — Cabeza
+de sección, franja que corta la pila de filas, línea de metadatos y esqueletos de carga.
 
-**`PreferenciaHora.tsx`** — *cliente*. Proveedor de contexto con la zona horaria elegida,
-guardada en el navegador, y el selector de dos opciones. Lo usa la parrilla, que hoy está
-oculta.
+## Interacción con la cuenta
 
-**`HoraEmision.tsx`** — *cliente*. Pinta una hora según la preferencia. Exporta también
-`CuentaAtras`. Al servicio de la parrilla, hoy oculta.
+Todos son *cliente* y todos envuelven una acción de servidor que devuelve `{ok, error}`.
 
-**`EfectosSala.tsx`** — Las capas de atmósfera: `CapaGrano` y `CapaVineteado`, más
-`SiluetaMarca`. El componente por defecto es la demostración interactiva del laboratorio y
-sí es de cliente; las capas sueltas no.
+**`BotonFavorito.tsx`** — Guarda en favoritos o en «ver después» según el icono que reciba.
+Con `compacto` es el botón de la esquina de una tarjeta.
+
+**`BotonQuitar.tsx`**, **`VaciarHistorial.tsx`** — Quitar una entrada y vaciar el historial,
+con confirmación en línea.
+
+**`Comentarios.tsx`** — *servidor*. La conversación de una obra o de un episodio: pide los
+datos y compone. **`Comentario.tsx`** — *cliente*. Uno solo, con «me gusta» optimista,
+responder, editar y borrar. **`FormularioComentario.tsx`** — *cliente*. Sirve para publicar
+y para responder: lo único que cambia es si lleva `parentId`.
+
+**`NotaComunidad.tsx`** — *cliente*. Diez botones, no cinco estrellas: el backend guarda de
+1 a 10, y una escala de estrellas con medias obliga a traducir entre lo que se pulsa y lo
+que se guarda.
+
+**`MarcarLeidas.tsx`** — *cliente*. Marca todas las notificaciones.
+
+**`AjustesPerfil.tsx`**, **`AjustesSeguridad.tsx`** (contraseña, correo y doble factor),
+**`AjustesSesiones.tsx`**, **`BorrarCuenta.tsx`** — *cliente*. Las cuatro piezas de
+`/cuenta`. El QR del 2FA lo genera el backend y llega como data URL: no hace falta ninguna
+librería de códigos.
+
+**`FormularioSesion.tsx`** — *cliente*. Entrar y registrarse.
+
+## Reproductor
+
+**`Reproductor.tsx`** — *cliente*. Elige variante de audio y servidor, resuelve los embeds
+que se pueden resolver, cae a `<iframe>` con los que no y cambia de servidor solo cuando uno
+falla.
+
+**`ControlesVideo.tsx`** — *cliente*. El mando: línea de tiempo, volumen, calidad,
+velocidad, PiP, pantalla completa y atajos de teclado. **Además guarda el progreso**: cada
+quince segundos mientras corre, y al pausar, al terminar, al salir de la página y al
+desmontar. Es lo que hace real el historial y la fila de «Seguir viendo».
+
+**`VideoConHls.tsx`** — *cliente*. Carga `hls.js` solo cuando hace falta.
+
+## Comunes
+
+**`Boton.tsx`** — `Boton`, `BotonEnlace`, `BotonIcono` y `EnlaceIcono`. Tres variantes
+(`primario`, `secundario`, `fantasma`) declaradas en un mapa, no en cada llamada.
+
+**`Campo.tsx`** — Etiqueta, campo, ayuda y error, conectados con `aria-describedby`.
+
+**`Icono.tsx`** — Los 41 iconos, dibujados a trazo 1,8. Exporta `NombreIcono`.
+
+**`Pronto.tsx`**, **`NoEncontrado.tsx`** — Los dos estados vacíos con nombre: «esto todavía
+no existe» y el 404.
+
+**`PreferenciaHora.tsx`** — *cliente*. Contexto de zona horaria con persistencia local.

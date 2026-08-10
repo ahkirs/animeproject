@@ -1,92 +1,81 @@
 # Estado del proyecto
 
-Qué funciona de verdad, qué es maqueta y qué falta. Actualizado tras conectar el catálogo
-a la API del scraper (Railway).
+Qué funciona de verdad, qué falta y qué no se puede hacer todavía. Actualizado tras la
+reconstrucción sobre el app shell.
 
 ## Funciona
 
-- **Catálogo real por API.** La portada, `/explorar` y la búsqueda se alimentan del scraper
-  (animeav1 y animeflv), deduplicando las obras que están en ambos proveedores
-- **Ficha de serie** con sinopsis, nota, géneros, carátula y lista de episodios reales
-- **Reproductor** con los servidores que da el proveedor: selector de audio (subtitulada /
-  doblada), selector de servidor y fallback cuando no hay enlaces. Los embeds de los hosts
-  soportados (mp4upload, UPNShare, Zilla/HLS) se resuelven a la URL directa del vídeo en el
-  servidor (`/api/reproducir`) y se reproducen en un `<video>` propio vía el proxy
-  `/api/stream` — mp4 con `<video>` nativo, HLS con hls.js (`VideoConHls`); los demás se
-  incrustan en un `<iframe>`. No aloja ni descarga vídeo
-- **Explorar** con filtro por género y cuatro órdenes. Los parámetros inválidos se ignoran
-  en vez de romper
-- **Buscador** con resultados mientras se escribe, manejable con teclado y con mínimo
-  adaptado a la escritura latina o japonesa
-- **Estados de carga y error.** Cada ruta de datos tiene su esqueleto (`loading.tsx`) y hay
-  una frontera de error compartida con botón de reintento
-- **Navegación completa** entre las rutas activas, sin enlaces rotos
-- **Accesibilidad básica**: enlaces de salto, foco visible, navegación por teclado,
-  `prefers-reduced-motion` respetado en todo lo que se mueve
+- **El marco.** Riel lateral fijo, barra superior con buscador centrado (`Ctrl/⌘+K`),
+  campana con punto de no leídas, y barra inferior en móvil. Montado una sola vez en
+  `app/(marco)/layout.tsx`; la ventana no se desplaza, lo hace `#panel`
+- **Catálogo real por API.** Portada, `/explorar` y búsqueda se alimentan del scraper,
+  deduplicando las obras que están en varios proveedores
+- **Destacado con tráiler.** `GET /anime/info` devuelve `trailer` y `backdrop`. El vídeo
+  entra con retraso y solo si la obra lo tiene; con `prefers-reduced-motion` no se carga
+- **Ficha de serie** con relaciones reales (precuelas, secuelas, películas), nota de la
+  comunidad, comentarios, episodios y recomendaciones
+- **Reproductor** con selector de audio y de servidor, resolución de embeds y respaldo a
+  `<iframe>`. No aloja ni descarga vídeo
+- **El progreso se guarda.** `ControlesVideo` llama a `POST /user/history` cada quince
+  segundos y en los cuatro remates (pausa, fin, salida de página, desmontaje). De ahí sale
+  el historial y la fila de «Seguir viendo», que ya no es una maqueta
+- **Comentarios** por obra y por episodio, con respuestas anidadas, «me gusta» optimista,
+  edición, borrado y reporte
+- **Notas de la comunidad** del 1 al 10, con media, recuento y tu propia nota
+- **Notificaciones** paginadas, con «marcar todas como leídas»
+- **Cuenta completa**: perfil editable, cambio de contraseña y de correo, doble factor con
+  QR, sesiones abiertas revocables una a una, y baja con doble confirmación
+- **Favoritos y ver después**, ya con el cuerpo que el backend espera
+- **404 propio**, en la raíz y dentro del marco. Antes salía el de Next y rompía el diseño
+  entero — era la pantalla más vista sin haberla diseñado nunca
+- **`/laboratorio`** como galería del sistema visual: sirve para cazar la pieza que se
+  queda descolgada de un cambio de tokens
 
-## Es maqueta
+## Maquetado a propósito
 
-- **Las cuentas no existen.** `/acceder` y `/registro` son formularios que no envían nada
-- **La lista no guarda.** Los datos están fijos en el código; marcar una serie no persiste
-- **El filtro de estado** de `/explorar` se deriva de la serie (en emisión / completa), no
-  del proveedor
+- **`/emision`** y **`/manga`**. Están en el riel y explican qué falta y de quién depende,
+  en vez de un «próximamente» que no informa de nada
+- **La pestaña «Reparto»** de la ficha. `characters` no existe en la API y nunca existió:
+  el tipo estaba deducido
 
-## Falta
+## No se puede hacer todavía (falta backend)
 
-Por orden de lo que más cambiaría el proyecto.
+- **Calendario de emisión.** No hay endpoint que diga qué día y a qué hora sale cada
+  episodio. `status` solo dice si una obra está en emisión, no cuándo
+- **Manga.** No hay catálogo, ni capítulos, ni páginas
+- **Reparto y personajes**
+- **Borrado en bloque del historial.** Solo existe `DELETE /user/history/{episodeId}`, así
+  que vaciar va de diez en diez y avisa de cuántos quedaron sin borrar. Si la lista crece,
+  merece la pena pedir un `DELETE /user/history`
+- **`/v1/anime/trending`** existe y devuelve el ranking de uso real, pero hoy está casi
+  vacío (`title: ""`, una entrada). Servirá cuando haya tráfico; mientras tanto la portada
+  se nutre del catálogo
 
-**Parrilla de emisión.** La página `/emision` está oculta y sin enlazar porque el scraper
-no publica horarios. Entra con AniList o MAL, que sí dan `emitidoUtc`. El modelo
-(`Programacion`) ya está preparado para ello.
+## Cabos sueltos conocidos
 
-**Dónde ver cada serie.** Es la razón de existir de un agregador y no está en ninguna
-parte. En qué plataformas legales está disponible, en qué región, con enlace. También
-entra con AniList o MAL.
+- **La forma de un comentario está deducida.** `GET /comments` está confirmado y devuelve
+  `{items, page, limit, total, totalPages}`, pero hoy no hay ni un comentario publicado en
+  producción, así que los nombres de campo de cada fila salen del cuerpo del POST. El mapeo
+  acepta varios alias por campo; hay que contrastarlo en cuanto haya datos reales
+- **`twoFactorEnabled`** va opcional en `PerfilUsuario`: el backend no documenta el esquema
+  de `/user/profile`. Si el campo se llama de otra forma, la página de cuenta enseña el 2FA
+  como apagado
+- **La paginación de comentarios** dice cuántos quedan fuera en vez de paginar. Se hará
+  cuando haya volumen que paginar
+- **`search` y `catalog` devuelven `score`, `status`, `year` y `backdrop` siempre a nulo.**
+  Las píldoras de las tarjetas solo se pueden rellenar pidiendo `/info` obra por obra, que
+  es lo que hace `tendencias(limite, conFicha)` con las primeras. **No ampliar ese patrón**
+  sin medirlo: la API ya devuelve 429 con cierta facilidad
+- **Los móviles no se han probado en un dispositivo real**, solo a 390px en el navegador
+- **`KUROBA` sigue siendo provisional** como nombre. Vive en `components/Marca.tsx` y en los
+  metadatos de `app/layout.tsx`
 
-**Backend, cuentas y listas.** Lo que convierte «Mi lista» de maqueta en función.
+## Sin verificar en navegador
 
-**Página 404 propia.** Ahora es la de Next por defecto y rompe el diseño entero. Es lo
-primero que ve quien llega por un enlace roto.
+La reconstrucción compila y pasa el `typecheck`, pero hay cosas que solo se ven corriendo:
 
-**Añadir a la lista desde la ficha.** El botón está dibujado pero no hay dónde guardar.
-
-**Prueba en móvil.** Hay puntos de ruptura escritos, pero escritos no es lo mismo que
-probados, y la mayoría del tráfico de un sitio así será móvil.
-
-**Despliegue.** El proyecto solo existe en local. Conviene hacerlo antes de meter
-autenticación, porque los proveedores de acceso necesitan una URL de retorno real.
-
-**Licencia.** El repositorio no tiene ninguna. Sin ella, aunque el código sea visible,
-legalmente nadie puede reutilizarlo.
-
-**Integración continua** que ejecute `typecheck` y `build` en cada push.
-
-## Deuda conocida
-
-**El nombre de marca sigue siendo provisional.** `KUROBA` vive en `components/Cabecera.tsx`
-y en el título de `app/layout.tsx`.
-
-**El rendimiento del catálogo depende del scraper.** Cada ficha de serie pide la info a la
-API, y `/mi-lista` pide cada serie una a una. Funciona, pero es lento cuando el scraper va
-justo. El filtro de género además se aplica dos veces (API y cliente para el estado).
-
-**Las láminas SVG comparten receta** —fondo, disco, siluetas— y en la rejilla se leen como
-repetición. Se resuelve solo con las portadas reales del proveedor, así que no merece la
-pena invertir ahí.
-
-**El lateral de la ficha se queda corto** respecto a la lista de episodios, y abajo queda
-un hueco vertical largo.
-
-**Los mandos del reproductor son los nuestros** para los servidores resueltos (mp4upload,
-UPNShare, Zilla) y los del proveedor para los que se incrustan en iframe. La resolución de
-embeds depende de que el host no cambie su formato: el de UPNShare usa una clave/IV fijos
-derivados de su `location`, el de mp4upload depende de la forma del HTML de su embed, y el
-de Zilla exige cabeceras `Sec-Fetch`/`Origin` en `/api/stream` más la reescritura de las
-URLs de sus segmentos dentro del m3u8. Si un host cambia, ese servidor vuelve a iframe sin
-romper el resto.
-
-**El ritmo del scroll de la portada es plano.** Varios bloques seguidos con la misma
-densidad y el mismo tamaño de titular. Falta contraste, y falta un cierre.
-
-**Grano y viñeteado están calibrados a ojo** sobre una sola pantalla. Pueden pasarse o
-desaparecer en otras. Los números están en `app/globals.css` y `components/EfectosSala.tsx`.
+1. Que ningún `position: fixed` del reproductor (menús de calidad y velocidad) quede
+   atrapado por el contenedor con scroll
+2. Pantalla completa entrando y saliendo
+3. El ciclo completo de comentarios, notas, notificaciones y 2FA contra el backend real
+4. Que el tráiler de YouTube cargue y se detenga como debe

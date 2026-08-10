@@ -163,3 +163,146 @@ backend en un proveedor comercial, el riesgo recae sobre el autor del proyecto.
 En la práctica esto se resolvió consumiendo una API de terceros ya existente (metadatos y
 enlaces de los proveedores) e incrustando el reproductor del proveedor, sin descargar ni
 resolver vídeo por nuestra cuenta.
+
+## El acento pasa de ámbar a granate
+
+El ámbar `#ffb03a` se sustituyó por un granate `#52050a`. La decisión es de gusto y vino
+del encargo, no de un problema con el ámbar.
+
+Lo que sí obligó a algo el color elegido es el contraste. `#52050a` contra el fondo
+`sala-900` da **1,3:1**: como campo grande con tinta clara encima se lee de sobra —13:1—,
+pero como forma no se despega del fondo, y en un filete de 3px o en una cifra pequeña
+directamente no existe. El ámbar no tenía este problema porque era claro.
+
+Así que el acento pasó de ser un token a ser dos registros del mismo color:
+
+- `granate` (`#52050a`) es **campo**. Botones, chapas, pestaña activa, selección de texto.
+  Siempre con `granate-tinta` encima y **filete de `granate-vivo`**, que es lo que le da
+  forma al botón: sin borde es texto flotando sobre el fondo.
+- `granate-vivo` (`#ee2b4a`) es **trazo**. Filetes de sección, anillo de foco, barras de
+  progreso, cifras, iconos, el interruptor de encadenar. Llega a 4,8:1, que es lo que pide
+  el texto pequeño.
+
+No son dos acentos —la regla 1 del sistema visual sigue en pie—, son el mismo acento en
+dos registros. La regla práctica está en [sistema-visual.md](sistema-visual.md).
+
+Queda un cabo suelto: `--color-rojo` (`#e0453a`), el color de error y de las acciones
+destructivas, ahora está a un paso del acento de marca. Se dejó como estaba porque cambiar
+la semántica de error es una decisión aparte, pero si un día un mensaje de error se
+confunde con un botón, **lo que hay que mover es el rojo de error, no el acento**.
+
+## El campo primario pasa a blanco, y las chapas al color de la obra
+
+Corrección de lo anterior, a los dos días. El acento granate se quedó, pero se retiró de
+donde no funcionaba.
+
+**Los botones y los estados seleccionados van en blanco con tinta negra.** El granate como
+campo de botón necesitaba un filete de `granate-vivo` para tener forma —solo, no se
+despegaba del fondo—, y ese borde rojo acabó siendo ruido en cuanto había dos o tres
+controles juntos. `bg-hueso` + `text-sala-900` se despega sin ayuda. El acento sigue
+siendo rojo, pero en el registro de trazo: filetes de sección, foco, progreso, cifras,
+iconos, el logo.
+
+**Las chapas de la ficha toman el color de la obra**, como en la referencia. Ahí el color
+sale del `coverImage.color` de AniList; nuestro scraper no lo da, así que `colorDeObra()`
+lo deriva del id. No es el color del arte y no hay que contarlo como si lo fuera, pero
+cumple lo que se le pide —uno por obra, siempre el mismo, sin una petición de más— y el
+día que el backend publique el dominante se sustituye el valor sin tocar nada más.
+
+La saturación y la luminosidad van fijas (S=80%, L=72%) y eso no es estético: es lo que
+garantiza más de 6:1 contra la tinta negra en cualquier tono. Bajar la L rompe las chapas
+de los azules, que son los que menos luz tienen a igualdad de luminosidad.
+
+## Reconstruida la web entera sobre un app shell
+
+Cambio de raíz, no de piel. El punto de partida era una referencia externa de la que solo
+sobrevivía el CSS compilado: ni componentes, ni datos, ni fuentes. Así que no se importó
+nada — se reconstruyó el patrón leyendo ese CSS y el marcado.
+
+Lo que se adopta es la **arquitectura**: riel lateral fijo de 48px, barra superior de 48px
+con el buscador centrado, y el contenido con scroll propio dentro. Lo que se conserva es
+todo lo nuestro: la marca, los 41 iconos dibujados y el código en español.
+
+La decisión con más consecuencias es que **la ventana deja de desplazarse**. El marco mide
+el alto de la pantalla y recorta; el que se desplaza es `#panel`. A cambio, el riel y la
+barra se quedan quietos sin `position: sticky` ni peleas de `z-index`, y cada página deja
+de montar su propia cabecera y su propio pie: once repeticiones que pasan a declararse una
+vez en `app/(marco)/layout.tsx`.
+
+`/acceder` y `/registro` quedan fuera del grupo a propósito. Son pantallas de una sola
+tarea, y una navegación completa solo invita a irse a otro sitio.
+
+## Sustituida la paleta cálida por una neutra con acento naranja
+
+Se va «Sala Oscura» entera: el negro cálido, el granate de butaca, el grano de proyección,
+el viñeteado y las dos sombras. Entra un gris neutro frío en cuatro escalones y un solo
+naranja.
+
+La regla que gobierna el sistema nuevo: **la profundidad la da la luminosidad, nunca una
+sombra**. No queda ni una sombra de elevación. Y el marco va **más claro** que el
+contenido, que es lo que hace que el panel parezca hundido sin dibujarle un borde.
+
+De paso se retiran las escalas propias `--text-paso-0..6` y `--spacing-e1..e6`. Eran una
+capa de indirección sobre la misma base de 4px de Tailwind y obligaban a traducir cada
+medida mentalmente. Karla (variable, 200–800) sustituye a Archivo Black, que al ser una
+display de un solo peso no servía para un título de sección y rompía la jerarquía por el
+medio.
+
+El riesgo de este cambio estaba localizado: las clases de Tailwind son cadenas, así que
+`tsc` no ve un `bg-sala-800` olvidado —se renderiza transparente y en silencio—. Por eso
+la verificación incluye un grep a cero coincidencias, y no solo el build.
+
+## Estrenados los endpoints que llevaban tiempo construidos
+
+Al sondear el backend para adaptar el diseño aparecieron **50 rutas, de las que la web
+usaba menos de la mitad**. No era una lista de deseos: estaban implementadas y
+respondiendo.
+
+Se conectan comentarios (con respuestas anidadas, «me gusta» y reportes), notas de la
+comunidad, notificaciones y una página de cuenta de verdad — contraseña, correo, doble
+factor con TOTP y sesiones abiertas revocables. Donde antes había dos botones
+desactivados y un comentario diciendo qué endpoint había detrás.
+
+También se descubrió que `GET /anime/info` devuelve bastante más de lo que declaraba
+`api-types.ts`: `backdrop`, `trailer`, `malId` y **`relations`**. De ahí salen el tráiler
+del destacado y la sección «Relacionadas», que sustituye a la pestaña de reparto — esa se
+queda vacía y explicando por qué, porque `characters` no existe y nunca existió: estaba
+deducido.
+
+El OpenAPI real está en `/api/docs/swagger-ui-init.js`. Los `/api/docs-json` de costumbre
+dan 404, y eso costó un rato encontrarlo.
+
+## Arreglados dos fallos que el rediseño destapó
+
+**Los favoritos no funcionaban.** `guardarEnFavoritos` mandaba `{ animeId }` porque el
+cuerpo se había deducido en vez de leerlo; el esquema exige además `title`. El backend
+rechazaba **todas** las altas. La estrella llevaba tiempo sin guardar nada.
+
+**El progreso no se guardaba nunca.** `POST /user/history` existía desde el principio y no
+lo llamaba nadie, así que el historial estaba siempre vacío. Por eso `EN_CURSO` era un
+array escrito a mano: «Seguir viendo» era una maqueta con obras reales dentro, que es la
+peor clase de maqueta porque no se distingue de lo que funciona.
+
+Ahora lo llama `ControlesVideo` cada quince segundos mientras corre el vídeo, y además al
+pausar, al terminar, al salir de la página y al desmontar. Los tres remates importan:
+cerrar la pestaña a los diez segundos de un guardado perdía justo el trozo por el que se
+quiere volver.
+
+Con eso se van también `MI_LISTA`, `USUARIO` y `ESTADOS_LISTA` de `lib/catalogo.ts`, y de
+`lib/types.ts` los tipos `EntradaLista` y `EstadoLista`: describían un modelo —«viendo»,
+«en pausa», «abandonada»— que la base de datos no puede almacenar, y un tipo que describe
+lo que no existe termina obligando a inventarse los datos.
+
+## Separadas las funciones puras de los módulos con `server-only`
+
+Dos veces seguidas falló el build por lo mismo: un componente de cliente importaba algo
+inocente —`haceCuanto`, `minimoParaBuscar`— de un módulo que acababa arrastrando
+`lib/sesion.ts`, que lleva `server-only`, al paquete del navegador.
+
+Las fechas relativas se van a `lib/fechas.ts`, que es cálculo puro sobre una cadena ISO y
+puede usarse desde los dos lados. Y `enCurso` se va de `catalogo.ts` a `perfil.ts`, que es
+donde pertenecía: lee el historial, no el catálogo.
+
+La regla que queda: **un módulo que importe `lib/sesion.ts` no puede exportar nada que un
+componente de cliente vaya a querer**. Si hace falta compartirlo, se saca a su propio
+archivo.

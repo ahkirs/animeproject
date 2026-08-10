@@ -121,6 +121,9 @@ export default function CarruselDestacado({ slides }: { slides: Diapositiva[] })
     <section
       aria-roledescription="carrusel"
       aria-label="Series destacadas"
+      /* Le dice a la barra superior que aquí hay imagen debajo de ella, así
+         que puede quedarse sin campo mientras no se baje. */
+      data-heroe=""
       onMouseEnter={() => setPausado(true)}
       onMouseLeave={() => setPausado(false)}
       className="bajo-barra relative isolate flex h-[70dvh] max-h-[760px] min-h-[440px] flex-col justify-end"

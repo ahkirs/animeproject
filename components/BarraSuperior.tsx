@@ -36,8 +36,15 @@ export default function BarraSuperior({
     setHayHistorial(window.history.length > 1)
   }, [])
 
-  // Arriba del todo la barra no tiene campo y deja ver el destacado; en
-  // cuanto se baja, lo recupera para que el texto no se apoye en la imagen.
+  // La barra solo se queda sin campo donde hay imagen que enseñar: encima
+  // de un destacado, y solo mientras no se haya bajado. En una página que
+  // arranca con contenido normal se mantiene opaca desde el primer píxel,
+  // porque si no lo que se transparenta es el panel a secas y la barra
+  // desaparece contra él.
+  //
+  // Si la página trae destacado se pregunta al DOM en vez de pasarlo como
+  // prop: el marco es un layout y no sabe —ni debe saber— qué monta cada
+  // ruta dentro. La marca la pone el propio destacado con `data-heroe`.
   //
   // Escucha a `#panel` y no a `window` porque en este marco la ventana no
   // se desplaza nunca. Y depende de la ruta porque al navegar el panel
@@ -47,8 +54,11 @@ export default function BarraSuperior({
     const panel = document.getElementById('panel')
     if (!panel) return
 
-    const alDesplazar = () => setDesplazada(panel.scrollTop > 8)
+    const hayHeroe = !!panel.querySelector('[data-heroe]')
+    const alDesplazar = () => setDesplazada(!hayHeroe || panel.scrollTop > 8)
     alDesplazar()
+
+    if (!hayHeroe) return
     panel.addEventListener('scroll', alDesplazar, { passive: true })
     return () => panel.removeEventListener('scroll', alDesplazar)
   }, [ruta])

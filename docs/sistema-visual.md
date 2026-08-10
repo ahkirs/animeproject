@@ -33,6 +33,13 @@ Cuatro tokens, y el orden importa.
 | `lienzo` | `oklch(16% 0 285.99)` | El panel de contenido |
 | `tarjeta` | `oklch(21% .006 285.885)` | Tarjetas, campos, píldoras, diálogos |
 | `apagado` | `oklch(27.4% .006 286.033)` | Superficie tenue: pistas de progreso, separadores |
+| `barra` | `#121212` | La barra superior, solo cuando coge campo al bajar |
+| `barra-borde` | `#2e2e2e` | Su filete inferior |
+
+La barra es el único sitio con un gris opaco en vez de blanco a baja opacidad, y es a
+propósito: por debajo de ella pasa lo que traiga la página —una carátula, un fondo
+claro—, así que un borde al 3 % desaparecería justo cuando hace falta. Va también más
+oscura que el marco, para separarse de él en vez de fundirse.
 
 Van en oklch y no en hexadecimal porque la luminosidad es el primer número:
 los cuatro escalones se leen en columna (18 → 16 → 21 → 27,4) sin descifrar
@@ -142,8 +149,14 @@ degradado**.
 
 - `.sin-barra` — carril que se desplaza sin enseñar barra.
 - `.velo-derecha`, `.velo-abajo` — difuminan un borde.
-- `.velo-heroe` — la del destacado: se desvanece hacia abajo siempre, y también hacia la
-  izquierda a partir de `lg`.
+- `.velo-heroe` — la del destacado. Se desvanece hacia abajo siempre, hacia la izquierda
+  a partir de `lg`, y **hacia arriba en los primeros 160px**. Ese corte de arriba es el
+  que sostiene la barra transparente: apaga la imagen contra el borde superior, así que
+  lo que queda detrás de la barra es fondo de página y no arte. Sin él, los cheurones y
+  el buscador se apoyan sobre una carátula y dejan de leerse.
+- `.bajo-barra` — sube una sección el alto de la barra para que arranque por debajo de
+  ella. El panel deja ese hueco arriba para que el contenido normal no quede tapado;
+  esto lo anula. La usan el destacado de la portada y el cabezal de una ficha.
 - `.tinte-obra` — la tinta que toma el color de la obra al pasar por encima.
 
 La diferencia con un degradado no es cosmética. Un degradado tiene que acertar el color

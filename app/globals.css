@@ -32,6 +32,13 @@
   --color-tarjeta: oklch(21% 0.006 285.885);
   --color-apagado: oklch(27.4% 0.006 286.033);
 
+  /* La barra superior cuando coge campo al bajar. Va más oscura que el
+     marco y con un filete que sí se ve —gris opaco, no blanco al 3 %—
+     porque tiene que recortarse contra contenido cualquiera: debajo de
+     ella pasa lo que sea que traiga la página. */
+  --color-barra: #121212;
+  --color-barra-borde: #2e2e2e;
+
   /* --- Tinta --- */
   --color-tinta: oklch(98.5% 0 0);
   --color-tinta-apagada: oklch(70.5% 0.015 286.067);
@@ -264,13 +271,21 @@
 /* La máscara del héroe: se desvanece hacia abajo para que el contenido
    entre sin costura, y hacia la izquierda en pantallas anchas para que el
    texto se apoye sobre fondo limpio en vez de sobre la imagen. */
+/* Tres cortes, y el de arriba es el que hace que la barra transparente
+   funcione: la imagen se apaga contra el borde superior en unos 160px, así
+   que lo que queda detrás de la barra es fondo de página y no arte. Sin él,
+   los mandos se apoyan sobre la carátula y dejan de leerse. */
 .velo-heroe {
-  mask-image: linear-gradient(to bottom, #000 45%, transparent 96%);
+  mask-image:
+    linear-gradient(to bottom, transparent 0%, #000 160px),
+    linear-gradient(to bottom, #000 45%, transparent 96%);
+  mask-composite: intersect;
 }
 
 @media (width >= 64rem) {
   .velo-heroe {
     mask-image:
+      linear-gradient(to bottom, transparent 0%, #000 160px),
       linear-gradient(to bottom, #000 45%, transparent 96%),
       linear-gradient(to right, transparent 0%, #000 55%);
     mask-composite: intersect;

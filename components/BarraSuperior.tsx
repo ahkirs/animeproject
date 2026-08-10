@@ -62,7 +62,9 @@ export default function BarraSuperior({
        debajo daría un salto al empezar a bajar. */
     <header
       className={`z-50 grid h-[var(--alto-barra)] grid-cols-[1fr_auto_1fr] items-center gap-2 border-b px-2 transition-colors duration-200 ease-sal md:grid-cols-[20%_1fr_20%] ${
-        desplazada ? 'border-borde bg-fondo' : 'border-transparent bg-transparent'
+        desplazada
+          ? 'border-barra-borde bg-barra'
+          : 'border-transparent bg-transparent'
       }`}
     >
       <div className="flex items-center gap-0.5">

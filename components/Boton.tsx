@@ -11,8 +11,11 @@ import type { ComponentProps, ReactNode } from 'react'
    Las variantes se declaran en un mapa y no en cada llamada para que dos
    botones del mismo peso no acaben con estilos distintos por descuido. */
 
+/* El `active:scale` es de la referencia y es lo que hace que un botón se
+   sienta pulsado en vez de solo pulsable. Un 3 % es suficiente: el gesto se
+   percibe aunque no se llegue a ver, que es justo lo que se busca. */
 const BASE =
-  'inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border text-sm font-semibold no-underline transition-colors duration-200 ease-sal disabled:pointer-events-none disabled:opacity-50'
+  'inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border text-sm font-semibold no-underline transition duration-200 ease-sal active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50'
 
 /* El primario es campo claro con tinta oscura encima, no naranja. En una
    página que es toda carátulas, el gris casi blanco es lo único que no

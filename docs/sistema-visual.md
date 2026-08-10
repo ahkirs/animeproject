@@ -161,6 +161,16 @@ degradado**.
   ella. El panel deja ese hueco arriba para que el contenido normal no quede tapado;
   esto lo anula. La usan el destacado de la portada y el cabezal de una ficha.
 - `.tinte-obra` — la tinta que toma el color de la obra al pasar por encima.
+- `.realce` / `.realce-texto` — el gesto de interacción básico: al pasar por encima
+  se superpone un velo de acento al 5 % con su filo entero, en 200 ms. Va en un
+  pseudoelemento y no en el fondo del elemento porque así hereda el radio sin
+  repetirlo y se anima solo la opacidad, que el compositor resuelve sin repintar.
+- `.velo-sinopsis` — sinopsis recortada que se destapa al pasar por encima. La
+  máscara mide cuatro veces el alto y se encoge a uno, así que el texto no cambia de
+  alto: un `max-height` haría saltar todo lo que tiene debajo.
+- `.paralaje-scroll`, `.atenuar-scroll` — las dos animaciones que no mueve el tiempo
+  sino el scroll (`animation-timeline: scroll()`, primeros 300px). Pixel y medio de
+  desplazamiento; donde el navegador no las soporta, el elemento se queda quieto.
 
 La diferencia con un degradado no es cosmética. Un degradado tiene que acertar el color
 del fondo y deja de funcionar en cuanto ese fondo cambia; una máscara recorta el propio

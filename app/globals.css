@@ -134,7 +134,6 @@
      llegue a parecer contenido cargado— y `paralaje` el desplazamiento de
      pixel y medio del fondo del destacado. */
   --animate-progreso: progreso 1.4s var(--ease-vaiven-cubico) infinite;
-  --animate-paralaje: paralaje 7s var(--ease-vaiven-cubico) infinite alternate;
 }
 
 @keyframes progreso {
@@ -152,6 +151,38 @@
   }
   100% {
     transform: translateY(-1.5px);
+  }
+}
+
+@keyframes atenuar {
+  0% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0.98;
+  }
+}
+
+/* Las dos animaciones que no las mueve el tiempo sino el scroll: avanzan con
+   los primeros 300px del panel y se quedan donde las dejes. Pixel y medio de
+   desplazamiento es casi nada, y ese es el punto —se nota que la página está
+   viva sin que nadie sepa decir qué se ha movido.
+
+   `animation-timeline` no está en todos los navegadores; donde no está, el
+   fotograma no se aplica y el elemento se queda quieto, que es exactamente lo
+   que debe pasar. Por eso van aquí y no en un `IntersectionObserver`: es
+   decoración, y la decoración no merece JavaScript. */
+@media (prefers-reduced-motion: no-preference) {
+  .paralaje-scroll {
+    animation: paralaje linear both;
+    animation-timeline: scroll();
+    animation-range: 0 300px;
+  }
+
+  .atenuar-scroll {
+    animation: atenuar linear both;
+    animation-timeline: scroll();
+    animation-range: 0 300px;
   }
 }
 
@@ -181,6 +212,18 @@
 
   svg {
     max-width: 100%;
+  }
+
+  /* Safari en iOS hace zoom sobre cualquier campo cuya tipografía baje de
+     16px, y luego no vuelve. La referencia lo impone a todos los campos;
+     aquí solo donde importa, para no engordar los formularios en escritorio,
+     porque el problema es del puntero grueso y no del tamaño de pantalla. */
+  @media (pointer: coarse) {
+    input,
+    select,
+    textarea {
+      font-size: 16px;
+    }
   }
 
   h1,
@@ -241,6 +284,58 @@
    Las cuatro cosas que Tailwind no trae y que este diseño usa
    constantemente.
    ============================================================ */
+
+/* El realce de la referencia, que es su gesto de interacción básico y el que
+   más carácter le da: al pasar por encima no se cambia el fondo del elemento,
+   se le superpone un velo de acento al 5 % con su filo de acento entero.
+
+   Va en un pseudoelemento y no en el propio fondo por dos razones: hereda el
+   radio sin tener que repetirlo, y se puede animar la opacidad sola, que es
+   lo único que el compositor puede resolver sin repintar. */
+.realce {
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.realce::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  border: 1px solid var(--color-acento);
+  background-color: var(--color-acento);
+  opacity: 0;
+  transition: opacity 200ms var(--default-transition-timing-function);
+}
+
+.realce:hover::before {
+  opacity: 0.05;
+}
+
+/* La variante que además tiñe la tinta. Para lo que es texto y no superficie:
+   entradas de menú, enlaces de una lista. */
+.realce-texto:hover {
+  color: var(--color-acento);
+}
+
+/* Sinopsis que se destapa al pasar por encima. La máscara mide cuatro veces
+   el alto de la caja y se encoge a uno: el texto no se mueve ni cambia de
+   alto, solo deja de estar recortado. Un `max-height` haría saltar todo lo
+   que tiene debajo. */
+.velo-sinopsis {
+  mask-image: linear-gradient(#000 0%, transparent 100%);
+  mask-position: 0 0;
+  mask-size: 100% 400%;
+  mask-repeat: no-repeat;
+  transition:
+    mask-size 300ms ease-out,
+    mask-position 300ms ease-out;
+}
+
+.group:hover .velo-sinopsis {
+  mask-size: 100% 100%;
+}
 
 /* Sección que arranca por debajo de la barra superior, no a continuación.
    El panel deja un hueco arriba del alto de la barra para que el contenido

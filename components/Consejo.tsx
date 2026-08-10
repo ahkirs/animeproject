@@ -24,9 +24,17 @@ export default function Consejo({
   return (
     <span className={`group/consejo relative flex ${className}`}>
       {children}
+      {/* Campo blanco con tinta oscura, como la referencia. Es la única pieza
+          del sistema que invierte el color, y por eso funciona: flota sobre
+          contenido cualquiera y no hay superficie oscura contra la que se
+          pueda perder.
+
+          Los tiempos también son los suyos, y son asimétricos a propósito:
+          entra en 300 ms y se va en 100. Al recorrer el riel, una etiqueta que
+          desaparece despacio se solapa con la siguiente. */}
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 left-[calc(100%+0.6rem)] z-90 -translate-y-1/2 scale-95 rounded-radio border border-borde bg-tarjeta px-2 py-1 text-xs font-medium whitespace-nowrap text-tinta opacity-0 transition-[opacity,transform] duration-150 ease-sal group-hover/consejo:scale-100 group-hover/consejo:opacity-100 group-focus-within/consejo:scale-100 group-focus-within/consejo:opacity-100"
+        className="pointer-events-none absolute top-1/2 left-[calc(100%+0.4rem)] z-90 -translate-x-1 -translate-y-1/2 rounded-radio bg-tinta px-3 py-0.5 text-sm whitespace-nowrap text-primario-tinta opacity-0 transition-[opacity,translate] duration-100 ease-sal group-hover/consejo:translate-x-0 group-hover/consejo:opacity-100 group-hover/consejo:duration-300 group-focus-within/consejo:translate-x-0 group-focus-within/consejo:opacity-100"
       >
         {texto}
       </span>

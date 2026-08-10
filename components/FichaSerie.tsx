@@ -73,7 +73,10 @@ export default function FichaSerie({
       style={color ? ({ '--color-obra': color } as React.CSSProperties) : undefined}
     >
       <Link href={href} className="flex flex-col gap-2 no-underline">
-        <div className="relative w-full overflow-hidden rounded-radio bg-tarjeta h-[200px] xs:h-[220px] lg:h-[260px]">
+        {/* Crece un 2 % al pasar por encima. Es poquísimo y tiene que serlo:
+            en una fila de carátulas pegadas, un salto mayor empuja ópticamente
+            a las vecinas y la fila entera parece moverse. */}
+        <div className="relative h-[200px] w-full overflow-hidden rounded-radio bg-tarjeta transition-transform duration-200 ease-out group-hover/ficha:scale-[1.02] xs:h-[220px] lg:h-[260px]">
           {/* El hover lo lleva la propia imagen —apagarse y bajar el
               brillo—, como en la referencia: así se funde con el bloque
               de texto que se enciende debajo. */}

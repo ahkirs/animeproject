@@ -22,7 +22,7 @@ const LAMINAS = {
         <circle cx="200" cy="215" r="118" fill="#c8442f" />
         <path d="M0 600V420l70-52 64 40 68-74 76 52 62-36 60 44v206z" fill="#0d0f14" />
         <path d="M200 150l52 44v96l-52 40-52-40v-96z" fill="#0d0f14" />
-        <path d="M176 214h20v22h-20zM204 214h20v22h-20z" fill="#ffb03a" />
+        <path d="M176 214h20v22h-20zM204 214h20v22h-20z" fill="#ee2b4a" />
         <path
           d="M200 330v112M158 366l42-30 42 30"
           stroke="#0d0f14"
@@ -67,7 +67,7 @@ const LAMINAS = {
           d="M0 600V300h44v-70h40v70h50V220h46v80h58v-56h42v56h46v96h74v204z"
           fill="#0a0e15"
         />
-        <g fill="#ffb03a" opacity="0.85">
+        <g fill="#ee2b4a" opacity="0.85">
           <rect x="12" y="330" width="10" height="14" />
           <rect x="56" y="262" width="10" height="14" />
           <rect x="150" y="252" width="10" height="14" />
@@ -114,7 +114,7 @@ const LAMINAS = {
         <circle cx="112" cy="164" r="86" fill="#f4efe6" />
         <path d="M0 600V430h400v170z" fill="#101016" />
         <rect x="-20" y="300" width="440" height="112" rx="10" fill="#2c3a4a" />
-        <g fill="#ffb03a">
+        <g fill="#ee2b4a">
           <rect x="8" y="330" width="42" height="34" rx="3" />
           <rect x="70" y="330" width="42" height="34" rx="3" />
           <rect x="132" y="330" width="42" height="34" rx="3" />
@@ -149,7 +149,7 @@ const LAMINAS = {
         <path d="M212 118v300" stroke="#1a100f" strokeWidth="9" />
         <path d="M188 288h48" stroke="#1a100f" strokeWidth="11" />
         <path d="M176 440c0-58 14-96 36-114 22 18 36 56 36 114z" fill="#1a100f" />
-        <circle cx="212" cy="306" r="7" fill="#ffb03a" />
+        <circle cx="212" cy="306" r="7" fill="#ee2b4a" />
       </>
     ),
   },
@@ -173,7 +173,7 @@ const LAMINAS = {
         />
         <g fill="#0a0910">
           <path d="M690 900V560l52-40 52 40v340z" />
-          <path d="M716 596h52v34h-52z" fill="#ffb03a" opacity="0.9" />
+          <path d="M716 596h52v34h-52z" fill="#ee2b4a" opacity="0.9" />
         </g>
         <g stroke="#2a2438" strokeWidth="2" opacity="0.5">
           <path d="M0 200h1600M0 340h1600M0 480h1600" />
@@ -215,7 +215,7 @@ const LAMINAS = {
         />
         <g fill="#080a10">
           <path d="M520 900V520l70-54 70 54v380z" />
-          <path d="M556 560h68v40h-68z" fill="#ffb03a" />
+          <path d="M556 560h68v40h-68z" fill="#ee2b4a" />
           <path
             d="M590 660v150M520 700l70-42 70 42"
             stroke="#080a10"
@@ -246,7 +246,7 @@ const LAMINAS = {
         <circle cx="300" cy="70" r="52" fill="#c8442f" />
         <path d="M0 225V150l60-28 58 22 70-40 66 30 74-24 72 34v81z" fill="#0d0f14" />
         <path d="M120 150V96l22-16 22 16v54z" fill="#0d0f14" />
-        <rect x="132" y="106" width="20" height="12" fill="#ffb03a" />
+        <rect x="132" y="106" width="20" height="12" fill="#ee2b4a" />
       </>
     ),
   },
@@ -258,7 +258,7 @@ const LAMINAS = {
         <rect width="400" height="225" fill="#182028" />
         <path d="M0 225V120c70-30 120 26 190-4s130-52 210-16v125z" fill="#0f1620" />
         <circle cx="92" cy="66" r="40" fill="#f4efe6" />
-        <g fill="#ffb03a">
+        <g fill="#ee2b4a">
           <rect x="250" y="130" width="8" height="26" />
           <rect x="284" y="118" width="8" height="38" />
           <rect x="318" y="136" width="8" height="20" />
@@ -289,7 +289,7 @@ const LAMINAS = {
           d="M0 225V110h40v-26h34v26h44V70h40v40h50v-22h36v22h40v40h76v75z"
           fill="#0a0e15"
         />
-        <g fill="#ffb03a" opacity="0.85">
+        <g fill="#ee2b4a" opacity="0.85">
           <rect x="14" y="126" width="8" height="10" />
           <rect x="86" y="90" width="8" height="10" />
           <rect x="176" y="80" width="8" height="10" />

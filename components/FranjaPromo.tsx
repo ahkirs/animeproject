@@ -3,10 +3,7 @@
    Existe por una razón estructural, no decorativa: seis filas seguidas
    de carátulas pesan todas lo mismo y la página se recorre sin que nada
    llame. Una franja a media altura da el respiro y marca dónde acaba un
-   bloque y empieza otro.
-
-   Va sangrada hasta el borde de la ventana, que es lo que la distingue
-   de una fila: rompe el margen en vez de respetarlo. */
+   bloque y empieza otro. */
 
 import Link from 'next/link'
 import Icono from './Icono'
@@ -26,7 +23,7 @@ export default function FranjaPromo({
   return (
     <section
       aria-labelledby={`p-${promo.id}`}
-      className="relative isolate mt-e6 overflow-hidden rounded-radio bg-sala-800 [margin-inline:calc(var(--spacing-margen)*-1)] max-[560px]:rounded-none"
+      className="relative isolate mt-16 overflow-hidden bg-tarjeta"
     >
       {arte && (
         <div className="absolute inset-0 -z-20">
@@ -34,24 +31,30 @@ export default function FranjaPromo({
         </div>
       )}
 
-      {/* El degradado hace legible el texto sobre cualquier ilustración.
-          Es estructura: sin él dependes de que el arte tenga una zona
-          oscura justo donde va la tipografía. */}
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#0b0a09_18%,rgba(11,10,9,0.82)_52%,rgba(11,10,9,0.35)_100%)]" />
+      {/* La imagen se recorta con una máscara hacia la izquierda en vez
+          de taparse con un degradado de color: así el bloque funciona
+          igual sobre el lienzo que sobre cualquier otra superficie, sin
+          tener que repetir el valor del fondo en un gradiente. */}
+      {arte && (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 bg-tarjeta [mask-image:linear-gradient(to_right,#000_30%,transparent_85%)]"
+        />
+      )}
 
-      <div className="max-w-[46ch] px-margen py-e5">
+      <div className="max-w-[46ch] px-bleed py-12">
         <h2
           id={`p-${promo.id}`}
-          className="font-display text-paso-4 leading-[1.02] tracking-[-0.035em]"
+          className="font-titulo text-3xl leading-tight font-extrabold tracking-[-0.03em] text-balance"
         >
           {promo.titulo}
         </h2>
 
-        <p className="mt-e2 text-paso-1 text-hueso-70">{promo.gancho}</p>
+        <p className="mt-3 text-sm text-tinta-apagada">{promo.gancho}</p>
 
         <Link
           href={promo.href}
-          className="mt-e3 inline-flex items-center gap-2 rounded-radio bg-ambar px-[1.35rem] py-3 text-paso-1 font-semibold text-ambar-tinta no-underline transition-colors duration-200 ease-sal hover:bg-ambar-claro"
+          className="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-acento px-5 text-sm font-semibold text-acento-tinta no-underline transition-opacity duration-200 ease-sal hover:opacity-85"
         >
           <Icono nombre="flecha" tam={16} />
           Ver ahora

@@ -10,43 +10,48 @@ interface Props {
   pie: { texto: string; enlace: string; href: string }
 }
 
-/** Marco compartido por acceder y registro: la lÃ¡mina panorÃ¡mica al
- *  fondo, apagada, y el formulario centrado encima. Es la misma sala a
- *  oscuras del resto del sitio, con el foco en una sola tarea. */
+/** Marco compartido por acceder y registro: la lámina panorámica al
+ *  fondo, apagada, y el formulario centrado encima.
+ *
+ *  Estas dos páginas quedan fuera del marco de la aplicación a propósito:
+ *  no llevan riel ni barra porque en ellas no hay nada más que hacer que
+ *  entrar, y una navegación completa solo invita a irse a otro sitio. */
 export default function MarcoCuenta({ titulo, entradilla, children, pie }: Props) {
   return (
     <div className="relative isolate flex min-h-screen flex-col">
       <div className="absolute inset-0 -z-20 overflow-hidden">
         <Lamina arte="panoramica-escena" />
       </div>
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_top,#0b0a09_18%,rgba(11,10,9,0.94)_55%,rgba(11,10,9,0.82)_100%)]" />
+      {/* La lámina se apaga casi del todo: está para que la pantalla no
+          sea un rectángulo vacío, no para mirarla. */}
+      <div className="absolute inset-0 -z-10 bg-fondo/92" />
 
-      <header className="px-margen py-e3">
+      <header className="px-bleed py-5">
         <Marca />
       </header>
 
       <main
         id="principal"
-        className="flex flex-1 items-center justify-center px-margen py-e5"
+        className="flex flex-1 items-center justify-center px-bleed py-13"
       >
         <div className="w-full max-w-[26rem]">
-          <h1 className="font-display text-paso-5 leading-[0.96] tracking-[-0.035em]">
+          <h1 className="font-titulo text-5xl leading-[0.96] tracking-[-0.035em]">
             {titulo}
           </h1>
-          <p className="mt-e2 mb-e4 text-hueso-70">{entradilla}</p>
+          <p className="mt-3 mb-8 text-tinta-apagada">{entradilla}</p>
 
           {children}
 
-          <p className="mt-e4 border-t border-borde pt-e3 text-paso-1 text-hueso-45">
+          <p className="mt-8 border-t border-borde pt-5 text-sm text-tinta-tenue">
             {pie.texto}{' '}
-            <Link href={pie.href} className="font-semibold text-ambar hover:underline">
+            <Link href={pie.href} className="font-semibold text-acento hover:underline">
               {pie.enlace}
             </Link>
           </p>
 
-          <p className="mt-e3 rounded-radio border border-borde bg-sala-800/80 px-e3 py-e2 text-paso-0 text-hueso-45">
-            Pantalla de diseÃ±o. El formulario todavÃ­a no envÃ­a nada: el registro y el
-            inicio de sesiÃ³n llegan cuando se conecte la base de datos.
+          <p className="mt-5 rounded-radio border border-borde bg-tarjeta/80 px-5 py-3 text-xs text-tinta-tenue">
+            Tu sesión se guarda en una cookie de este sitio, no del proveedor, y
+            el token nunca pasa por JavaScript.
           </p>
         </div>
       </main>

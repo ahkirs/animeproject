@@ -81,13 +81,13 @@ export default function FormularioSesion({
   }
 
   return (
-    <form className="grid gap-e3" onSubmit={enviar} noValidate>
+    <form className="grid gap-5" onSubmit={enviar} noValidate>
       {error && (
         <p
           role="alert"
-          className="flex items-start gap-e2 rounded-radio border border-rojo/40 bg-rojo/10 px-e3 py-e2 text-paso-1 text-hueso"
+          className="flex items-start gap-3 rounded-radio border border-error/40 bg-error/10 px-5 py-3 text-sm text-tinta"
         >
-          <span className="mt-[0.15rem] shrink-0 text-rojo">
+          <span className="mt-[0.15rem] shrink-0 text-error">
             <Icono nombre="cerrar" tam={15} />
           </span>
           {error}
@@ -138,7 +138,7 @@ export default function FormularioSesion({
       <button
         type="submit"
         disabled={enviando}
-        className="mt-e2 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-radio border border-transparent bg-ambar px-[1.35rem] py-3 text-paso-2 font-semibold text-ambar-tinta transition-colors duration-200 ease-sal hover:bg-ambar-claro active:translate-y-px disabled:cursor-wait disabled:opacity-60"
+        className="mt-3 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-radio bg-tinta px-[1.35rem] py-3 text-base font-semibold text-fondo transition-colors duration-200 ease-sal hover:bg-white active:translate-y-px disabled:cursor-wait disabled:opacity-60"
       >
         {enviando
           ? 'Un momento…'

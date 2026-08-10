@@ -4,13 +4,16 @@ import { Fragment, type ReactNode } from 'react'
 export default function Datos({ children }: { children: ReactNode[] }) {
   const visibles = children.filter(Boolean)
   return (
-    <div className="flex flex-wrap items-center gap-[0.7rem] text-paso-1 text-hueso-70">
+    <div className="flex flex-wrap items-center gap-3 text-sm text-tinta-apagada">
       {visibles.map((hijo, i) => (
         <Fragment key={i}>
           {i > 0 && (
-            <span aria-hidden="true" className="size-[3px] rounded-full bg-hueso-45" />
+            <span
+              aria-hidden="true"
+              className="size-[3px] rounded-full bg-tinta-tenue"
+            />
           )}
-          <span className="inline-flex items-center gap-[0.35rem]">{hijo}</span>
+          <span className="inline-flex items-center gap-1.5">{hijo}</span>
         </Fragment>
       ))}
     </div>
@@ -19,7 +22,7 @@ export default function Datos({ children }: { children: ReactNode[] }) {
 
 export function Nota({ valor }: { valor: number }) {
   return (
-    <span className="font-bold text-ambar tabular-nums">
+    <span className="font-bold text-acento tabular-nums">
       {valor.toLocaleString('es-ES', { minimumFractionDigits: 1 })}
     </span>
   )
@@ -33,7 +36,7 @@ export function NotaOpcional({ valor }: { valor: number | null | undefined }) {
 
 export function Clasificacion({ valor }: { valor: string }) {
   return (
-    <span className="rounded-[2px] border border-borde-vivo px-[0.35rem] py-[0.05rem] text-xs font-bold tracking-[0.04em] text-hueso-70">
+    <span className="rounded-[3px] border border-borde-vivo px-1.5 py-px text-xs font-bold tracking-[0.04em] text-tinta-apagada">
       {valor}
     </span>
   )

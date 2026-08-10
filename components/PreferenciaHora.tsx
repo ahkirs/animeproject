@@ -70,12 +70,12 @@ export function SelectorHora() {
   useEffect(() => setNombreZona(zonaDelNavegador()), [])
 
   return (
-    <div className="flex flex-wrap items-center gap-e2">
-      <span className="text-paso-0 font-bold tracking-[0.12em] text-hueso-45 uppercase">
+    <div className="flex flex-wrap items-center gap-3">
+      <span className="text-xs font-bold tracking-[0.12em] text-tinta-tenue uppercase">
         Horario
       </span>
 
-      <div role="group" aria-label="Zona horaria de los estrenos" className="flex gap-e1">
+      <div role="group" aria-label="Zona horaria de los estrenos" className="flex gap-1.5">
         {OPCIONES.map((o) => {
           const activa = montado && zona === o.id
           return (
@@ -84,10 +84,10 @@ export function SelectorHora() {
               type="button"
               onClick={() => cambiar(o.id)}
               aria-pressed={activa}
-              className={`cursor-pointer rounded-full border px-[0.9rem] py-[0.3rem] text-paso-0 font-bold tracking-[0.06em] uppercase transition-colors duration-200 ease-sal ${
+              className={`cursor-pointer rounded-full border px-[0.9rem] py-[0.3rem] text-xs font-bold tracking-[0.06em] uppercase transition-colors duration-200 ease-sal ${
                 activa
-                  ? 'border-ambar bg-ambar text-ambar-tinta'
-                  : 'border-borde-vivo text-hueso-70 hover:border-hueso-45 hover:text-hueso'
+                  ? 'border-transparent bg-tinta text-fondo'
+                  : 'border-borde-vivo text-tinta-apagada hover:border-tinta-tenue hover:text-tinta'
               }`}
             >
               {o.texto}
@@ -96,7 +96,7 @@ export function SelectorHora() {
         })}
       </div>
 
-      <span className="text-paso-0 text-hueso-45 tabular-nums">
+      <span className="text-xs text-tinta-tenue tabular-nums">
         {montado && zona === 'local' && nombreZona ? nombreZona : 'UTC+0'}
       </span>
     </div>

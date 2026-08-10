@@ -1,28 +1,33 @@
-﻿import Link from 'next/link'
+import Link from 'next/link'
 import Marca from './Marca'
+
+/* El pie.
+
+   Vive dentro del panel con scroll del marco, así que se ve al final de
+   cualquier página sin que ninguna tenga que montarlo. Va callado a
+   propósito: en un sitio donde el contenido es la carátula, el pie es
+   señalización, no una sección más. */
 
 const COLUMNAS: { titulo: string; enlaces: { texto: string; href: string }[] }[] = [
   {
-    titulo: 'CatÃ¡logo',
+    titulo: 'Catálogo',
     enlaces: [
       { texto: 'Explorar', href: '/explorar' },
-      { texto: 'Simulcast', href: '/explorar?estado=emision' },
-      { texto: 'Doblaje en espaÃ±ol', href: '/explorar' },
+      { texto: 'En emisión', href: '/explorar?estado=emision' },
+      { texto: 'Completas', href: '/explorar?estado=completa' },
     ],
   },
   {
     titulo: 'Cuenta',
     enlaces: [
       { texto: 'Mi lista', href: '/mi-lista' },
-      { texto: 'Entrar', href: '/acceder' },
-      { texto: 'Crear cuenta', href: '/registro' },
-      { texto: 'Dispositivos', href: '/mi-lista' },
+      { texto: 'Notificaciones', href: '/notificaciones' },
+      { texto: 'Ajustes', href: '/cuenta' },
     ],
   },
   {
     titulo: 'Ayuda',
     enlaces: [
-      { texto: 'Centro de soporte', href: '#' },
       { texto: 'Accesibilidad', href: '#' },
       { texto: 'Aviso legal', href: '#' },
       { texto: 'Privacidad', href: '#' },
@@ -30,34 +35,29 @@ const COLUMNAS: { titulo: string; enlaces: { texto: string; href: string }[] }[]
   },
 ]
 
-interface Props {
-  /** Texto del aviso legal, distinto en el reproductor. */
-  aviso?: string
-  /** El reproductor lo pega al contenido, sin margen superior. */
-  pegado?: boolean
-}
-
 const AVISO_POR_DEFECTO =
-  'Maqueta de diseÃ±o. Todos los tÃ­tulos, sinopsis, fechas, valoraciones, nombres y carÃ¡tulas son material sintÃ©tico creado para esta demostraciÃ³n: ninguna obra, marca ni persona real aparece en la pÃ¡gina. Sustituye este contenido por el catÃ¡logo real antes de publicar.'
+  'KUROBA no aloja ningún vídeo. El catálogo, las fichas y los enlaces de reproducción se obtienen de proveedores externos y se enlazan tal cual; los derechos de cada obra pertenecen a sus autores y licenciatarios.'
 
-export default function Pie({ aviso = AVISO_POR_DEFECTO, pegado }: Props) {
+export default function Pie({
+  /** Texto legal, distinto en el reproductor. */
+  aviso = AVISO_POR_DEFECTO,
+}: {
+  aviso?: string
+}) {
   return (
-    <footer
-      className={`border-t border-borde px-margen pt-e5 pb-e4 text-paso-1 text-hueso-45 ${
-        pegado ? 'mt-0' : 'mt-e6'
-      }`}
-    >
-      <div className="mx-auto flex max-w-[1600px] flex-wrap items-start justify-between gap-e4">
+    <footer className="mt-16 border-t border-borde px-bleed pt-10 pb-8 text-sm text-tinta-tenue">
+      <div className="mx-auto flex max-w-[1600px] flex-wrap items-start justify-between gap-8">
         <div>
           <Marca />
           <p className="mt-3 max-w-[34ch]">
-            CatÃ¡logo de anime con emisiÃ³n simultÃ¡nea y subtÃ­tulos en cinco idiomas.
+            Catálogo de anime en español, con lo que está emitiéndose ahora
+            mismo.
           </p>
         </div>
 
         {COLUMNAS.map((col) => (
           <div key={col.titulo}>
-            <h3 className="mb-e2 text-paso-0 font-bold tracking-[0.1em] text-hueso-70 uppercase">
+            <h3 className="mb-3 text-xs font-bold tracking-[0.1em] text-tinta-apagada uppercase">
               {col.titulo}
             </h3>
             <ul className="grid list-none gap-[0.45rem] p-0">
@@ -65,7 +65,7 @@ export default function Pie({ aviso = AVISO_POR_DEFECTO, pegado }: Props) {
                 <li key={e.texto}>
                   <Link
                     href={e.href}
-                    className="no-underline hover:text-hueso hover:underline"
+                    className="no-underline transition-colors duration-150 ease-sal hover:text-tinta"
                   >
                     {e.texto}
                   </Link>
@@ -76,7 +76,7 @@ export default function Pie({ aviso = AVISO_POR_DEFECTO, pegado }: Props) {
         ))}
       </div>
 
-      <p className="mx-auto mt-e4 max-w-[1600px] border-t border-borde pt-e3 text-paso-0 leading-relaxed text-hueso-45">
+      <p className="mx-auto mt-8 max-w-[1600px] border-t border-borde pt-5 text-xs leading-relaxed">
         {aviso}
       </p>
     </footer>

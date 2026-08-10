@@ -34,6 +34,44 @@ const ICONOS = {
     </g>
   ),
 
+  /* Tres filetes del mismo grosor que el resto de la familia. El de en
+     medio va corto: a 20px es lo que lo distingue de un icono de lista. */
+  menu: (
+    <g stroke="currentColor" {...TRAZO} strokeWidth={2}>
+      <path d="M4 7h16M4 12h11M4 17h16" />
+    </g>
+  ),
+
+  info: (
+    <g stroke="currentColor" {...TRAZO}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 11v5.5" />
+      <path d="M12 7.8h.01" strokeWidth={2.2} />
+    </g>
+  ),
+
+  calendario: (
+    <g stroke="currentColor" {...TRAZO}>
+      <rect x="3.5" y="5.5" width="17" height="15" rx="2" />
+      <path d="M3.5 10h17M8 3.5v4M16 3.5v4" />
+    </g>
+  ),
+
+  reloj: (
+    <g stroke="currentColor" {...TRAZO}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7v5.3l3.4 2" />
+    </g>
+  ),
+
+  /* Episodios: la tira de fotogramas, que es lo que se cuenta. */
+  episodios: (
+    <g stroke="currentColor" {...TRAZO}>
+      <rect x="2.5" y="5.5" width="19" height="13" rx="2" />
+      <path d="M2.5 9.5h19M2.5 14.5h19M7.5 5.5v13M16.5 5.5v13" />
+    </g>
+  ),
+
   flecha: (
     <g stroke="currentColor" {...TRAZO}>
       <path d="M5 12h13M13 6.5l5.5 5.5-5.5 5.5" />
@@ -59,11 +97,82 @@ const ICONOS = {
     </g>
   ),
 
+  /* Estrella de guardar. El mismo trazado en hueca y maciza, para que al
+     marcarla no cambie la silueta, solo el relleno. */
+  estrella: (
+    <g stroke="currentColor" {...TRAZO}>
+      <path d="M12 4.2l2.36 4.78 5.28.77-3.82 3.72.9 5.26L12 16.25l-4.72 2.48.9-5.26-3.82-3.72 5.28-.77z" />
+    </g>
+  ),
+
+  'estrella-llena': (
+    <path
+      d="M12 4.2l2.36 4.78 5.28.77-3.82 3.72.9 5.26L12 16.25l-4.72 2.48.9-5.26-3.82-3.72 5.28-.77z"
+      fill="currentColor"
+    />
+  ),
+
   /* Cheurón de menú. Va más fino que el resto de la familia a propósito:
      se usa a 12px junto al avatar, y al grosor normal se emborrona. */
   cheuron: (
     <g stroke="currentColor" {...TRAZO} strokeWidth={2.2}>
       <path d="M7 10l5 5 5-5" />
+    </g>
+  ),
+
+  /* Los dos cheurones de la barra superior (atrás y adelante). Existen
+     aparte del cheurón de menú en vez de rotarlo con una transformación:
+     girar el de menú deja el trazo con los extremos en la diagonal y a
+     20px se nota que está torcido. */
+  'cheuron-izq': (
+    <g stroke="currentColor" {...TRAZO} strokeWidth={2}>
+      <path d="M14.5 6l-6 6 6 6" />
+    </g>
+  ),
+
+  'cheuron-der': (
+    <g stroke="currentColor" {...TRAZO} strokeWidth={2}>
+      <path d="M9.5 6l6 6-6 6" />
+    </g>
+  ),
+
+  /* --- Navegación del riel --- */
+
+  casa: (
+    <g stroke="currentColor" {...TRAZO}>
+      <path d="M4 10.5L12 4l8 6.5V19a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 19z" />
+      <path d="M9.5 20.5v-6h5v6" />
+    </g>
+  ),
+
+  /* Brújula: explorar no es «buscar». La lupa ya está ocupada por el
+     buscador de la barra, y dos lupas en la misma pantalla no dicen
+     nada. */
+  brujula: (
+    <g stroke="currentColor" {...TRAZO}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M15.2 8.8l-1.9 4.5-4.5 1.9 1.9-4.5z" />
+    </g>
+  ),
+
+  biblioteca: (
+    <g stroke="currentColor" {...TRAZO}>
+      <path d="M4 4.5h3.5v15H4zM10 4.5h3.5v15H10z" />
+      <path d="M16.4 5.4l3.3.9-3.9 14.5-3.3-.9z" />
+    </g>
+  ),
+
+  mensajes: (
+    <g stroke="currentColor" {...TRAZO}>
+      <path d="M3.5 6.5A2 2 0 015.5 4.5h9a2 2 0 012 2v5a2 2 0 01-2 2H8l-4.5 3z" />
+      <path d="M18 9.5h.5a2 2 0 012 2v5a2 2 0 01-2 2H18l-3 2.5V19" />
+    </g>
+  ),
+
+  usuario: (
+    <g stroke="currentColor" {...TRAZO}>
+      <circle cx="12" cy="8.5" r="3.8" />
+      <path d="M4.8 20a7.2 7.2 0 0114.4 0" />
     </g>
   ),
 

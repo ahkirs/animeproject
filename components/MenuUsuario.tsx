@@ -7,7 +7,7 @@
    recorren las opciones, Inicio y Fin saltan a los extremos, y un clic
    fuera lo cierra. Sin eso queda inalcanzable para quien no usa ratón.
 
-   Las opciones vienen de fuera para que la cabecera decida qué hay: hoy
+   Las opciones vienen de fuera para que el marco decida qué hay: hoy
    favoritos e historial, mañana las listas guardadas. */
 
 import { useEffect, useId, useRef, useState } from 'react'
@@ -23,14 +23,30 @@ export interface OpcionMenu {
   separada?: boolean
 }
 
+/** Dónde se despliega el panel. El avatar vive al pie del riel lateral,
+ *  así que allí el menú tiene que salir hacia arriba y hacia la derecha;
+ *  `abajo` queda para cuando el disparador está en una barra superior. */
+type Direccion = 'arriba-derecha' | 'abajo-derecha'
+
+const PANEL: Record<Direccion, string> = {
+  'arriba-derecha': 'bottom-0 left-[calc(100%+0.6rem)]',
+  'abajo-derecha': 'top-[calc(100%+0.55rem)] right-0',
+}
+
 export default function MenuUsuario({
   iniciales,
   alias,
   opciones,
+  direccion = 'arriba-derecha',
+  /** En el riel el cheurón sobra: no hay sitio y el avatar ya se lee como
+   *  algo pulsable. */
+  conCheuron = false,
 }: {
   iniciales: string
   alias: string
   opciones: OpcionMenu[]
+  direccion?: Direccion
+  conCheuron?: boolean
 }) {
   const [abierto, setAbierto] = useState(false)
   const [activa, setActiva] = useState(-1)
@@ -42,8 +58,8 @@ export default function MenuUsuario({
   const router = useRouter()
 
   /** Cerrar sesión borra las cookies en el servidor y refresca para que
-   *  los componentes de servidor vuelvan a leerlas. Sin el refresh, la
-   *  cabecera seguiría enseñando el avatar hasta la siguiente recarga. */
+   *  los componentes de servidor vuelvan a leerlas. Sin el refresh, el
+   *  marco seguiría enseñando el avatar hasta la siguiente recarga. */
   async function salir() {
     if (saliendo) return
     setSaliendo(true)
@@ -112,7 +128,7 @@ export default function MenuUsuario({
   }
 
   return (
-    <div ref={envoltorio} className="relative" onKeyDown={tecla}>
+    <div ref={envoltorio} className="relative flex" onKeyDown={tecla}>
       <button
         ref={disparador}
         type="button"
@@ -124,24 +140,26 @@ export default function MenuUsuario({
           setAbierto((v) => !v)
           setActiva(-1)
         }}
-        className="flex cursor-pointer items-center gap-[0.3rem] rounded-full border-0 bg-transparent p-0 text-hueso-45 transition-colors duration-200 ease-sal hover:text-hueso"
+        className="flex cursor-pointer items-center gap-[0.3rem] rounded-full border-0 bg-transparent p-0 text-tinta-apagada transition-colors duration-200 ease-sal hover:text-tinta"
       >
         <span
           aria-hidden="true"
-          className={`grid size-[34px] shrink-0 place-items-center rounded-full border bg-sala-600 text-paso-0 font-bold text-hueso-70 transition-colors duration-200 ease-sal ${
-            abierto ? 'border-hueso-45 text-hueso' : 'border-borde-vivo'
+          className={`grid size-8 shrink-0 place-items-center rounded-full border bg-apagado text-[0.7rem] font-bold transition-colors duration-200 ease-sal ${
+            abierto ? 'border-borde-vivo text-tinta' : 'border-borde text-tinta-apagada'
           }`}
         >
           {iniciales}
         </span>
-        <span
-          aria-hidden="true"
-          className={`transition-transform duration-200 ease-sal ${
-            abierto ? 'rotate-180' : ''
-          }`}
-        >
-          <Icono nombre="cheuron" tam={12} />
-        </span>
+        {conCheuron && (
+          <span
+            aria-hidden="true"
+            className={`transition-transform duration-200 ease-sal ${
+              abierto ? 'rotate-180' : ''
+            }`}
+          >
+            <Icono nombre="cheuron" tam={12} />
+          </span>
+        )}
       </button>
 
       {abierto && (
@@ -149,9 +167,9 @@ export default function MenuUsuario({
           id={idMenu}
           role="menu"
           aria-label={`Cuenta de ${alias}`}
-          className="absolute top-[calc(100%+0.55rem)] right-0 z-70 min-w-[13.5rem] rounded-radio border border-borde-vivo bg-sala-800 py-[0.3rem] shadow-alta"
+          className={`absolute z-90 min-w-[13.5rem] rounded-radio border border-borde bg-tarjeta py-[0.3rem] ${PANEL[direccion]}`}
         >
-          <p className="truncate px-e3 pt-[0.35rem] pb-e2 text-paso-0 text-hueso-45">
+          <p className="truncate px-4 pt-[0.35rem] pb-2 text-xs text-tinta-tenue">
             @{alias}
           </p>
 
@@ -165,11 +183,11 @@ export default function MenuUsuario({
                 opcionesRef.current[i] = nodo
               }}
               onClick={() => cerrar(false)}
-              className={`flex items-center gap-e2 px-e3 py-[0.5rem] text-paso-1 text-hueso-70 no-underline transition-colors duration-150 ease-sal hover:bg-sala-700 hover:text-hueso focus-visible:bg-sala-700 focus-visible:text-hueso ${
-                o.separada ? 'mt-[0.3rem] border-t border-borde pt-e2' : ''
+              className={`flex items-center gap-3 px-4 py-2 text-sm text-tinta-apagada no-underline transition-colors duration-150 ease-sal hover:bg-apagado hover:text-tinta focus-visible:bg-apagado focus-visible:text-tinta ${
+                o.separada ? 'mt-[0.3rem] border-t border-borde pt-3' : ''
               }`}
             >
-              <span className="text-hueso-45">
+              <span className="text-tinta-tenue">
                 <Icono nombre={o.icono} tam={16} />
               </span>
               {o.texto}
@@ -182,9 +200,9 @@ export default function MenuUsuario({
             tabIndex={-1}
             onClick={salir}
             disabled={saliendo}
-            className="mt-[0.3rem] flex w-full cursor-pointer items-center gap-e2 border-0 border-t border-borde bg-transparent px-e3 py-[0.5rem] pt-e2 text-left text-paso-1 text-hueso-45 transition-colors duration-150 ease-sal hover:bg-sala-700 hover:text-hueso focus-visible:bg-sala-700 focus-visible:text-hueso disabled:cursor-wait disabled:opacity-60"
+            className="mt-[0.3rem] flex w-full cursor-pointer items-center gap-3 border-0 border-t border-borde bg-transparent px-4 py-2 pt-3 text-left text-sm text-tinta-tenue transition-colors duration-150 ease-sal hover:bg-apagado hover:text-tinta focus-visible:bg-apagado focus-visible:text-tinta disabled:cursor-wait disabled:opacity-60"
           >
-            <span className="text-hueso-45">
+            <span className="text-tinta-tenue">
               <Icono nombre="atras" tam={16} />
             </span>
             {saliendo ? 'Cerrando…' : 'Cerrar sesión'}

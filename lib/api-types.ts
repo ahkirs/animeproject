@@ -34,6 +34,32 @@ export interface ApiEpisodioInfo {
   url: string | null
 }
 
+/** Otra obra emparentada con esta: precuelas, secuelas, películas,
+ *  OVAs y especiales.
+ *
+ *  El código de `type` no está documentado en ninguna parte, así que se
+ *  ha deducido comparando fichas conocidas:
+ *
+ *    1  → la obra de la que esta desciende (Sennen Kessen-hen apunta a
+ *         Bleach). Precuela o serie madre.
+ *    2  → continuación directa (Shingeki no Kyojin → Season 2).
+ *    4  → versiones alternativas y arcos recontados.
+ *    6  → especiales que recuentan la historia desde otro personaje.
+ *    10 → el cajón de sastre: películas, OVAs y especiales sueltos. Es
+ *         con diferencia el más frecuente.
+ *
+ *  Solo 1 y 2 se han visto lo bastante como para etiquetarlos; el resto
+ *  se agrupa bajo un rótulo genérico en `relacionesDeInfo`. Si algún día
+ *  el backend documenta la enumeración, ese mapa es lo único que hay que
+ *  tocar. */
+export interface ApiRelacion {
+  type: number
+  title: string
+  slug: string | null
+  url: string | null
+  startDate: string | null
+}
+
 /** Respuesta de /anime/info. */
 export interface ApiAnimeInfo {
   id: string | number | null
@@ -54,6 +80,8 @@ export interface ApiAnimeInfo {
   trailer: string | null
   genres: ApiGenero[]
   episodes: ApiEpisodioInfo[]
+  /** Obras emparentadas. Llega siempre, aunque sea vacío. */
+  relations: ApiRelacion[]
 }
 
 export interface ApiVideoLink {

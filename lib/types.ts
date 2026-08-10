@@ -28,6 +28,10 @@ export type ClaveLamina =
 
 export type EstadoEpisodio = 'visto' | 'en-curso' | 'disponible' | 'bloqueado'
 
+/** Estado de emisión de la obra. Solo se conoce cuando se ha pedido la
+ *  ficha completa: el catálogo devuelve `status` a nulo. */
+export type EstadoEmision = 'en-emision' | 'finalizada'
+
 export interface Episodio {
   numero: number
   titulo: string
@@ -50,11 +54,18 @@ export interface Temporada {
   episodios: Episodio[]
 }
 
-export interface Persona {
-  nombre: string
-  papel?: string
-  voz?: string
-  iniciales: string
+/** Otra obra emparentada: precuela, secuela, película, OVA.
+ *
+ *  Sustituye al reparto, que nunca llegó a existir: el scraper no
+ *  devuelve personajes, pero sí devuelve estas, y son lo que de verdad
+ *  necesita alguien que acaba de terminar una temporada. */
+export interface Relacionada {
+  /** Id canónico, si la obra está en el catálogo y se puede abrir. */
+  id: string | null
+  titulo: string
+  /** «Precuela», «Secuela» o «Relacionada». Ver ApiRelacion. */
+  vinculo: string
+  anio: number | null
 }
 
 export interface FichaTecnica {
@@ -135,12 +146,22 @@ export interface Serie {
   genero: string
   generos: string[]
   temporadaEtiqueta: string
+  /** En emisión o terminada, cuando el proveedor lo dice. */
+  estado?: EstadoEmision
+  /** Primer día de emisión, en ISO. De aquí sale «Verano 2026». */
+  fechaInicio?: string
   sinopsisCorta: string
   sinopsis: string
   /** Carátula (poster) o su SVG de reserva. */
   lamina: Arte
   /** Fondo panorámico o su SVG de reserva. */
   panoramica?: Arte
+  /** Tráiler, tal y como lo publica el proveedor: una URL cuyo último
+   *  segmento es el identificador del vídeo. Solo lo trae la ficha, y
+   *  buena parte de las obras no lo tiene. */
+  trailer?: string
+  /** Identificador en MyAnimeList, para enlazar la ficha de allí. */
+  malId?: number
   /** URL en el proveedor: es la que se pasa para pedir info/episodios. */
   url: string
   proveedor: Proveedor
@@ -150,7 +171,7 @@ export interface Serie {
   /** El scraper no agrupa por temporada: todos los episodios van en una. */
   temporadas?: Temporada[]
   ficha?: FichaTecnica
-  reparto?: Persona[]
+  relacionadas?: Relacionada[]
 }
 
 /** Otra copia de la misma obra en un proveedor distinto. */
@@ -160,33 +181,23 @@ export interface SerieAlternativa {
   url: string
 }
 
-/* ---------------- Lista del usuario ---------------- */
+/* ---------------- Lista del usuario ----------------
 
-export type EstadoLista =
-  | 'viendo'
-  | 'pendiente'
-  | 'completada'
-  | 'pausada'
-  | 'abandonada'
+   Aquí vivían EstadoLista y EntradaLista: «viendo», «en pausa»,
+   «abandonada»… Se han quitado porque el backend no guarda nada de eso.
+   Guarda tres cosas y solo tres: favoritos, watchlist e historial por
+   episodio (ver lib/perfil.ts). Un tipo que describe un modelo que no
+   existe termina obligando a inventarse los datos, que es exactamente
+   lo que pasaba. */
 
-/** Una serie dentro de la lista de alguien. Cuando haya cuentas, esto
- *  es una fila por usuario y serie en la base de datos. */
-export interface EntradaLista {
-  serieId: string
-  estado: EstadoLista
-  episodiosVistos: number
-  /** Puntuación personal del 1 al 10. Sin puntuar si falta. */
-  puntuacion?: number
-  /** Última vez que se tocó la entrada, en ISO. */
-  actualizado: string
-}
-
-/** Una entrada de «Seguir viendo». */
+/** Una entrada de «Seguir viendo», derivada del historial real. */
 export interface EnCurso {
   serieId: string
   serieTitulo: string
   episodio: string
-  restanteMin: number
+  /** Cuánto queda. Nulo si el backend no guardó la duración total. */
+  restanteMin: number | null
+  /** De 0 a 100. Cero si no se puede calcular. */
   progreso: number
   lamina: Arte
 }

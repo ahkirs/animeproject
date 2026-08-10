@@ -15,6 +15,7 @@
 
 import { pedirConSesion } from './sesion'
 import { urlImagenProxy } from './api'
+import type { EnCurso } from './types'
 
 /* ------------------------------------------------------------
    Formas del backend
@@ -34,6 +35,10 @@ export interface PerfilUsuario {
   isEmailVerified: boolean
   createdAt: string
   profileVisibility: Visibilidad
+  /** Si la cuenta tiene 2FA activo. Va opcional porque el backend no
+   *  documenta el esquema de /user/profile y el nombre puede variar; la
+   *  página de cuenta lo trata como «apagado» si no llega. */
+  twoFactorEnabled?: boolean
 }
 
 /** Una entrada de `/user/favorites` o `/user/watchlist`. Las dos
@@ -226,40 +231,57 @@ async function pedirSinSesion<T>(ruta: string): Promise<T | null> {
 }
 
 /* ------------------------------------------------------------
-   Ayudas de presentación
+   SEGUIR VIENDO
+
+   Vive aquí y no en lib/catalogo.ts —que es donde estaba— por dos
+   razones. La de fondo: esto lee el historial, así que pertenece a los
+   datos de la cuenta, no al catálogo. La práctica: catalogo.ts lo
+   importan componentes de cliente (el buscador usa `minimoParaBuscar`),
+   y en cuanto tiraba de perfil.ts arrastraba lib/sesion.ts —que lleva
+   `server-only`— al paquete del navegador y la compilación se caía.
    ------------------------------------------------------------ */
 
-/** «hace 2 h», «ayer», «hace 3 días». */
-export function haceCuanto(iso: string, referencia = Date.now()): string {
-  const minutos = Math.round((referencia - Date.parse(iso)) / 60_000)
-  if (!Number.isFinite(minutos)) return ''
-  if (minutos < 1) return 'ahora mismo'
-  if (minutos < 60) return `hace ${minutos} min`
+/** Las últimas obras empezadas y sin terminar, para el riel de la
+ *  portada.
+ *
+ *  El historial llega por episodio, y una serie que se está viendo tiene
+ *  una fila por cada capítulo visto. Aquí se agrupa por obra y se
+ *  conserva solo la vista más reciente de cada una: enseñar tres
+ *  episodios seguidos de la misma serie sería tres veces la misma
+ *  tarjeta.
+ *
+ *  Se descarta lo que está prácticamente terminado (>92%): quien acaba
+ *  de ver los créditos no quiere «seguir viendo» eso, y si no se filtra,
+ *  el riel se llena de episodios acabados. */
+export async function enCurso(limite = 12): Promise<EnCurso[]> {
+  // Se piden más filas de las que caben porque muchas colapsarán al
+  // agrupar por serie.
+  const pagina = await historial(1, limite * 4)
 
-  const horas = Math.round(minutos / 60)
-  if (horas < 24) return `hace ${horas} h`
+  const porSerie = new Map<string, EnCurso>()
 
-  const dias = Math.round(horas / 24)
-  if (dias === 1) return 'ayer'
-  if (dias < 30) return `hace ${dias} días`
+  for (const fila of pagina.filas) {
+    if (porSerie.has(fila.animeId)) continue
 
-  const meses = Math.round(dias / 30)
-  return meses === 1 ? 'hace un mes' : `hace ${meses} meses`
-}
+    const progreso =
+      fila.duracionSeg && fila.duracionSeg > 0
+        ? Math.min(100, Math.round((fila.segundo / fila.duracionSeg) * 100))
+        : 0
+    if (progreso > 92) continue
 
-/** Etiqueta del grupo al que pertenece una vista: Hoy, Ayer, o la fecha. */
-export function grupoDeDia(iso: string, referencia = Date.now()): string {
-  const dia = (t: number) => Math.floor(t / 86_400_000)
-  const diferencia = dia(referencia) - dia(Date.parse(iso))
+    porSerie.set(fila.animeId, {
+      serieId: fila.animeId,
+      serieTitulo: fila.animeTitle,
+      episodio: fila.episodeTitle,
+      restanteMin: fila.duracionSeg
+        ? Math.max(0, Math.round((fila.duracionSeg - fila.segundo) / 60))
+        : null,
+      progreso,
+      lamina: fila.imagen ?? 'panoramica-obra',
+    })
 
-  if (!Number.isFinite(diferencia)) return 'Antes'
-  if (diferencia <= 0) return 'Hoy'
-  if (diferencia === 1) return 'Ayer'
-  if (diferencia < 7) return 'Esta semana'
-  if (diferencia < 30) return 'Este mes'
-  return new Date(iso).toLocaleDateString('es-ES', {
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  })
+    if (porSerie.size >= limite) break
+  }
+
+  return [...porSerie.values()]
 }

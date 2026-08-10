@@ -1,10 +1,4 @@
-import type {
-  EnCurso,
-  EntradaLista,
-  EstadoLista,
-  Serie,
-  Temporada,
-} from './types'
+import type { EstadoEmision, Relacionada, Serie, Temporada } from './types'
 import type { ApiAnimeInfo, ApiEnlacesEpisodio, ApiResultado } from './api-types'
 import {
   apiBuscar,
@@ -125,6 +119,19 @@ function anioDeInfo(info: ApiAnimeInfo): number | null {
   return null
 }
 
+/** Estado de emisión a partir de la ficha.
+ *
+ *  El proveedor marca con `status: 2` lo que sigue emitiéndose, pero no
+ *  usa ningún código para lo terminado: las obras antiguas llegan con el
+ *  campo a nulo y una fecha de fin. Así que lo terminado se deduce de
+ *  `endDate`, y lo que no tiene ni una cosa ni la otra se deja sin
+ *  estado en vez de inventarlo. */
+function estadoDeInfo(info: ApiAnimeInfo): EstadoEmision | undefined {
+  if (info.status === 2) return 'en-emision'
+  if (info.endDate) return 'finalizada'
+  return undefined
+}
+
 /** Primera frase de la sinopsis, para las tarjetas. */
 function sinopsisCortaDe(texto: string | null): string {
   if (!texto) return ''
@@ -132,6 +139,35 @@ function sinopsisCortaDe(texto: string | null): string {
   const punto = llana.indexOf('.')
   if (punto !== -1 && punto < 180) return llana.slice(0, punto + 1)
   return llana.length > 180 ? `${llana.slice(0, 180)}…` : llana
+}
+
+/** Rótulo de cada código de relación. Solo se nombran los dos que se han
+ *  podido confirmar contra fichas conocidas; lo demás cae en el genérico
+ *  antes que arriesgarse a llamar «secuela» a una película. La deducción
+ *  está explicada en ApiRelacion. */
+const VINCULOS: Record<number, string> = {
+  1: 'Precuela',
+  2: 'Secuela',
+}
+
+/** Obras emparentadas, listas para pintar.
+ *
+ *  Una relación solo es navegable si trae `url`: de ahí sale el id
+ *  canónico con el que se abre su ficha. Las que no la traen se enseñan
+ *  igual, pero sin enlace —existen, y decir que existen ya es
+ *  información— y por eso `id` puede ser nulo. */
+function relacionesDeInfo(info: ApiAnimeInfo): Relacionada[] | undefined {
+  const relaciones = (info.relations ?? []).filter((r) => r?.title?.trim())
+  if (relaciones.length === 0) return undefined
+
+  return relaciones.map((r) => ({
+    id: r.url
+      ? idCanonicoDe({ url: r.url, provider: nombreProveedor('animeav1'), id: null })
+      : null,
+    titulo: r.title.trim(),
+    vinculo: VINCULOS[r.type] ?? 'Relacionada',
+    anio: r.startDate ? Number(r.startDate.slice(0, 4)) : null,
+  }))
 }
 
 /** Ficha completa de una obra, con todos sus episodios. */
@@ -166,13 +202,18 @@ function infoASerie(
     genero: generos[0] ?? info.type ?? 'Anime',
     generos,
     temporadaEtiqueta: info.type ?? 'Serie',
+    estado: estadoDeInfo(info),
+    fechaInicio: info.startDate ?? undefined,
     sinopsisCorta: sinopsisCortaDe(info.description),
     sinopsis: info.description ?? '',
     lamina: urlImagenProxy(info.image) ?? 'mecha',
     panoramica: urlImagenProxy(info.backdrop) ?? 'panoramica-obra',
+    trailer: info.trailer ?? undefined,
+    malId: info.malId ?? undefined,
     url,
     proveedor,
     alternativas: [],
+    relacionadas: relacionesDeInfo(info),
     totalEpisodios: info.totalEpisodes ?? episodios.length,
     temporadas: [
       {
@@ -326,8 +367,11 @@ async function catalogarAnimeav1(
 }
 
 /** Unas cuantas obras para las portadas. La API ordena como puede; se
- *  enriquecen las primeras con la ficha para tener sinopsis y nota. */
-export async function tendencias(limite = 10): Promise<Serie[]> {
+ *  enriquecen las primeras con la ficha para tener sinopsis y nota.
+ *
+ *  `conFicha` es cuántas se enriquecen: cada una es una llamada más al
+ *  scraper, así que sube solo lo que el destacado vaya a enseñar. */
+export async function tendencias(limite = 10, conFicha = 4): Promise<Serie[]> {
   const dedupe = deduplicar(await catalogarAnimeav1(undefined, PAGINAS_FILA))
 
   const series = dedupe
@@ -336,7 +380,7 @@ export async function tendencias(limite = 10): Promise<Serie[]> {
 
   // Las primeras, con ficha completa, para el destacado.
   const enriquecidas = await Promise.all(
-    series.slice(0, 4).map(async (s) => {
+    series.slice(0, conFicha).map(async (s) => {
       if (!s.url) return s
       try {
         const info = await apiInfo(s.url)
@@ -349,7 +393,26 @@ export async function tendencias(limite = 10): Promise<Serie[]> {
       }
     }),
   )
-  return [...enriquecidas, ...series.slice(4)]
+  return [...enriquecidas, ...series.slice(conFicha)]
+}
+
+/* ------------------------------------------------------------
+   Temporada de estreno
+
+   El scraper no da la temporada, da la fecha de inicio. Se deriva
+   del mes, que es como se nombran las temporadas de anime: enero
+   es invierno, abril primavera, julio verano y octubre otoño.
+   ------------------------------------------------------------ */
+
+const TEMPORADAS = ['Invierno', 'Primavera', 'Verano', 'Otoño'] as const
+
+/** «Verano 2026» a partir de una fecha ISO. Nada si no hay fecha. */
+export function temporadaDe(fechaIso: string | undefined): string | undefined {
+  if (!fechaIso) return undefined
+  const fecha = new Date(fechaIso)
+  if (Number.isNaN(fecha.getTime())) return undefined
+  const nombre = TEMPORADAS[Math.floor(fecha.getUTCMonth() / 3)]
+  return `${nombre} ${fecha.getUTCFullYear()}`
 }
 
 export function estaEnEmision(serie: Serie): boolean {
@@ -505,132 +568,3 @@ export async function buscarSeries(
         d.alternativas.map((a) => a.provider ?? '').filter(Boolean).join(' · '),
     }))
 }
-
-/* ------------------------------------------------------------
-   LISTA DEL USUARIO
-   Datos de ejemplo mientras no hay cuentas. Los ids apuntan a obras
-   reales del scraper para que la página se vea con contenido.
-   ------------------------------------------------------------ */
-
-export const ESTADOS_LISTA: {
-  id: EstadoLista
-  texto: string
-  descripcion: string
-}[] = [
-  { id: 'viendo', texto: 'Viendo', descripcion: 'Series que tienes empezadas' },
-  { id: 'pendiente', texto: 'Pendientes', descripcion: 'Guardadas para más adelante' },
-  { id: 'completada', texto: 'Completadas', descripcion: 'Terminadas de ver' },
-  { id: 'pausada', texto: 'En pausa', descripcion: 'Aparcadas por ahora' },
-  { id: 'abandonada', texto: 'Abandonadas', descripcion: 'Dejadas a medias' },
-]
-
-export const USUARIO = {
-  nombre: 'Adrián',
-  alias: 'ahkirs',
-  iniciales: 'AR',
-  desde: 'agosto de 2026',
-}
-
-export const MI_LISTA: EntradaLista[] = [
-  {
-    serieId: 'animeav1-one-piece',
-    estado: 'viendo',
-    episodiosVistos: 1138,
-    puntuacion: 9,
-    actualizado: '2026-08-07T12:40:00Z',
-  },
-  {
-    serieId: 'animeav1-jujutsu-kaisen',
-    estado: 'viendo',
-    episodiosVistos: 2,
-    puntuacion: 8,
-    actualizado: '2026-08-06T21:10:00Z',
-  },
-  {
-    serieId: 'animeav1-spy-x-family',
-    estado: 'viendo',
-    episodiosVistos: 11,
-    actualizado: '2026-08-05T23:55:00Z',
-  },
-  {
-    serieId: 'animeav1-mushoku-tensei-iii-isekai-ittara-honki-dasu',
-    estado: 'viendo',
-    episodiosVistos: 7,
-    puntuacion: 9,
-    actualizado: '2026-08-04T19:20:00Z',
-  },
-  {
-    serieId: 'animeav1-sousou-no-frieren-2nd-season',
-    estado: 'pendiente',
-    episodiosVistos: 0,
-    actualizado: '2026-08-02T11:00:00Z',
-  },
-  {
-    serieId: 'animeav1-youjo-senki-ii',
-    estado: 'completada',
-    episodiosVistos: 12,
-    puntuacion: 8,
-    actualizado: '2026-08-01T09:30:00Z',
-  },
-]
-
-/** Entradas de la lista, opcionalmente de un solo estado, de más
- *  reciente a más antigua. */
-export function miLista(estado?: EstadoLista): EntradaLista[] {
-  return MI_LISTA.filter((e) => !estado || e.estado === estado).sort((a, b) =>
-    b.actualizado.localeCompare(a.actualizado),
-  )
-}
-
-export function cuantasEnEstado(estado: EstadoLista): number {
-  return MI_LISTA.filter((e) => e.estado === estado).length
-}
-
-/** Resumen para la cabecera del perfil. */
-export function resumenLista() {
-  const episodios = MI_LISTA.reduce((s, e) => s + e.episodiosVistos, 0)
-  const puntuadas = MI_LISTA.filter((e) => e.puntuacion !== undefined)
-  const media =
-    puntuadas.length > 0
-      ? puntuadas.reduce((s, e) => s + (e.puntuacion ?? 0), 0) / puntuadas.length
-      : undefined
-
-  return {
-    series: MI_LISTA.length,
-    episodios,
-    horas: Math.round((episodios * 24) / 60),
-    media,
-  }
-}
-
-/* ------------------------------------------------------------
-   SEGUIR VIENDO
-   Sin cuentas todavía no hay historial real: se muestra un ejemplo.
-   ------------------------------------------------------------ */
-
-export const EN_CURSO: EnCurso[] = [
-  {
-    serieId: 'animeav1-one-piece',
-    serieTitulo: 'One Piece',
-    episodio: 'E1138',
-    restanteMin: 22,
-    progreso: 8,
-    lamina: 'panoramica-obra',
-  },
-  {
-    serieId: 'animeav1-spy-x-family',
-    serieTitulo: 'Spy x Family',
-    episodio: 'E12',
-    restanteMin: 18,
-    progreso: 23,
-    lamina: 'panoramica-obra',
-  },
-  {
-    serieId: 'animeav1-mushoku-tensei-iii-isekai-ittara-honki-dasu',
-    serieTitulo: 'Mushoku Tensei III',
-    episodio: 'E8',
-    restanteMin: 2,
-    progreso: 91,
-    lamina: 'panoramica-obra',
-  },
-]

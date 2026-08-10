@@ -149,7 +149,7 @@ export default async function Ficha({
           izquierda y el texto se justifica contra ella. */}
       <section
         aria-labelledby="titulo-obra"
-        className="relative isolate overflow-hidden"
+        className="bajo-barra relative isolate overflow-hidden pt-[var(--alto-barra)]"
       >
         <div aria-hidden="true" className="absolute inset-0 z-0 h-[420px] lg:h-[360px]">
           <div className="velo-abajo size-full opacity-60 blur-[2px]">

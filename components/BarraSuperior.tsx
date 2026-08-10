@@ -13,7 +13,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Icono from './Icono'
 import PaletaBuscador from './PaletaBuscador'
 
@@ -25,7 +25,9 @@ export default function BarraSuperior({
   noLeidas: number
 }) {
   const router = useRouter()
+  const ruta = usePathname()
   const [hayHistorial, setHayHistorial] = useState(false)
+  const [desplazada, setDesplazada] = useState(false)
 
   // `history.length` no distingue hacia dónde se puede ir, pero sí dice
   // si esta pestaña se abrió directamente en esta página. Con una sola
@@ -34,11 +36,35 @@ export default function BarraSuperior({
     setHayHistorial(window.history.length > 1)
   }, [])
 
+  // Arriba del todo la barra no tiene campo y deja ver el destacado; en
+  // cuanto se baja, lo recupera para que el texto no se apoye en la imagen.
+  //
+  // Escucha a `#panel` y no a `window` porque en este marco la ventana no
+  // se desplaza nunca. Y depende de la ruta porque al navegar el panel
+  // vuelve arriba sin emitir ningún evento de scroll: sin eso, la barra se
+  // quedaría con campo en una página que empieza en su primer píxel.
+  useEffect(() => {
+    const panel = document.getElementById('panel')
+    if (!panel) return
+
+    const alDesplazar = () => setDesplazada(panel.scrollTop > 8)
+    alDesplazar()
+    panel.addEventListener('scroll', alDesplazar, { passive: true })
+    return () => panel.removeEventListener('scroll', alDesplazar)
+  }, [ruta])
+
   const mando =
     'grid size-7 place-items-center rounded-radio text-tinta-apagada transition-colors duration-200 ease-sal hover:bg-tinta/10 hover:text-tinta disabled:pointer-events-none disabled:opacity-40'
 
   return (
-    <header className="z-50 grid h-[var(--alto-barra)] grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-borde bg-fondo px-2 md:grid-cols-[20%_1fr_20%]">
+    /* El borde va siempre, transparente cuando no toca: si apareciera y
+       desapareciera, la barra cambiaría de alto un píxel y todo lo de
+       debajo daría un salto al empezar a bajar. */
+    <header
+      className={`z-50 grid h-[var(--alto-barra)] grid-cols-[1fr_auto_1fr] items-center gap-2 border-b px-2 transition-colors duration-200 ease-sal md:grid-cols-[20%_1fr_20%] ${
+        desplazada ? 'border-borde bg-fondo' : 'border-transparent bg-transparent'
+      }`}
+    >
       <div className="flex items-center gap-0.5">
         <button
           type="button"

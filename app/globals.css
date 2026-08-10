@@ -230,6 +230,14 @@
    constantemente.
    ============================================================ */
 
+/* Sección que arranca por debajo de la barra superior, no a continuación.
+   El panel deja un hueco arriba del alto de la barra para que el contenido
+   normal no quede tapado; esto lo anula, y es lo que hace que el destacado
+   y el cabezal de una ficha se vean a través de la barra transparente. */
+.bajo-barra {
+  margin-top: calc(var(--alto-barra) * -1);
+}
+
 /* Carril que se desplaza sin enseñar barra. Es la base de todos los
    rieles: la barra la sustituyen las flechas al pasar por encima. */
 .sin-barra {

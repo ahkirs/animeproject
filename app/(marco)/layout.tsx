@@ -72,15 +72,22 @@ export default async function MarcoLayout({ children }: { children: ReactNode })
         opcionesCuenta={usuario ? opcionesCuenta(usuario.username) : []}
       />
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-lienzo">
-        <BarraSuperior hayUsuario={!!usuario} noLeidas={noLeidas} />
+      {/* La barra se sale del flujo y flota sobre el panel: arriba del todo
+          es transparente, y para que eso enseñe algo tiene que haber
+          contenido pasando por debajo. El panel recupera el hueco con un
+          relleno superior, que las secciones a sangre anulan con
+          `.bajo-barra`. */}
+      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col bg-lienzo">
+        <div className="absolute inset-x-0 top-0 z-50">
+          <BarraSuperior hayUsuario={!!usuario} noLeidas={noLeidas} />
+        </div>
 
         {/* El único elemento con scroll de la aplicación. `overscroll-none`
             evita que al llegar al final arrastre la página de debajo, que
             en móvil se nota como un rebote raro. */}
         <div
           id="panel"
-          className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-none"
+          className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-none pt-[var(--alto-barra)]"
         >
           <a
             href="#principal"

@@ -123,7 +123,7 @@ export default function CarruselDestacado({ slides }: { slides: Diapositiva[] })
       aria-label="Series destacadas"
       onMouseEnter={() => setPausado(true)}
       onMouseLeave={() => setPausado(false)}
-      className="relative isolate flex h-[70dvh] max-h-[760px] min-h-[440px] flex-col justify-end"
+      className="bajo-barra relative isolate flex h-[70dvh] max-h-[760px] min-h-[440px] flex-col justify-end"
     >
       {/* --- Fondo --- */}
       <div aria-hidden="true" className="absolute inset-0 -z-10 overflow-hidden">

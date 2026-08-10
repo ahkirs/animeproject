@@ -178,7 +178,7 @@ export default async function Explorar({
       </div>
 
       <div className="flex flex-wrap items-baseline justify-between gap-3 px-bleed pt-5">
-        <p className="text-sm text-tinta-tenue tabular-nums">
+        <p className="text-sm text-tinta-tenue cifras">
           {visibles.length === 1 ? '1 serie' : `${visibles.length} series`}
           {hayFiltros && ' con estos filtros'}
         </p>

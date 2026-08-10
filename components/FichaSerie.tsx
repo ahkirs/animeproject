@@ -119,7 +119,7 @@ export default function FichaSerie({
               </span>
             )}
             {episodios ? (
-              <span className="pill-obra rounded bg-apagado/60 px-2 py-0.5 text-[10px] font-medium text-tinta-apagada tabular-nums xs:text-xs">
+              <span className="pill-obra rounded bg-apagado/60 px-2 py-0.5 text-[10px] font-medium text-tinta-apagada cifras xs:text-xs">
                 {episodios} ep
               </span>
             ) : null}

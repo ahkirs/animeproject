@@ -184,14 +184,14 @@ export default function CarruselDestacado({ slides }: { slides: Diapositiva[] })
           {actual.anio != null && <Pastilla>{actual.anio}</Pastilla>}
           {actual.nota != null && (
             <Pastilla>
-              <span className="tabular-nums">
+              <span className="cifras">
                 {actual.nota.toLocaleString('es-ES', { minimumFractionDigits: 1 })}
               </span>
             </Pastilla>
           )}
           {actual.episodio ? (
             <Pastilla>
-              <span className="tabular-nums">{actual.episodio}</span> episodios
+              <span className="cifras">{actual.episodio}</span> episodios
             </Pastilla>
           ) : null}
           {(actual.generos ?? []).slice(0, 3).map((g) => (

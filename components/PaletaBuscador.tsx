@@ -251,7 +251,7 @@ export default function PaletaBuscador() {
                           </span>
                         </span>
                         {r.nota != null && (
-                          <span className="shrink-0 text-xs font-bold text-acento tabular-nums">
+                          <span className="shrink-0 text-xs font-bold text-acento cifras">
                             {r.nota.toLocaleString('es-ES', {
                               minimumFractionDigits: 1,
                             })}

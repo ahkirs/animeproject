@@ -116,7 +116,7 @@ export default async function PaginaVer({ params }: { params: Params }) {
                 <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-full border border-borde bg-tarjeta px-4 py-2 text-sm font-semibold text-tinta transition-colors duration-200 ease-sal hover:border-borde-vivo hover:bg-apagado [&::-webkit-details-marker]:hidden">
                   <Icono nombre="descarga" tam={16} />
                   Descargar
-                  <span className="text-xs text-tinta-tenue tabular-nums">
+                  <span className="text-xs text-tinta-tenue cifras">
                     {descargas.length}
                   </span>
                 </summary>
@@ -156,7 +156,7 @@ export default async function PaginaVer({ params }: { params: Params }) {
             <h2 className="text-sm font-semibold text-tinta">
               {temp?.etiqueta ?? 'Episodios'}
             </h2>
-            <span className="text-xs text-tinta-tenue tabular-nums">
+            <span className="text-xs text-tinta-tenue cifras">
               {episodios.length}
             </span>
           </div>

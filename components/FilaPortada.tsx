@@ -27,7 +27,7 @@ function FichaNumerada({ serie, puesto }: { serie: Serie; puesto: number }) {
       <div className="flex items-end gap-1">
         <span
           aria-hidden="true"
-          className="-mb-2 shrink-0 font-titulo text-[clamp(3.2rem,6vw,4.6rem)] leading-[0.72] font-extrabold tracking-[-0.06em] text-apagado transition-colors duration-300 ease-sal group-hover/ficha:text-tinta-tenue tabular-nums"
+          className="-mb-2 shrink-0 font-titulo text-[clamp(3.2rem,6vw,4.6rem)] leading-[0.72] font-extrabold tracking-[-0.06em] text-apagado transition-colors duration-300 ease-sal group-hover/ficha:text-tinta-tenue cifras"
         >
           {puesto}
         </span>

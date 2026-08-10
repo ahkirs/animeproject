@@ -87,7 +87,7 @@ export default function FormularioComentario({
           {error ? (
             <span className="font-semibold text-error">{error}</span>
           ) : texto.length > LIMITE - 200 ? (
-            <span className="tabular-nums">
+            <span className="cifras">
               {LIMITE - texto.length} caracteres
             </span>
           ) : null}

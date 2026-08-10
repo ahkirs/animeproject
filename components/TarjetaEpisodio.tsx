@@ -62,7 +62,7 @@ export default function TarjetaEpisodio({ vista }: { vista: VistaEpisodio }) {
         </span>
 
         <span
-          className={`absolute right-3 bottom-3 rounded-[2px] px-[0.4rem] py-[0.1rem] text-xs font-semibold tabular-nums ${
+          className={`absolute right-3 bottom-3 rounded-[2px] px-[0.4rem] py-[0.1rem] text-xs font-semibold cifras ${
             visto
               ? 'bg-fondo/85 text-tinta-apagada'
               : hayDuracion

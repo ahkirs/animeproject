@@ -60,10 +60,10 @@ export default function NotaComunidad({
 
       <div className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-4 rounded-radio border border-borde bg-tarjeta px-5 py-4">
         <div className="shrink-0">
-          <p className="font-titulo text-4xl leading-none font-extrabold text-tinta tabular-nums">
+          <p className="font-titulo text-4xl leading-none font-extrabold text-tinta cifras">
             {media != null ? media.toLocaleString('es-ES', { maximumFractionDigits: 1 }) : '—'}
           </p>
-          <p className="mt-1 text-xs text-tinta-tenue tabular-nums">
+          <p className="mt-1 text-xs text-tinta-tenue cifras">
             {votos === 0
               ? 'Sin votos todavía'
               : votos === 1
@@ -79,7 +79,7 @@ export default function NotaComunidad({
                 {nota != null ? (
                   <>
                     Tu nota:{' '}
-                    <b className="font-semibold text-acento tabular-nums">{nota}</b>{' '}
+                    <b className="font-semibold text-acento cifras">{nota}</b>{' '}
                     <span className="text-xs text-tinta-tenue">
                       (púlsala otra vez para quitarla)
                     </span>
@@ -104,7 +104,7 @@ export default function NotaComunidad({
                     disabled={pendiente}
                     aria-pressed={nota === n}
                     aria-label={`Puntuar con un ${n}`}
-                    className={`size-8 cursor-pointer rounded-radio border text-xs font-semibold transition-colors duration-150 tabular-nums disabled:opacity-60 ${
+                    className={`size-8 cursor-pointer rounded-radio border text-xs font-semibold transition-colors duration-150 cifras disabled:opacity-60 ${
                       n <= resaltado
                         ? 'border-transparent bg-acento text-acento-tinta'
                         : 'border-borde bg-fondo text-tinta-apagada hover:border-borde-vivo'

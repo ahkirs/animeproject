@@ -92,7 +92,7 @@ async function SeguirViendo() {
             <p className="mt-2 truncate text-sm font-semibold text-tinta">
               {c.serieTitulo}
             </p>
-            <p className="mt-0.5 flex justify-between gap-2 text-xs text-tinta-tenue tabular-nums">
+            <p className="mt-0.5 flex justify-between gap-2 text-xs text-tinta-tenue cifras">
               <span className="truncate">{c.episodio}</span>
               {c.restanteMin != null && (
                 <span className="shrink-0">quedan {c.restanteMin} min</span>

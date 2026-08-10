@@ -121,14 +121,14 @@ export default function Laboratorio() {
             Karla en cuerpo de sección
           </p>
           <p className="text-base">
-            Inter regular — el cuerpo del texto, que es lo que se lee de
-            verdad.
+            Karla regular — también el cuerpo del texto, que es lo que se lee
+            de verdad. Y no va en blanco: el cuerpo está a 85,3 %.
           </p>
           <p className="text-sm text-tinta-apagada">
-            Inter pequeño, en tinta apagada: datos y apoyos.
+            Karla pequeña, en tinta apagada: datos y apoyos.
           </p>
-          <p className="text-xs text-tinta-tenue tabular-nums">
-            Inter menudo con cifras tabulares — 1234567890
+          <p className="cifras text-xs text-tinta-tenue">
+            Inter se queda solo para las cifras — 1234567890
           </p>
         </div>
       </Bloque>

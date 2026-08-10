@@ -167,7 +167,7 @@ export default function Comentario({
               } disabled:pointer-events-none disabled:opacity-50`}
             >
               <Icono nombre={meGusta ? 'estrella-llena' : 'estrella'} tam={14} />
-              {cuantos > 0 && <span className="tabular-nums">{cuantos}</span>}
+              {cuantos > 0 && <span className="cifras">{cuantos}</span>}
             </button>
 
             {haySesion && !anidado && (

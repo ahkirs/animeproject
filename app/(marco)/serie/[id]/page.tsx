@@ -66,7 +66,7 @@ function Chapa({ children, color }: { children: ReactNode; color?: string }) {
   return (
     <span
       style={color ? { backgroundColor: color } : undefined}
-      className={`inline-flex h-6 items-center rounded-radio px-2.5 text-xs font-semibold tabular-nums ${
+      className={`inline-flex h-6 items-center rounded-radio px-2.5 text-xs font-semibold cifras ${
         color ? 'text-fondo' : 'bg-apagado text-tinta-apagada'
       }`}
     >
@@ -401,7 +401,7 @@ export default async function Ficha({
                         <span className="line-clamp-2 text-sm font-semibold text-tinta">
                           {r.titulo}
                         </span>
-                        <span className="text-xs text-tinta-tenue tabular-nums">
+                        <span className="text-xs text-tinta-tenue cifras">
                           {r.anio ?? '—'}
                         </span>
                       </>

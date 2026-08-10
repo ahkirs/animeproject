@@ -96,7 +96,7 @@ export function SelectorHora() {
         })}
       </div>
 
-      <span className="text-xs text-tinta-tenue tabular-nums">
+      <span className="text-xs text-tinta-tenue cifras">
         {montado && zona === 'local' && nombreZona ? nombreZona : 'UTC+0'}
       </span>
     </div>

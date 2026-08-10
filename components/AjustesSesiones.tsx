@@ -65,7 +65,7 @@ export default function AjustesSesiones({ sesiones }: { sesiones: SesionActiva[]
                 )}
               </p>
               <p className="mt-0.5 text-xs text-tinta-tenue">
-                {s.ip && <span className="tabular-nums">{s.ip} · </span>}
+                {s.ip && <span className="cifras">{s.ip} · </span>}
                 {s.ultimoUso ? `activa ${haceCuanto(s.ultimoUso)}` : 'sin uso reciente'}
               </p>
             </div>

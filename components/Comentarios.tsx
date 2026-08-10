@@ -37,7 +37,7 @@ export default async function Comentarios({
       >
         {titulo}
         {pagina.total > 0 && (
-          <span className="text-sm font-normal text-tinta-tenue tabular-nums">
+          <span className="text-sm font-normal text-tinta-tenue cifras">
             {pagina.total}
           </span>
         )}

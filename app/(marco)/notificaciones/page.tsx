@@ -51,7 +51,7 @@ export default async function Notificaciones({
         <h1 className="font-titulo text-2xl font-extrabold tracking-[-0.02em]">
           Notificaciones
           {datos.sinLeer > 0 && (
-            <span className="ml-2 align-middle text-sm font-normal text-tinta-tenue tabular-nums">
+            <span className="ml-2 align-middle text-sm font-normal text-tinta-tenue cifras">
               {datos.sinLeer} sin leer
             </span>
           )}
@@ -153,7 +153,7 @@ export default async function Notificaciones({
             <span />
           )}
 
-          <span className="text-xs text-tinta-tenue tabular-nums">
+          <span className="text-xs text-tinta-tenue cifras">
             {pagina} de {datos.paginas}
           </span>
 

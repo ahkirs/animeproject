@@ -112,8 +112,19 @@ garantiza más de 6:1 contra tinta oscura en cualquier tono.
 
 Dos familias, las dos variables, las dos autoalojadas por `next/font`.
 
-- **Karla** (`font-titulo`), eje 200–800. Los títulos van a 800.
-- **Inter** (`font-texto`). Cuerpo, datos y cifras.
+- **Karla** (`font-titulo`), eje 200–800. **Todo**: títulos a 800 y también el cuerpo
+  del texto, como en la referencia.
+- **Inter** (`font-texto`) queda solo para las cifras, vía la utilidad `.cifras`. Es
+  donde le saca ventaja: sus números son de ancho fijo y de altura más pareja, así que
+  un contador que sube no da saltos de ancho ni de peso óptico.
+
+`.cifras` une las dos cosas que siempre iban juntas —la familia y `tabular-nums`— para
+que no se pueda poner una sin la otra. En el marcado no queda ni un `tabular-nums`
+suelto.
+
+**El cuerpo del texto no va en blanco.** El `body` escribe a `tinta-cuerpo`
+(`oklch(85.31% …)`); el 98,5 % de `tinta` se reserva para títulos y para lo que tiene
+que destacar sobre ese cuerpo. Si todo va en blanco, no destaca nada.
 
 Karla sustituyó a Archivo Black, que era una display de un solo peso: a cuerpo grande iba
 bien, pero no servía para un título de sección de 20px, así que había que saltar a la

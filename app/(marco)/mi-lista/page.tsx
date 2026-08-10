@@ -94,7 +94,7 @@ async function Historial() {
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
-        <p className="text-xs text-tinta-tenue tabular-nums">
+        <p className="text-xs text-tinta-tenue cifras">
           {pagina.total} episodios registrados
           {pagina.paginas > 1 && (
             <>
@@ -314,7 +314,7 @@ export default async function MiLista({
             >
               {x.texto}
               {n !== null && n > 0 && (
-                <span className="text-xs font-normal text-tinta-tenue tabular-nums">
+                <span className="text-xs font-normal text-tinta-tenue cifras">
                   {n}
                 </span>
               )}

@@ -216,7 +216,10 @@
     /* 85,3 %, no blanco. `text-tinta` sigue disponible para lo que tenga que
        destacar sobre este cuerpo; si todo va en blanco, nada destaca. */
     color: var(--color-tinta-cuerpo);
-    font-family: var(--font-texto);
+    /* Karla también en el cuerpo, como la referencia. Inter deja de ser la
+       familia por defecto y pasa a usarse a mano —`font-texto`— donde su
+       ventaja se nota: cifras, datos y todo lo que lleve `tabular-nums`. */
+    font-family: var(--font-titulo);
     font-size: 0.9375rem;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
@@ -336,6 +339,16 @@
    entradas de menú, enlaces de una lista. */
 .realce-texto:hover {
   color: var(--color-acento);
+}
+
+/* Cifras. Inter deja de ser la familia del cuerpo y se queda para esto, que
+   es donde le saca ventaja a Karla: sus números son de ancho fijo y de altura
+   más pareja, así que un contador que sube no da saltos de ancho ni de peso
+   óptico. Une las dos cosas que siempre iban juntas —familia y `tabular-nums`—
+   para que no se pueda poner una sin la otra. */
+.cifras {
+  font-family: var(--font-texto);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Tarjeta que se puede pulsar entera: la de un comentario, la de una nota.

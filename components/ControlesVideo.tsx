@@ -778,7 +778,7 @@ export default function ControlesVideo({
           {/* Globo con el tiempo bajo el puntero */}
           <div
             ref={globoRef}
-            className={`pointer-events-none absolute bottom-[28px] left-0 rounded-[3px] border border-borde-vivo bg-fondo px-[0.45rem] py-[0.15rem] font-variant-numeric tabular-nums whitespace-nowrap transition-opacity duration-150 ease-sal ${
+            className={`pointer-events-none absolute bottom-[28px] left-0 rounded-[3px] border border-borde-vivo bg-fondo px-[0.45rem] py-[0.15rem] font-variant-numeric cifras whitespace-nowrap transition-opacity duration-150 ease-sal ${
               globoVisible ? 'opacity-100' : ''
             }`}
             style={{ left: globoX, opacity: globoVisible ? 1 : 0 }}
@@ -851,7 +851,7 @@ export default function ControlesVideo({
             </div>
           </div>
 
-          <span className="ml-[0.35rem] text-xs text-tinta-apagada tabular-nums max-[480px]:hidden">
+          <span className="ml-[0.35rem] text-xs text-tinta-apagada cifras max-[480px]:hidden">
             {formatearTiempo(tiempoActual)}{' '}
             <span className="text-tinta-tenue">/</span>{' '}
             {formatearTiempo(duracion)}

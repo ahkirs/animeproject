@@ -20,7 +20,7 @@ export default function NoEncontrado({ conMarco }: { conMarco?: boolean }) {
     >
       <p
         aria-hidden="true"
-        className="font-titulo text-6xl leading-none font-extrabold text-apagado tabular-nums"
+        className="font-titulo text-6xl leading-none font-extrabold text-apagado cifras"
       >
         404
       </p>

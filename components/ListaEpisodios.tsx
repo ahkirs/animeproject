@@ -54,7 +54,7 @@ function TarjetaEpisodio({
 
         {/* Badge de duración */}
         {ep.duracionMin != null && (
-          <span className="absolute bottom-[5px] left-[5px] rounded-[3px] bg-fondo/85 px-[0.35rem] py-[2px] text-[0.65rem] font-bold tabular-nums text-tinta">
+          <span className="absolute bottom-[5px] left-[5px] rounded-[3px] bg-fondo/85 px-[0.35rem] py-[2px] text-[0.65rem] font-bold cifras text-tinta">
             {ep.duracionMin}m
           </span>
         )}

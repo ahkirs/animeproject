@@ -98,7 +98,7 @@ export default async function PerfilPublicoPagina({
                     i > 0 ? 'border-l border-borde pl-5' : ''
                   }`}
                 >
-                  <dd className="m-0 text-base font-semibold text-tinta tabular-nums">
+                  <dd className="m-0 text-base font-semibold text-tinta cifras">
                     {c.valor}
                   </dd>
                   <dt className="text-xs text-tinta-tenue">{c.etiqueta}</dt>

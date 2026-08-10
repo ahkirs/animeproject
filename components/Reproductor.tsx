@@ -496,7 +496,7 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
                 Servidor
               </span>
               <span
-                className="min-w-[7.5rem] rounded-full border border-borde-vivo bg-tarjeta px-[0.85rem] py-[0.3rem] text-xs font-semibold text-tinta tabular-nums"
+                className="min-w-[7.5rem] rounded-full border border-borde-vivo bg-tarjeta px-[0.85rem] py-[0.3rem] text-xs font-semibold text-tinta cifras"
                 title={servidores[indice] ? nombreDeServidor(servidores[indice].server) : undefined}
               >
                 Servidor {indice + 1} de {servidores.length}

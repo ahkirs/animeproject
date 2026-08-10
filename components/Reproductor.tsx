@@ -49,16 +49,16 @@ function PanelRespaldo({
   nota: string
 }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-e2 bg-sala-900/72 p-e4 text-center">
-      <p className="text-paso-1 font-semibold text-hueso">
+    <div className="flex h-full flex-col items-center justify-center gap-3 bg-fondo/72 p-8 text-center">
+      <p className="text-sm font-semibold text-tinta">
         Este servidor no se pudo cargar
       </p>
-      <p className="max-w-[46ch] text-paso-1 text-hueso-70">{nota}</p>
+      <p className="max-w-[46ch] text-sm text-tinta-apagada">{nota}</p>
       <a
         href={enlace}
         target="_blank"
         rel="noreferrer"
-        className="mt-e2 inline-flex items-center gap-2 rounded-radio bg-ambar px-[1.35rem] py-3 text-paso-1 font-semibold text-ambar-tinta no-underline transition-colors duration-200 ease-sal hover:bg-ambar-claro"
+        className="mt-3 inline-flex items-center gap-2 rounded-radio bg-tinta px-[1.35rem] py-3 text-sm font-semibold text-fondo no-underline transition-colors duration-200 ease-sal hover:bg-white"
       >
         <Icono nombre="emitir" tam={16} />
         Abrir en el proveedor
@@ -78,6 +78,11 @@ export default function Reproductor({
   titulo,
   proveedorUrl,
   urlSiguiente,
+  serieId,
+  serieTitulo,
+  episodioId,
+  episodioTitulo,
+  imagen,
 }: {
   enlaces: ApiEnlacesEpisodio | null
   titulo: string
@@ -85,6 +90,15 @@ export default function Reproductor({
   proveedorUrl?: string
   /** URL del episodio siguiente, para el botón "siguiente". */
   urlSiguiente?: string
+  /* Identificación de lo que se está viendo, para guardar el progreso.
+     Va todo junto y todo opcional: si falta alguna pieza, no se registra
+     nada en vez de mandar una fila a medias que luego no se puede
+     pintar en «Seguir viendo». */
+  serieId?: string
+  serieTitulo?: string
+  episodioId?: string
+  episodioTitulo?: string
+  imagen?: string
 }) {
   const servidoresSub = useMemo(
     () => (enlaces ? servidoresOrdenados(enlaces, 'SUB').filter((s) => s.url) : []),
@@ -314,6 +328,17 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
             contenedorRef={contenedorRef}
             titulo={titulo}
             urlSiguiente={urlSiguiente}
+            vista={
+              serieId && serieTitulo && episodioId && episodioTitulo
+                ? {
+                    animeId: serieId,
+                    animeTitle: serieTitulo,
+                    episodeId: episodioId,
+                    episodeTitle: episodioTitulo,
+                    image: imagen,
+                  }
+                : undefined
+            }
           />
         )}
 
@@ -327,13 +352,13 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
             nota="El archivo del servidor no cargó en este navegador. Puedes abrirlo directamente en el proveedor."
           />
         ) : elegido && resolviendo ? (
-          <div className="absolute inset-0 grid place-items-center bg-sala-900/72 p-e4 text-center">
-            <div className="flex flex-col items-center gap-e3">
+          <div className="absolute inset-0 grid place-items-center bg-fondo/72 p-8 text-center">
+            <div className="flex flex-col items-center gap-5">
               <span
                 aria-hidden="true"
-                className="size-9 animate-spin rounded-full border-[3px] border-borde-vivo border-t-ambar"
+                className="size-9 animate-spin rounded-full border-[3px] border-borde-vivo border-t-acento"
               />
-              <p className="text-paso-1 font-semibold text-hueso">
+              <p className="text-sm font-semibold text-tinta">
                 Resolviendo reproducción…
               </p>
             </div>
@@ -348,13 +373,13 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
             className="absolute inset-0 h-full w-full border-0"
           />
         ) : elegido ? (
-          <div className="absolute inset-0 grid place-items-center bg-sala-900/72 p-e4 text-center">
-            <div className="flex flex-col items-center gap-e3">
+          <div className="absolute inset-0 grid place-items-center bg-fondo/72 p-8 text-center">
+            <div className="flex flex-col items-center gap-5">
               <span
                 aria-hidden="true"
-                className="size-9 animate-spin rounded-full border-[3px] border-borde-vivo border-t-ambar"
+                className="size-9 animate-spin rounded-full border-[3px] border-borde-vivo border-t-acento"
               />
-<p className="text-paso-1 font-semibold text-hueso">
+<p className="text-sm font-semibold text-tinta">
                 Este servidor no respondió, probando otro…
               </p>
             </div>
@@ -362,12 +387,12 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
             ) : (
               <>
                 <Lamina arte="panoramica-player" />
-                <div className="absolute inset-0 grid place-items-center bg-sala-900/72 p-e4 text-center">
+                <div className="absolute inset-0 grid place-items-center bg-fondo/72 p-8 text-center">
                   <div className="max-w-[46ch]">
-                    <p className="text-paso-3 font-semibold">
+                    <p className="text-xl font-semibold">
                       No hay enlaces de reproducción
                     </p>
-                    <p className="mt-e2 text-paso-1 text-hueso-70">
+                    <p className="mt-3 text-sm text-tinta-apagada">
                       La API no devuelve servidores para este episodio todavía.
                     </p>
                     {proveedorUrl && (
@@ -375,7 +400,7 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
                         href={proveedorUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="mt-e3 inline-flex items-center gap-2 rounded-radio bg-ambar px-[1.35rem] py-3 text-paso-1 font-semibold text-ambar-tinta no-underline transition-colors duration-200 ease-sal hover:bg-ambar-claro"
+                        className="mt-5 inline-flex items-center gap-2 rounded-radio bg-tinta px-[1.35rem] py-3 text-sm font-semibold text-fondo no-underline transition-colors duration-200 ease-sal hover:bg-white"
                       >
                         <Icono nombre="emitir" tam={16} />
                         Abrir en el proveedor
@@ -390,8 +415,8 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
 
         {/* Aviso de cambio automático de servidor */}
         {aviso && (
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center p-e3">
-            <p className="rounded-full border border-ambar/40 bg-sala-900/88 px-e3 py-e1 text-paso-0 font-semibold text-ambar backdrop-blur-[4px]">
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center p-5">
+            <p className="rounded-full border border-acento/40 bg-fondo/88 px-5 py-1.5 text-xs font-semibold text-acento backdrop-blur-[4px]">
               {aviso}
             </p>
           </div>
@@ -400,8 +425,8 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
 
       {/* ---------- Barra de respaldo ---------- */}
       {elegido && enlaceRespaldo && (
-        <div className="flex flex-wrap items-center justify-between gap-x-e4 gap-y-e2 border-t border-borde bg-sala-900 px-e3 py-e2">
-          <p className="text-paso-0 text-hueso-45">
+        <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-t border-borde bg-fondo px-5 py-3">
+          <p className="text-xs text-tinta-tenue">
             {visorDirecto
               ? 'Reproducción directa del archivo del proveedor.'
               : 'Reproducción incrustada del reproductor del proveedor. Algunos hosts bloquean la incrustación.'}
@@ -410,7 +435,7 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
             href={enlaceRespaldo}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-borde-vivo bg-hueso/6 px-[0.9rem] py-[0.4rem] text-paso-0 font-semibold text-hueso no-underline transition-colors duration-200 ease-sal hover:border-hueso-45 hover:bg-hueso/12"
+            className="inline-flex items-center gap-2 rounded-full border border-borde-vivo bg-tinta/6 px-[0.9rem] py-[0.4rem] text-xs font-semibold text-tinta no-underline transition-colors duration-200 ease-sal hover:border-tinta-tenue hover:bg-tinta/12"
           >
             <Icono nombre="emitir" tam={15} />
             ¿No se ve? Abrir en el proveedor
@@ -420,10 +445,10 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
 
       {/* ---------- Selector de audio y servidor ---------- */}
       {(servidoresSub.length > 0 || servidoresDub.length > 0) && (
-        <div className="flex flex-wrap items-center gap-x-e4 gap-y-e2 border-t border-borde bg-sala-900 px-e3 py-e2">
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-borde bg-fondo px-5 py-3">
           {/* Audio */}
-          <div className="flex items-center gap-e2">
-            <span className="text-paso-0 font-bold tracking-[0.11em] text-hueso-45 uppercase">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-bold tracking-[0.11em] text-tinta-tenue uppercase">
               Audio
             </span>
             <div
@@ -437,10 +462,10 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
                   role="tab"
                   aria-selected={variante === 'SUB'}
                   onClick={() => cambiarVariante('SUB')}
-                  className={`cursor-pointer rounded-radio border-0 px-[0.9rem] py-[0.3rem] text-paso-0 font-bold transition-colors duration-200 ease-sal ${
+                  className={`cursor-pointer rounded-radio border-0 px-[0.9rem] py-[0.3rem] text-xs font-bold transition-colors duration-200 ease-sal ${
                     variante === 'SUB'
-                      ? 'bg-ambar text-ambar-tinta'
-                      : 'bg-transparent text-hueso-70 hover:text-hueso'
+                      ? 'bg-tinta text-fondo'
+                      : 'bg-transparent text-tinta-apagada hover:text-tinta'
                   }`}
                 >
                   Subtitulado
@@ -452,10 +477,10 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
                   role="tab"
                   aria-selected={variante === 'DUB'}
                   onClick={() => cambiarVariante('DUB')}
-                  className={`cursor-pointer rounded-radio border-0 px-[0.9rem] py-[0.3rem] text-paso-0 font-bold transition-colors duration-200 ease-sal ${
+                  className={`cursor-pointer rounded-radio border-0 px-[0.9rem] py-[0.3rem] text-xs font-bold transition-colors duration-200 ease-sal ${
                     variante === 'DUB'
-                      ? 'bg-ambar text-ambar-tinta'
-                      : 'bg-transparent text-hueso-70 hover:text-hueso'
+                      ? 'bg-tinta text-fondo'
+                      : 'bg-transparent text-tinta-apagada hover:text-tinta'
                   }`}
                 >
                   Latino
@@ -466,12 +491,12 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
 
           {/* Servidor */}
           {servidores.length > 0 && (
-            <div className="flex items-center gap-e2">
-              <span className="text-paso-0 font-bold tracking-[0.11em] text-hueso-45 uppercase">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold tracking-[0.11em] text-tinta-tenue uppercase">
                 Servidor
               </span>
               <span
-                className="min-w-[7.5rem] rounded-full border border-borde-vivo bg-sala-800 px-[0.85rem] py-[0.3rem] text-paso-0 font-semibold text-hueso tabular-nums"
+                className="min-w-[7.5rem] rounded-full border border-borde-vivo bg-tarjeta px-[0.85rem] py-[0.3rem] text-xs font-semibold text-tinta tabular-nums"
                 title={servidores[indice] ? nombreDeServidor(servidores[indice].server) : undefined}
               >
                 Servidor {indice + 1} de {servidores.length}
@@ -480,7 +505,7 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
                 <button
                   type="button"
                   onClick={() => elegirServidor((indice + 1) % servidores.length)}
-                  className="inline-flex cursor-pointer items-center gap-[0.4rem] rounded-radio border border-borde-vivo px-[0.8rem] py-[0.3rem] text-paso-0 font-semibold text-hueso-70 transition-colors duration-200 ease-sal hover:border-hueso-45 hover:text-hueso"
+                  className="inline-flex cursor-pointer items-center gap-[0.4rem] rounded-radio border border-borde-vivo px-[0.8rem] py-[0.3rem] text-xs font-semibold text-tinta-apagada transition-colors duration-200 ease-sal hover:border-tinta-tenue hover:text-tinta"
                 >
                   <Icono nombre="cambiar" tam={15} />
                   Cambiar

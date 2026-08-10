@@ -43,7 +43,7 @@ export default function BotonQuitar({
         disabled={pendiente}
         aria-label={etiqueta}
         title={etiqueta}
-        className={`z-1 grid size-8 cursor-pointer place-items-center rounded-full border border-borde-vivo bg-sala-900/85 text-hueso-70 transition-all duration-200 ease-sal hover:border-hueso-45 hover:text-hueso disabled:cursor-wait disabled:opacity-50 ${className}`}
+        className={`z-1 grid size-8 cursor-pointer place-items-center rounded-full border border-borde bg-black/70 text-tinta-apagada backdrop-blur-sm transition-colors duration-200 ease-sal hover:border-borde-vivo hover:text-tinta disabled:cursor-wait disabled:opacity-50 ${className}`}
       >
         <Icono nombre={pendiente ? 'ajustes' : 'cerrar'} tam={14} />
       </button>
@@ -51,7 +51,7 @@ export default function BotonQuitar({
       {error && (
         <span
           role="alert"
-          className="absolute inset-x-0 bottom-0 z-1 rounded-b-radio bg-rojo px-[0.4rem] py-[0.15rem] text-center text-paso-0 font-semibold text-hueso"
+          className="absolute inset-x-0 bottom-0 z-1 rounded-b-radio bg-error px-2 py-0.5 text-center text-xs font-semibold text-fondo"
         >
           {error}
         </span>

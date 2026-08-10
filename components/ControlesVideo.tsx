@@ -8,6 +8,7 @@ import {
   type RefObject,
 } from 'react'
 import Icono from './Icono'
+import { registrarProgreso } from '@/lib/acciones'
 
 /* ============================================================
    ControlesVideo — controles personalizados para <video>
@@ -31,7 +32,7 @@ function formatearTiempo(seg: number): string {
 
 /** Clases comunes para los botones del reproductor. */
 const CLS_MANDO =
-  'inline-grid place-items-center size-[42px] shrink-0 rounded-[3px] border-0 bg-transparent text-hueso cursor-pointer transition-colors duration-150 hover:bg-hueso/14 max-[640px]:size-9'
+  'inline-grid place-items-center size-[42px] shrink-0 rounded-[3px] border-0 bg-transparent text-tinta cursor-pointer transition-colors duration-150 hover:bg-tinta/14 max-[640px]:size-9'
 
 const VELOCIDADES = [0.5, 0.75, 1, 1.25, 1.5, 2]
 
@@ -50,6 +51,12 @@ const ATAJOS: [string, string][] = [
 ]
 
 const CLAVE_ENCADENAR = 'kuroba:encadenar'
+
+/** Cada cuánto se guarda por dónde va el episodio. Quince segundos es el
+ *  equilibrio: al volver se pierde como mucho ese trozo, y una serie de
+ *  veinticuatro minutos son unas noventa escrituras, que el upsert del
+ *  backend absorbe sin despeinarse. */
+const INTERVALO_PROGRESO = 15_000
 
 function leerEncadenar(): boolean {
   try {
@@ -77,6 +84,15 @@ interface Props {
   saltarCabecera?: [number, number]
   /** El padre se encarga de cambiar de fuente (remonta el <video>). */
   cambiarFuente?: (c: Calidad) => void
+  /** Qué se está viendo, para guardar el progreso. Sin esto no se
+   *  registra nada: es lo que pasa cuando no hay sesión. */
+  vista?: {
+    animeId: string
+    animeTitle: string
+    episodeId: string
+    episodeTitle: string
+    image?: string
+  }
 }
 
 export default function ControlesVideo({
@@ -87,6 +103,7 @@ export default function ControlesVideo({
   calidades,
   saltarCabecera,
   cambiarFuente,
+  vista,
 }: Props) {
   /* Estado --------------------------------------------------- */
   const [reproduciendo, setReproduciendo] = useState(false)
@@ -387,6 +404,64 @@ export default function ControlesVideo({
     }
   }, [videoRef, urlSiguiente])
 
+  /* --------------------- Guardar el progreso -------------------
+
+     Esta es la pieza que faltaba en todo el sitio: el backend tiene
+     POST /user/history desde el principio y nadie lo llamaba, así que el
+     historial estaba siempre vacío y «Seguir viendo» era una lista
+     escrita a mano.
+
+     Se guarda cada quince segundos mientras corre el vídeo, y además al
+     pausar, al terminar y al salir de la página. Los tres remates
+     importan: sin ellos, cerrar la pestaña a los diez segundos de haber
+     guardado pierde ese trozo, que es justo por donde se quiere volver.
+
+     Solo se manda si hay algo que contar (`currentTime > 5`): registrar
+     el segundo cero llena el historial de episodios que solo se
+     abrieron. El backend hace upsert por episodio, así que repetir la
+     llamada no acumula filas.                                        */
+  useEffect(() => {
+    if (!vista) return
+    const v = videoRef.current
+    if (!v) return
+
+    let ultimoGuardado = 0
+
+    const guardar = () => {
+      const segundo = v.currentTime
+      if (!Number.isFinite(segundo) || segundo < 5) return
+      // No repetir la misma posición si el vídeo está parado.
+      if (Math.abs(segundo - ultimoGuardado) < 1) return
+      ultimoGuardado = segundo
+
+      void registrarProgreso({
+        ...vista,
+        progress: segundo,
+        duration: Number.isFinite(v.duration) && v.duration > 0 ? v.duration : undefined,
+      })
+    }
+
+    const reloj = setInterval(() => {
+      if (!v.paused) guardar()
+    }, INTERVALO_PROGRESO)
+
+    v.addEventListener('pause', guardar)
+    v.addEventListener('ended', guardar)
+    // `pagehide` y no `beforeunload`: es el único que dispara de forma
+    // fiable en Safari de iOS al cambiar de aplicación.
+    window.addEventListener('pagehide', guardar)
+
+    return () => {
+      clearInterval(reloj)
+      v.removeEventListener('pause', guardar)
+      v.removeEventListener('ended', guardar)
+      window.removeEventListener('pagehide', guardar)
+      // Al desmontar —cambiar de episodio, navegar a otra página— se
+      // guarda una última vez.
+      guardar()
+    }
+  }, [videoRef, vista])
+
   /* Fullscreen change ----------------------------------------- */
   useEffect(() => {
     const handler = () => setPantallaCompleta(!!document.fullscreenElement)
@@ -528,7 +603,7 @@ export default function ControlesVideo({
           <span
             role="status"
             aria-label="Cargando"
-            className="size-[54px] rounded-full border-[3px] border-hueso/22 border-t-ambar"
+            className="size-[54px] rounded-full border-[3px] border-tinta/22 border-t-acento"
           />
         ) : (
           !reproduciendo && (
@@ -537,7 +612,7 @@ export default function ControlesVideo({
                 e.stopPropagation()
                 togglePlay()
               }}
-              className="pointer-events-auto flex size-[84px] items-center justify-center rounded-[99px] border-0 bg-ambar text-ambar-tinta shadow-alta transition-transform duration-200 ease-sal hover:scale-[1.06] max-[640px]:size-16"
+              className="pointer-events-auto flex size-[84px] items-center justify-center rounded-[99px] bg-tinta text-fondo transition-transform duration-200 ease-sal hover:scale-[1.06] max-[640px]:size-16"
               aria-label="Reproducir"
             >
               <Icono nombre="play" tam={36} />
@@ -549,7 +624,7 @@ export default function ControlesVideo({
       {/* Aviso de tecla */}
       <div
         aria-live="polite"
-        className={`pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[3px] border border-borde-vivo bg-sala-900/82 px-e3 py-e2 text-paso-2 font-semibold opacity-0 transition-opacity duration-300 ease-sal ${
+        className={`pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[3px] border border-borde-vivo bg-fondo/82 px-5 py-3 text-base font-semibold opacity-0 transition-opacity duration-300 ease-sal ${
           avisoEncendido ? 'opacity-100' : ''
         }`}
       >
@@ -559,7 +634,7 @@ export default function ControlesVideo({
       {/* Saltar cabecera */}
       {saltarCabecera && (
         <button
-          className={`absolute right-e3 bottom-[104px] z-20 rounded-[3px] border border-borde-vivo bg-sala-900/86 px-[1.1rem] py-[0.6rem] text-paso-1 font-semibold text-hueso backdrop-blur-[4px] transition-colors duration-150 ease-sal hover:border-ambar hover:bg-ambar hover:text-ambar-tinta ${
+          className={`absolute right-5 bottom-[104px] z-20 rounded-[3px] border border-borde-vivo bg-fondo/86 px-[1.1rem] py-[0.6rem] text-sm font-semibold text-tinta backdrop-blur-[4px] transition-colors duration-150 ease-sal hover:border-transparent hover:bg-tinta hover:text-fondo ${
             enRangoCabecera && !ocultos ? '' : 'hidden'
           }`}
           onClick={(e) => {
@@ -580,15 +655,15 @@ export default function ControlesVideo({
         role="dialog"
         aria-modal="false"
         aria-labelledby="titulo-atajos"
-        className={`absolute right-e3 bottom-[104px] z-30 w-[26rem] max-w-[calc(100%-2rem)] rounded-[3px] border border-borde-vivo bg-sala-900/94 p-e3 shadow-alta backdrop-blur-[6px] ${
+        className={`absolute right-5 bottom-[104px] z-30 w-[26rem] max-w-[calc(100%-2rem)] rounded-[3px] border border-borde-vivo bg-fondo/94 p-5 backdrop-blur-[6px] ${
           atajosAbiertos ? '' : 'hidden'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-e2 flex items-center justify-between gap-e2 border-b border-borde pb-e2">
+        <div className="mb-3 flex items-center justify-between gap-3 border-b border-borde pb-3">
           <h2
             id="titulo-atajos"
-            className="text-paso-0 font-bold tracking-[0.11em] text-hueso-45 uppercase"
+            className="text-xs font-bold tracking-[0.11em] text-tinta-tenue uppercase"
           >
             Atajos de teclado
           </h2>
@@ -600,13 +675,13 @@ export default function ControlesVideo({
             <Icono nombre="cerrar" tam={18} />
           </button>
         </div>
-        <dl className="grid max-h-[46vh] grid-cols-[auto_1fr] gap-x-e3 gap-y-[0.4rem] overflow-y-auto text-paso-0">
+        <dl className="grid max-h-[46vh] grid-cols-[auto_1fr] gap-x-5 gap-y-[0.4rem] overflow-y-auto text-xs">
           {ATAJOS.map(([tecla, desc]) => (
             <div className="contents" key={tecla}>
-              <dt className="justify-self-start rounded-[2px] border border-borde-vivo bg-sala-700 px-[0.4rem] py-[0.1rem] font-mono whitespace-nowrap">
+              <dt className="justify-self-start rounded-[2px] border border-borde-vivo bg-tarjeta px-[0.4rem] py-[0.1rem] font-mono whitespace-nowrap">
                 {tecla}
               </dt>
-              <dd className="m-0 self-center text-hueso-70">{desc}</dd>
+              <dd className="m-0 self-center text-tinta-apagada">{desc}</dd>
             </div>
           ))}
         </dl>
@@ -617,7 +692,7 @@ export default function ControlesVideo({
 
       {/* Barra de controles */}
       <div
-        className={`absolute inset-x-0 bottom-0 z-20 px-e3 pt-e5 transition-[opacity,transform] duration-200 ease-sal ${
+        className={`absolute inset-x-0 bottom-0 z-20 px-5 pt-13 transition-[opacity,transform] duration-200 ease-sal ${
           ocultos
             ? 'pointer-events-none translate-y-2 opacity-0'
             : 'translate-y-0 opacity-100'
@@ -668,29 +743,29 @@ export default function ControlesVideo({
         >
           <div
             ref={pistaRef}
-            className="relative h-[4px] w-full rounded-[99px] bg-hueso/22 transition-[height] duration-150 ease-sal group-hover/linea:h-[7px]"
+            className="relative h-[4px] w-full rounded-[99px] bg-tinta/22 transition-[height] duration-150 ease-sal group-hover/linea:h-[7px]"
           >
             <div
-              className="absolute inset-y-0 left-0 rounded-[99px] bg-hueso/32"
+              className="absolute inset-y-0 left-0 rounded-[99px] bg-tinta/32"
               style={{ width: `${progresoBuffer}%` }}
             />
             <div
-              className="absolute inset-y-0 left-0 rounded-[99px] bg-ambar"
+              className="absolute inset-y-0 left-0 rounded-[99px] bg-acento"
               style={{ width: `${progreso}%` }}
             />
             <div
-              className="absolute top-1/2 size-[14px] -translate-x-1/2 -translate-y-1/2 scale-0 rounded-[99px] bg-ambar shadow-baja transition-transform duration-150 ease-sal group-hover/linea:scale-100"
+              className="absolute top-1/2 size-[14px] -translate-x-1/2 -translate-y-1/2 scale-0 rounded-[99px] bg-acento transition-transform duration-150 ease-sal group-hover/linea:scale-100"
               style={{ left: `${progreso}%` }}
             />
             {saltarCabecera && duracion > 0 && (
               <>
                 <div
-                  className="absolute -top-[3px] h-[10px] w-[3px] rounded-[2px] bg-hueso-45"
+                  className="absolute -top-[3px] h-[10px] w-[3px] rounded-[2px] bg-tinta-tenue"
                   title="Cabecera"
                   style={{ left: `${(saltarCabecera[0] / duracion) * 100}%` }}
                 />
                 <div
-                  className="absolute -top-[3px] h-[10px] w-[3px] rounded-[2px] bg-hueso-45"
+                  className="absolute -top-[3px] h-[10px] w-[3px] rounded-[2px] bg-tinta-tenue"
                   title="Cierre"
                   style={{
                     left: `${Math.max(0, ((duracion - 25) / duracion) * 100)}%`,
@@ -703,7 +778,7 @@ export default function ControlesVideo({
           {/* Globo con el tiempo bajo el puntero */}
           <div
             ref={globoRef}
-            className={`pointer-events-none absolute bottom-[28px] left-0 rounded-[3px] border border-borde-vivo bg-sala-900 px-[0.45rem] py-[0.15rem] font-variant-numeric tabular-nums whitespace-nowrap transition-opacity duration-150 ease-sal ${
+            className={`pointer-events-none absolute bottom-[28px] left-0 rounded-[3px] border border-borde-vivo bg-fondo px-[0.45rem] py-[0.15rem] font-variant-numeric tabular-nums whitespace-nowrap transition-opacity duration-150 ease-sal ${
               globoVisible ? 'opacity-100' : ''
             }`}
             style={{ left: globoX, opacity: globoVisible ? 1 : 0 }}
@@ -766,26 +841,26 @@ export default function ControlesVideo({
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={silenciado ? 0 : Math.round(volumen * 100)}
-              className="relative h-[4px] w-0 cursor-pointer rounded-[99px] bg-hueso/22 opacity-0 transition-[width,opacity] duration-200 ease-sal focus-within:w-[74px] focus-within:opacity-100 group-hover/vol:w-[74px] group-hover/vol:opacity-100"
+              className="relative h-[4px] w-0 cursor-pointer rounded-[99px] bg-tinta/22 opacity-0 transition-[width,opacity] duration-200 ease-sal focus-within:w-[74px] focus-within:opacity-100 group-hover/vol:w-[74px] group-hover/vol:opacity-100"
               onClick={clicVolumen}
             >
               <div
-                className="absolute inset-y-0 left-0 rounded-[99px] bg-hueso"
+                className="absolute inset-y-0 left-0 rounded-[99px] bg-tinta"
                 style={{ width: `${silenciado ? 0 : volumen * 100}%` }}
               />
             </div>
           </div>
 
-          <span className="ml-[0.35rem] text-paso-0 text-hueso-70 tabular-nums max-[480px]:hidden">
+          <span className="ml-[0.35rem] text-xs text-tinta-apagada tabular-nums max-[480px]:hidden">
             {formatearTiempo(tiempoActual)}{' '}
-            <span className="text-hueso-45">/</span>{' '}
+            <span className="text-tinta-tenue">/</span>{' '}
             {formatearTiempo(duracion)}
           </span>
 
           <span className="flex-1" />
 
           {titulo && (
-            <span className="mr-e2 max-w-[30ch] truncate text-paso-0 font-semibold text-hueso/80 max-[800px]:hidden">
+            <span className="mr-3 max-w-[30ch] truncate text-xs font-semibold text-tinta/80 max-[800px]:hidden">
               {titulo}
             </span>
           )}
@@ -813,12 +888,12 @@ export default function ControlesVideo({
                 }
               >
                 <Icono nombre="calidad" tam={21} />
-                <span className="text-paso-0 font-bold tracking-[0.04em] text-hueso-70">
+                <span className="text-xs font-bold tracking-[0.04em] text-tinta-apagada">
                   {calidades![0]?.etiqueta}
                 </span>
               </button>
               <div
-                className={`absolute right-0 bottom-[calc(100%+0.5rem)] min-w-[8rem] rounded-[3px] border border-borde-vivo bg-sala-800 p-e1 shadow-alta ${
+                className={`absolute right-0 bottom-[calc(100%+0.5rem)] min-w-[8rem] rounded-[3px] border border-borde-vivo bg-tarjeta p-1.5 ${
                   menuAbierto === 'calidad' ? '' : 'hidden'
                 }`}
                 onClick={(e) => e.stopPropagation()}
@@ -828,7 +903,7 @@ export default function ControlesVideo({
                     key={c.etiqueta}
                     role="menuitemradio"
                     aria-checked={c.etiqueta === calidades![0]?.etiqueta}
-                    className="block w-full cursor-pointer rounded-[2px] border-0 bg-transparent px-[0.7rem] py-[0.4rem] text-left text-paso-1 hover:bg-sala-700 aria-checked:font-semibold aria-checked:text-ambar"
+                    className="block w-full cursor-pointer rounded-[2px] border-0 bg-transparent px-[0.7rem] py-[0.4rem] text-left text-sm hover:bg-tarjeta aria-checked:font-semibold aria-checked:text-acento"
                     onClick={() => cambiarCalidad(c, i)}
                   >
                     {c.etiqueta}
@@ -852,7 +927,7 @@ export default function ControlesVideo({
               <Icono nombre="velocidad" tam={21} />
             </button>
             <div
-              className={`absolute right-0 bottom-[calc(100%+0.5rem)] min-w-[8rem] rounded-[3px] border border-borde-vivo bg-sala-800 p-e1 shadow-alta ${
+              className={`absolute right-0 bottom-[calc(100%+0.5rem)] min-w-[8rem] rounded-[3px] border border-borde-vivo bg-tarjeta p-1.5 ${
                 menuAbierto === 'velocidad' ? '' : 'hidden'
               }`}
               onClick={(e) => e.stopPropagation()}
@@ -862,7 +937,7 @@ export default function ControlesVideo({
                   key={v}
                   role="menuitemradio"
                   aria-checked={velocidad === v}
-                  className="block w-full cursor-pointer rounded-[2px] border-0 bg-transparent px-[0.7rem] py-[0.4rem] text-left text-paso-1 hover:bg-sala-700 aria-checked:font-semibold aria-checked:text-ambar"
+                  className="block w-full cursor-pointer rounded-[2px] border-0 bg-transparent px-[0.7rem] py-[0.4rem] text-left text-sm hover:bg-tarjeta aria-checked:font-semibold aria-checked:text-acento"
                   onClick={() => cambiarVelocidad(v)}
                 >
                   {v === 1 ? 'Normal' : `${v}×`}

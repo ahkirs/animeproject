@@ -36,7 +36,7 @@ export default function VaciarHistorial({
 
   if (error) {
     return (
-      <p role="alert" className="text-paso-0 font-semibold text-rojo">
+      <p role="alert" className="text-xs font-semibold text-error">
         {error}
       </p>
     )
@@ -47,7 +47,7 @@ export default function VaciarHistorial({
       <button
         type="button"
         onClick={() => setConfirmando(true)}
-        className="cursor-pointer border-0 bg-transparent p-0 text-paso-0 font-semibold tracking-[0.06em] text-hueso-45 uppercase transition-colors duration-200 ease-sal hover:text-rojo"
+        className="cursor-pointer border-0 bg-transparent p-0 text-xs font-semibold tracking-[0.06em] text-tinta-tenue uppercase transition-colors duration-200 ease-sal hover:text-error"
       >
         Borrar historial
       </button>
@@ -55,8 +55,8 @@ export default function VaciarHistorial({
   }
 
   return (
-    <span className="flex flex-wrap items-center gap-e2 text-paso-0">
-      <span className="text-hueso-70">
+    <span className="flex flex-wrap items-center gap-3 text-xs">
+      <span className="text-tinta-apagada">
         ¿Borrar {cuantos === 1 ? 'el episodio' : `los ${cuantos} episodios`}? No se
         puede deshacer.
       </span>
@@ -64,7 +64,7 @@ export default function VaciarHistorial({
         type="button"
         onClick={borrar}
         disabled={pendiente}
-        className="cursor-pointer rounded-radio border border-rojo/50 bg-rojo/12 px-[0.7rem] py-[0.2rem] font-semibold text-hueso transition-colors duration-200 ease-sal hover:bg-rojo/20 disabled:cursor-wait disabled:opacity-60"
+        className="cursor-pointer rounded-radio border border-error/50 bg-error/12 px-[0.7rem] py-[0.2rem] font-semibold text-tinta transition-colors duration-200 ease-sal hover:bg-error/20 disabled:cursor-wait disabled:opacity-60"
       >
         {pendiente ? 'Borrando…' : 'Sí, borrar'}
       </button>
@@ -72,7 +72,7 @@ export default function VaciarHistorial({
         type="button"
         onClick={() => setConfirmando(false)}
         disabled={pendiente}
-        className="cursor-pointer border-0 bg-transparent p-0 font-semibold text-hueso-45 transition-colors duration-200 ease-sal hover:text-hueso"
+        className="cursor-pointer border-0 bg-transparent p-0 font-semibold text-tinta-tenue transition-colors duration-200 ease-sal hover:text-tinta"
       >
         Cancelar
       </button>

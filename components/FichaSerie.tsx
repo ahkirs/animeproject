@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import Lamina from './Lamina'
 import Icono from './Icono'
 import { colorDeObra } from '@/lib/color'
-import type { Arte, EstadoEmision } from '@/lib/types'
+import type { Arte } from '@/lib/types'
 
 /** Marco de una carátula: 2:3 por defecto, 16:9 si es panorámica.
  *  Se usa suelto donde hace falta el marco sin la tarjeta entera. */
@@ -36,13 +36,17 @@ interface Props {
   arte: Arte | null | undefined
   /** Id canónico. De él sale el color de la obra para el hover. */
   id?: string
-  /** Píldora de estado. Solo se pinta si se conoce: el catálogo devuelve
-   *  `status` a nulo y no hay que inventarlo. */
-  estado?: EstadoEmision
+  /** Géneros. Se pintan los dos primeros: con tres, la línea no cabe en los
+   *  140px de la tarjeta pequeña y se corta por la mitad de una palabra. */
+  generos?: string[]
+  /** Año de estreno. El catálogo lo devuelve a nulo y solo llega con ficha,
+   *  así que se omite cuando falta en vez de escribir un hueco. */
+  anio?: number | null
   /** Número de episodios, si se sabe. */
   episodios?: number
-  /** Dato suelto para cuando no hay ni estado ni episodios: el tipo de
-   *  obra («Película», «OVA»), que sí llega siempre. */
+  /** Tipo de obra («TV», «Película», «OVA»). Es lo único que el catálogo
+   *  devuelve siempre, así que abre la línea cuando no hay géneros: sin él,
+   *  en /explorar la línea entera se quedaría vacía. */
   etiqueta?: string
   /** Lo que va en la esquina de la carátula al pasar por encima: guardar
    *  en la lista. Se pasa desde fuera porque necesita sesión y acciones
@@ -50,86 +54,82 @@ interface Props {
   accion?: ReactNode
 }
 
-/** Tarjeta de una obra dentro de un riel o una rejilla.
- *
- *  Ancho fijo por diseño, no fluido: en un riel, las columnas elásticas
- *  hacen que cada fila tenga tarjetas de un tamaño distinto según cuántas
- *  quepan, y la página deja de tener una retícula reconocible. */
+/** Tarjeta de una obra dentro de un riel o una rejilla. Clon de la
+ *  tarjeta de Shiroko, con el grupo `group/card` y el color de la obra
+ *  en `--color-obra` (ahí es `--media-color`). */
 export default function FichaSerie({
   href,
   titulo,
   arte,
   id,
-  estado,
+  generos,
+  anio,
   episodios,
   etiqueta,
   accion,
 }: Props) {
   const color = id ? colorDeObra(id) : undefined
 
+  /* Una sola línea con todo lo que se sabe, separado por puntos medios. Se
+     construye filtrando en vez de encadenando condicionales en el marcado:
+     así el separador nunca queda suelto al principio ni al final cuando la
+     API no manda el año, que es lo normal fuera de las obras con ficha. */
+  const generosVisibles = (generos ?? []).slice(0, 2)
+  const meta = [
+    ...(generosVisibles.length > 0 ? generosVisibles : [etiqueta]),
+    anio != null ? String(anio) : null,
+    episodios ? `${episodios} eps` : null,
+  ].filter(Boolean) as string[]
+
   return (
     <div
-      className="group/ficha w-[140px] shrink-0 xs:w-[160px] lg:w-[180px]"
+      className="group/card transition-opacity duration-200"
       style={color ? ({ '--color-obra': color } as React.CSSProperties) : undefined}
     >
-      <Link href={href} className="flex flex-col gap-2 no-underline">
-        {/* Crece un 2 % al pasar por encima. Es poquísimo y tiene que serlo:
-            en una fila de carátulas pegadas, un salto mayor empuja ópticamente
-            a las vecinas y la fila entera parece moverse. */}
-        <div className="relative h-[200px] w-full overflow-hidden rounded-radio bg-tarjeta transition-transform duration-200 ease-out group-hover/ficha:scale-[1.02] xs:h-[220px] lg:h-[260px]">
-          {/* El hover lo lleva la propia imagen —apagarse y bajar el
-              brillo—, como en la referencia: así se funde con el bloque
-              de texto que se enciende debajo. */}
+      <Link
+        href={href}
+        className="relative flex w-[140px] shrink-0 cursor-pointer flex-col gap-2 text-start xs:w-[160px] lg:w-[180px]"
+      >
+        <div className="relative z-20 h-[200px] w-[140px] shrink-0 overflow-hidden rounded bg-tarjeta xs:h-[220px] xs:w-[160px] lg:h-[260px] lg:w-[180px]">
+          {/* La carátula no se apaga al pasar por encima. El realce lo lleva
+              el texto de abajo, que se tiñe del color de la obra: oscurecer
+              además el arte deja la tarjeta más apagada que sus vecinas justo
+              cuando se está mirando. */}
           <Lamina
             arte={arte}
-            className="size-full object-cover transition-all duration-200 ease-out group-hover/ficha:opacity-75 group-hover/ficha:brightness-[0.7]"
+            className="size-full object-cover transition-all duration-200 ease-out"
           />
 
           {/* Guardar en ver después. Aparece al pasar por encima con la
-              misma curva de la referencia: se encoge y se funde hasta
-              que la tarjeta se observa, y al hover propio crece. */}
-          <div className="absolute top-2 right-2 z-20 scale-75 opacity-0 transition-all duration-200 ease-out group-hover/ficha:scale-100 group-hover/ficha:opacity-100 group-hover/ficha:text-(--color-obra) focus-within:scale-100 focus-within:opacity-100 [@media(hover:none)]:opacity-100 [@media(hover:none)]:scale-100">
+              misma animación de la tarjeta de Shiroko: fundido y
+              encogido hasta que la tarjeta se observa, y al hover propio
+              crece. */}
+          <div className="absolute top-2 right-2 z-20 opacity-0 scale-75 transition-all duration-200 ease-out group-hover/card:scale-100 group-hover/card:opacity-100 focus-within:scale-100 focus-within:opacity-100 [@media(hover:none)]:opacity-100 [@media(hover:none)]:scale-100">
             {accion ?? (
-              <span className="pointer-events-none grid size-7 place-items-center rounded-full bg-fondo shadow-[0_2px_10px_rgb(0_0_0/0.4)]">
+              <span className="pointer-events-none flex size-7 items-center justify-center rounded-full bg-fondo shadow group-hover/card:text-(--color-obra)">
                 <Icono nombre="mas" tam={15} />
               </span>
             )}
           </div>
         </div>
 
-        {/* Título con el interlineado de la referencia y el tinte al
-            color de la obra al pasar por encima. */}
-        <h3
-          className="tinte-obra line-clamp-2 text-sm leading-6 font-semibold text-balance text-tinta"
-          title={titulo}
-        >
-          {titulo}
-        </h3>
+        {/* Título y píldoras: todo el bloque se tiñe del color de la
+            obra al pasar por encima, como el de la referencia. */}
+        <div className="pointer-events-none flex w-full flex-col transition-all duration-200 ease-out group-hover/card:text-(--color-obra)">
+          {/* Una línea y puntos suspensivos. Con dos líneas, las tarjetas de
+              una fila acaban con el bloque de texto a alturas distintas según
+              lo largo que sea cada título, y la fila pierde su base común.
+              El título entero sigue estando en el `title`. */}
+          <p className="truncate text-sm leading-6 font-semibold" title={titulo}>
+            {titulo}
+          </p>
 
-        {(estado || episodios || etiqueta) && (
-          <div className="flex flex-wrap items-center gap-2 pt-2">
-            {estado === 'en-emision' && (
-              <span className="pill-obra rounded bg-exito/20 px-2 py-0.5 text-[10px] font-medium text-exito xs:text-xs">
-                En emisión
-              </span>
-            )}
-            {estado === 'finalizada' && (
-              <span className="pill-obra rounded bg-apagado/60 px-2 py-0.5 text-[10px] font-medium text-tinta-apagada xs:text-xs">
-                Completa
-              </span>
-            )}
-            {episodios ? (
-              <span className="pill-obra rounded bg-apagado/60 px-2 py-0.5 text-[10px] font-medium text-tinta-apagada cifras xs:text-xs">
-                {episodios} ep
-              </span>
-            ) : null}
-            {!estado && !episodios && etiqueta && (
-              <span className="pill-obra rounded bg-apagado/60 px-2 py-0.5 text-[10px] font-medium text-tinta-apagada xs:text-xs">
-                {etiqueta}
-              </span>
-            )}
-          </div>
-        )}
+          {meta.length > 0 && (
+            <p className="truncate text-xs text-tinta-apagada">
+              {meta.join(' · ')}
+            </p>
+          )}
+        </div>
       </Link>
     </div>
   )

@@ -78,8 +78,13 @@ function Pastilla({ children }: { children: ReactNode }) {
 export default function CarruselDestacado({ slides }: { slides: Diapositiva[] }) {
   const [indice, setIndice] = useState(0)
   const [pausado, setPausado] = useState(false)
+  const [mudo, setMudo] = useState(true)
   const [conTrailer, setConTrailer] = useState(false)
   const temporizador = useRef<number | null>(null)
+
+  // Al cambiar de obra, el tráiler vuelve a arrancar silenciado: nadie
+  // quiere que un autoplay con sonido le salte encima.
+  useEffect(() => setMudo(true), [indice])
 
   const ir = useCallback(
     (n: number) => setIndice((n + slides.length) % slides.length),
@@ -147,7 +152,7 @@ export default function CarruselDestacado({ slides }: { slides: Diapositiva[] })
               title=""
               aria-hidden="true"
               tabIndex={-1}
-              src={`https://www.youtube-nocookie.com/embed/${video}?autoplay=1&mute=1&controls=0&loop=1&playlist=${video}&playsinline=1&modestbranding=1&rel=0`}
+              src={`https://www.youtube-nocookie.com/embed/${video}?autoplay=1&mute=${mudo ? 1 : 0}&controls=0&loop=1&playlist=${video}&playsinline=1&modestbranding=1&rel=0`}
               allow="autoplay; encrypted-media"
               // El vídeo se recorta para cubrir: 16:9 sobre una caja de
               // otra proporción deja franjas negras si no se sobredimensiona.
@@ -170,7 +175,7 @@ export default function CarruselDestacado({ slides }: { slides: Diapositiva[] })
 
         <h1
           key={actual.id}
-          className="animar-entrada font-titulo text-3xl leading-[1.05] font-extrabold text-balance lg:text-5xl xl:text-6xl"
+          className="animar-entrada font-titulo text-[30px] leading-10 font-extrabold text-balance lg:text-4xl xl:leading-14 xl:text-5xl"
         >
           {actual.titulo}
         </h1>
@@ -208,18 +213,28 @@ export default function CarruselDestacado({ slides }: { slides: Diapositiva[] })
         <div className="mt-6 flex items-center gap-2">
           <Link
             href={actual.hrefVer}
-            className="inline-flex h-10 items-center gap-2 rounded-full bg-primario px-6 text-sm font-semibold text-primario-tinta no-underline transition-opacity duration-200 ease-sal hover:opacity-85"
+            className="inline-flex h-9 items-center gap-2 rounded-full bg-primario px-4 text-base font-semibold text-primario-tinta no-underline transition-colors duration-200 ease-sal hover:bg-primario/90"
           >
-            <Icono nombre="play" tam={16} />
+            <Icono nombre="play" tam={14} />
             Ver ahora
           </Link>
           <Link
             href={actual.hrefFicha}
-            className="inline-flex h-10 items-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 text-sm font-semibold text-white no-underline backdrop-blur-sm transition-colors duration-200 ease-sal hover:bg-white/20"
+            aria-label={`Añadir ${actual.titulo}`}
+            className="grid size-9 place-items-center rounded-full bg-white/10 text-tinta no-underline backdrop-blur-sm transition-colors duration-200 ease-sal hover:bg-white/20"
           >
-            <Icono nombre="info" tam={16} />
-            Más información
+            <Icono nombre="mas" tam={18} />
           </Link>
+          {video && (
+            <button
+              type="button"
+              aria-label={mudo ? 'Quitar el silencio del tráiler' : 'Silenciar el tráiler'}
+              onClick={() => setMudo((m) => !m)}
+              className="grid size-9 place-items-center rounded-full bg-white/10 text-tinta backdrop-blur-sm transition-colors duration-200 ease-sal hover:bg-white/20"
+            >
+              <Icono nombre={mudo ? 'silencio' : 'volumen'} tam={18} />
+            </button>
+          )}
         </div>
       </div>
 

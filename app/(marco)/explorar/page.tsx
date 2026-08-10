@@ -202,7 +202,8 @@ export default async function Explorar({
               href={`/serie/${s.id}`}
               titulo={s.titulo}
               arte={s.lamina}
-              estado={s.estado}
+              generos={s.generos}
+              anio={s.anio}
               episodios={totalEpisodios(s) || undefined}
               etiqueta={s.genero}
             />

@@ -21,13 +21,13 @@ function FichaNumerada({ serie, puesto }: { serie: Serie; puesto: number }) {
   return (
     <Link
       href={`/serie/${serie.id}`}
-      className="group/ficha block w-[190px] shrink-0 no-underline lg:w-[230px]"
+      className="group/card block w-[190px] shrink-0 no-underline lg:w-[230px]"
       style={{ '--color-obra': colorDeObra(serie.id) } as React.CSSProperties}
     >
       <div className="flex items-end gap-1">
         <span
           aria-hidden="true"
-          className="-mb-2 shrink-0 font-titulo text-[clamp(3.2rem,6vw,4.6rem)] leading-[0.72] font-extrabold tracking-[-0.06em] text-apagado transition-colors duration-300 ease-sal group-hover/ficha:text-tinta-tenue cifras"
+          className="-mb-2 shrink-0 font-titulo text-[clamp(3.2rem,6vw,4.6rem)] leading-[0.72] font-extrabold tracking-[-0.06em] text-apagado transition-colors duration-300 ease-sal group-hover/card:text-tinta-tenue cifras"
         >
           {puesto}
         </span>
@@ -35,7 +35,7 @@ function FichaNumerada({ serie, puesto }: { serie: Serie; puesto: number }) {
         <div className="relative aspect-2/3 min-w-0 flex-1 overflow-hidden rounded-radio bg-tarjeta">
           <Lamina
             arte={serie.lamina}
-            className="size-full object-cover transition-all duration-200 ease-out group-hover/ficha:opacity-75 group-hover/ficha:brightness-[0.7]"
+            className="size-full object-cover transition-all duration-200 ease-out group-hover/card:opacity-75 group-hover/card:brightness-[0.7]"
           />
         </div>
       </div>
@@ -81,7 +81,8 @@ export default function FilaPortada({
                 href={`/serie/${s.id}`}
                 titulo={s.titulo}
                 arte={s.lamina}
-                estado={s.estado}
+                generos={s.generos}
+                anio={s.anio}
                 episodios={s.totalEpisodios || undefined}
                 etiqueta={s.genero}
               />

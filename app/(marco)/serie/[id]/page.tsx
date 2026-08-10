@@ -493,7 +493,8 @@ export default async function Ficha({
                   href={`/serie/${s.id}`}
                   titulo={s.titulo}
                   arte={s.lamina}
-                  estado={s.estado}
+                  generos={s.generos}
+                  anio={s.anio}
                   episodios={s.totalEpisodios || undefined}
                   etiqueta={s.genero}
                 />

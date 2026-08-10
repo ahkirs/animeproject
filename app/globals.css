@@ -490,7 +490,7 @@
   transition: color 200ms var(--ease-sal);
 }
 
-.group\/ficha:hover .tinte-obra {
+.group\/card:hover .tinte-obra {
   color: var(--color-obra, var(--color-tinta));
 }
 
@@ -502,7 +502,7 @@
   transition: background-color 200ms var(--ease-sal);
 }
 
-.group\/ficha:hover .pill-obra {
+.group\/card:hover .pill-obra {
   background-color: color-mix(in srgb, var(--color-obra, var(--color-tinta)) 10%, transparent);
 }
 

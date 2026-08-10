@@ -70,7 +70,7 @@ async function SeguirViendo() {
           <Link
             key={c.serieId}
             href={`/serie/${c.serieId}`}
-            className="group/ficha block w-[240px] shrink-0 no-underline lg:w-[300px]"
+            className="group/card block w-[240px] shrink-0 no-underline lg:w-[300px]"
           >
             <Cartel arte={c.lamina} ancho>
               <span className="absolute inset-0 grid place-items-center bg-black/30 opacity-0 transition-opacity duration-200 ease-sal group-hover/ficha:opacity-100">

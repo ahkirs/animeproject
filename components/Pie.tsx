@@ -1,83 +1,55 @@
-import Link from 'next/link'
-import Marca from './Marca'
+'use client'
 
 /* El pie.
 
-   Vive dentro del panel con scroll del marco, así que se ve al final de
-   cualquier página sin que ninguna tenga que montarlo. Va callado a
-   propósito: en un sitio donde el contenido es la carátula, el pie es
-   señalización, no una sección más. */
+   La barra delgada de abajo del todo: cuatro enlaces legales separados por
+   puntos y el copyright empujado a la derecha. Es la versión de KUROBA del
+   pie de Shiroko — misma idea (enlaces + copyright en una línea), traducida
+   a los tokens del sistema.
 
-const COLUMNAS: { titulo: string; enlaces: { texto: string; href: string }[] }[] = [
-  {
-    titulo: 'Catálogo',
-    enlaces: [
-      { texto: 'Explorar', href: '/explorar' },
-      { texto: 'En emisión', href: '/explorar?estado=emision' },
-      { texto: 'Completas', href: '/explorar?estado=completa' },
-    ],
-  },
-  {
-    titulo: 'Cuenta',
-    enlaces: [
-      { texto: 'Mi lista', href: '/mi-lista' },
-      { texto: 'Notificaciones', href: '/notificaciones' },
-      { texto: 'Ajustes', href: '/cuenta' },
-    ],
-  },
-  {
-    titulo: 'Ayuda',
-    enlaces: [
-      { texto: 'Accesibilidad', href: '#' },
-      { texto: 'Aviso legal', href: '#' },
-      { texto: 'Privacidad', href: '#' },
-    ],
-  },
+   Vive dentro del panel con scroll del marco. Va «pegado» al fondo con
+   `sticky bottom-0`, así que se ve siempre sin que ninguna página tenga que
+   montarlo. Es de cliente porque marca el enlace activo con `usePathname`,
+   como hacen el riel y la barra de móvil. */
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+
+const ENLACES = [
+  { texto: 'Privacidad', href: '/privacidad' },
+  { texto: 'Términos', href: '/terminos' },
+  { texto: 'DMCA', href: '/dmca' },
+  { texto: 'Changelog', href: '/changelog' },
 ]
 
-const AVISO_POR_DEFECTO =
-  'KUROBA no aloja ningún vídeo. El catálogo, las fichas y los enlaces de reproducción se obtienen de proveedores externos y se enlazan tal cual; los derechos de cada obra pertenecen a sus autores y licenciatarios.'
+export default function Pie() {
+  const ruta = usePathname()
 
-export default function Pie({
-  /** Texto legal, distinto en el reproductor. */
-  aviso = AVISO_POR_DEFECTO,
-}: {
-  aviso?: string
-}) {
   return (
-    <footer className="mt-16 border-t border-borde px-bleed pt-10 pb-8 text-sm text-tinta-tenue">
-      <div className="mx-auto flex max-w-[1600px] flex-wrap items-start justify-between gap-8">
-        <div>
-          <Marca />
-          <p className="mt-3 max-w-[34ch]">
-            Catálogo de anime en español, con lo que está emitiéndose ahora
-            mismo.
-          </p>
-        </div>
-
-        {COLUMNAS.map((col) => (
-          <div key={col.titulo}>
-            <h3 className="mb-3 text-xs font-bold tracking-[0.1em] text-tinta-apagada uppercase">
-              {col.titulo}
-            </h3>
-            <ul className="grid list-none gap-[0.45rem] p-0">
-              {col.enlaces.map((e) => (
-                <li key={e.texto}>
-                  <Link
-                    href={e.href}
-                    className="no-underline transition-colors duration-150 ease-sal hover:text-tinta"
-                  >
-                    {e.texto}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+    <footer className="flex flex-wrap items-center gap-x-2.5 gap-y-1 border-t border-borde bg-fondo px-bleed py-1 text-sm text-tinta-tenue md:sticky md:bottom-0 md:z-30">
+      <nav aria-label="Legal" className="flex flex-wrap items-center gap-2.5">
+        {ENLACES.map((e, i) => (
+          <span key={e.href} className="flex items-center gap-2.5">
+            {i > 0 && (
+              <span
+                aria-hidden="true"
+                className="size-[3px] rounded-full bg-tinta-tenue/60"
+              />
+            )}
+            <Link
+              href={e.href}
+              aria-current={ruta === e.href ? 'page' : undefined}
+              className={`no-underline transition-colors duration-150 ease-sal ${
+                ruta === e.href ? 'text-tinta' : 'hover:text-tinta'
+              }`}
+            >
+              {e.texto}
+            </Link>
+          </span>
         ))}
-      </div>
-
-      <p className="mx-auto mt-8 max-w-[1600px] border-t border-borde pt-5 text-xs leading-relaxed">
-        {aviso}
+      </nav>
+      <p className="ml-auto hidden whitespace-nowrap sm:block">
+        © 2026 KUROBA. Todos los derechos reservados.
       </p>
     </footer>
   )

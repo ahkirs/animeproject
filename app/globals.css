@@ -483,6 +483,70 @@
   }
 }
 
+/* El cuerpo de las páginas de documento (legales y registro de cambios).
+   No es la `prose` de Tailwind: es un estilo mínimo a propósito, porque
+   estos documentos son la única vez que la web escribe párrafos largos.
+   Los títulos vuelven a Karla extrabold y el cuerpo a la tinta de siempre;
+   lo único nuevo es la jerarquía de encabezados y el aire entre bloques. */
+.prose-doc {
+  color: var(--color-tinta-cuerpo);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
+
+.prose-doc h2 {
+  font-family: var(--font-titulo);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-tinta);
+  letter-spacing: -0.01em;
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-doc h3 {
+  font-family: var(--font-titulo);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-tinta);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-doc p {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-doc ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-doc li {
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+}
+
+.prose-doc strong {
+  color: var(--color-tinta);
+  font-weight: 600;
+}
+
+.prose-doc a {
+  color: var(--color-tinta);
+  text-decoration: underline;
+  text-underline-offset: 0.22em;
+  text-decoration-thickness: 1px;
+  transition: color 200ms var(--ease-sal);
+}
+
+.prose-doc a:hover {
+  color: var(--color-acento);
+}
+
 /* Tinta apagada que se ilumina con el color de la obra al pasar por
    encima. El color lo inyecta cada tarjeta en --color-obra
    (ver lib/color.ts). */

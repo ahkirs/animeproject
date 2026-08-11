@@ -44,7 +44,7 @@ export default function MarcoCuenta({ titulo, entradilla, children, pie }: Props
 
           <p className="mt-8 border-t border-borde pt-5 text-sm text-tinta-tenue">
             {pie.texto}{' '}
-            <Link href={pie.href} className="font-semibold text-acento hover:underline">
+            <Link href={pie.href} className="font-semibold text-primario hover:underline">
               {pie.enlace}
             </Link>
           </p>

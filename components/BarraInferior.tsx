@@ -54,7 +54,7 @@ export default function BarraInferior({
                 href={d.href}
                 aria-current={activo ? 'page' : undefined}
                 className={`flex flex-col items-center gap-1 py-2 text-[0.625rem] font-medium no-underline transition-colors duration-200 ease-sal ${
-                  activo ? 'text-acento' : 'text-tinta-tenue'
+                  activo ? 'text-primario' : 'text-tinta-tenue'
                 }`}
               >
                 <Icono nombre={d.icono} tam={20} />

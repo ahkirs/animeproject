@@ -59,7 +59,7 @@ export default function AjustesSesiones({ sesiones }: { sesiones: SesionActiva[]
               <p className="truncate text-sm font-medium text-tinta">
                 {s.dispositivo}
                 {s.actual && (
-                  <span className="ml-2 rounded-full bg-acento-tenue px-2 py-0.5 text-xs font-semibold text-acento">
+                  <span className="ml-2 rounded-full bg-primario/10 px-2 py-0.5 text-xs font-semibold text-primario">
                     esta
                   </span>
                 )}

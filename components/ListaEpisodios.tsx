@@ -72,7 +72,7 @@ function TarjetaEpisodio({
 
       {/* Info */}
       <div className="flex min-w-0 flex-col justify-center gap-[4px]">
-        <h3 className="line-clamp-1 text-sm font-bold leading-snug tracking-[-0.01em] text-acento transition-colors duration-200 ease-sal group-hover:text-acento">
+        <h3 className="line-clamp-1 text-sm font-bold leading-snug tracking-[-0.01em] text-tinta transition-colors duration-200 ease-sal group-hover:text-primario">
           {tituloFormateado(ep)}
         </h3>
 
@@ -180,7 +180,7 @@ export default function ListaEpisodios({
       {episodios.length > 0 && (
         <p className="mt-3 text-xs text-tinta-tenue">
           Mostrando{' '}
-          <span className="font-semibold text-acento">
+          <span className="font-semibold text-primario">
             {mostrando === totalStr
               ? totalStr
               : `${mostrando} de ${totalStr}`}

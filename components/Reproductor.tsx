@@ -356,7 +356,7 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
             <div className="flex flex-col items-center gap-5">
               <span
                 aria-hidden="true"
-                className="size-9 animate-spin rounded-full border-[3px] border-borde-vivo border-t-acento"
+                className="size-9 animate-spin rounded-full border-[3px] border-borde-vivo border-t-primario"
               />
               <p className="text-sm font-semibold text-tinta">
                 Resolviendo reproducción…
@@ -377,7 +377,7 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
             <div className="flex flex-col items-center gap-5">
               <span
                 aria-hidden="true"
-                className="size-9 animate-spin rounded-full border-[3px] border-borde-vivo border-t-acento"
+                className="size-9 animate-spin rounded-full border-[3px] border-borde-vivo border-t-primario"
               />
 <p className="text-sm font-semibold text-tinta">
                 Este servidor no respondió, probando otro…
@@ -416,7 +416,7 @@ const servidores = variante === 'SUB' ? servidoresSub : servidoresDub
         {/* Aviso de cambio automático de servidor */}
         {aviso && (
           <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center p-5">
-            <p className="rounded-full border border-acento/40 bg-fondo/88 px-5 py-1.5 text-xs font-semibold text-acento backdrop-blur-[4px]">
+            <p className="rounded-full border border-primario/40 bg-fondo/88 px-5 py-1.5 text-xs font-semibold text-primario backdrop-blur-[4px]">
               {aviso}
             </p>
           </div>

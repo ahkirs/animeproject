@@ -603,7 +603,7 @@ export default function ControlesVideo({
           <span
             role="status"
             aria-label="Cargando"
-            className="size-[54px] rounded-full border-[3px] border-tinta/22 border-t-acento"
+            className="size-[54px] rounded-full border-[3px] border-tinta/22 border-t-primario"
           />
         ) : (
           !reproduciendo && (
@@ -750,11 +750,11 @@ export default function ControlesVideo({
               style={{ width: `${progresoBuffer}%` }}
             />
             <div
-              className="absolute inset-y-0 left-0 rounded-[99px] bg-acento"
+              className="absolute inset-y-0 left-0 rounded-[99px] bg-primario"
               style={{ width: `${progreso}%` }}
             />
             <div
-              className="absolute top-1/2 size-[14px] -translate-x-1/2 -translate-y-1/2 scale-0 rounded-[99px] bg-acento transition-transform duration-150 ease-sal group-hover/linea:scale-100"
+              className="absolute top-1/2 size-[14px] -translate-x-1/2 -translate-y-1/2 scale-0 rounded-[99px] bg-primario transition-transform duration-150 ease-sal group-hover/linea:scale-100"
               style={{ left: `${progreso}%` }}
             />
             {saltarCabecera && duracion > 0 && (
@@ -903,7 +903,7 @@ export default function ControlesVideo({
                     key={c.etiqueta}
                     role="menuitemradio"
                     aria-checked={c.etiqueta === calidades![0]?.etiqueta}
-                    className="block w-full cursor-pointer rounded-[2px] border-0 bg-transparent px-[0.7rem] py-[0.4rem] text-left text-sm hover:bg-tarjeta aria-checked:font-semibold aria-checked:text-acento"
+                    className="block w-full cursor-pointer rounded-[2px] border-0 bg-transparent px-[0.7rem] py-[0.4rem] text-left text-sm hover:bg-tarjeta aria-checked:font-semibold aria-checked:text-primario"
                     onClick={() => cambiarCalidad(c, i)}
                   >
                     {c.etiqueta}
@@ -937,7 +937,7 @@ export default function ControlesVideo({
                   key={v}
                   role="menuitemradio"
                   aria-checked={velocidad === v}
-                  className="block w-full cursor-pointer rounded-[2px] border-0 bg-transparent px-[0.7rem] py-[0.4rem] text-left text-sm hover:bg-tarjeta aria-checked:font-semibold aria-checked:text-acento"
+                  className="block w-full cursor-pointer rounded-[2px] border-0 bg-transparent px-[0.7rem] py-[0.4rem] text-left text-sm hover:bg-tarjeta aria-checked:font-semibold aria-checked:text-primario"
                   onClick={() => cambiarVelocidad(v)}
                 >
                   {v === 1 ? 'Normal' : `${v}×`}

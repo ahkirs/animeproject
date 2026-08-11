@@ -236,7 +236,7 @@ export default async function Ficha({
                   <span className="line-clamp-2 text-sm leading-relaxed text-tinta-apagada group-open/sinopsis:line-clamp-none">
                     {sinopsis}
                   </span>
-                  <span className="mt-1 inline-block text-xs font-semibold text-acento">
+                  <span className="mt-1 inline-block text-xs font-semibold text-primario">
                     <span className="group-open/sinopsis:hidden">Leer más</span>
                     <span className="hidden group-open/sinopsis:inline">Leer menos</span>
                   </span>
@@ -312,7 +312,7 @@ export default async function Ficha({
                     <span className="line-clamp-2 text-sm leading-relaxed text-tinta-apagada group-open/sinopsis:line-clamp-none">
                       {sinopsis}
                     </span>
-                    <span className="mt-1 inline-block text-xs font-semibold text-acento">
+                    <span className="mt-1 inline-block text-xs font-semibold text-primario">
                       <span className="group-open/sinopsis:hidden">Leer más</span>
                       <span className="hidden group-open/sinopsis:inline">Leer menos</span>
                     </span>

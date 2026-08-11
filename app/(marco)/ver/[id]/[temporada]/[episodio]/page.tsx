@@ -88,7 +88,7 @@ export default async function PaginaVer({ params }: { params: Params }) {
           <div className="px-2 pt-5 lg:px-4">
             <Link
               href={`/serie/${serie.id}`}
-              className="text-sm font-semibold text-acento no-underline hover:underline"
+              className="text-sm font-semibold text-primario no-underline hover:underline"
             >
               {serie.titulo}
             </Link>
@@ -180,14 +180,14 @@ export default async function PaginaVer({ params }: { params: Params }) {
                       <Lamina arte={ep.lamina} />
                       {esActual && (
                         <span className="absolute inset-0 grid place-items-center bg-black/50">
-                          <Icono nombre="play" tam={16} className="text-acento" />
+                          <Icono nombre="play" tam={16} className="text-primario" />
                         </span>
                       )}
                     </span>
                     <span className="min-w-0">
                       <b
                         className={`block truncate text-sm font-semibold ${
-                          esActual ? 'text-acento' : 'text-tinta'
+                          esActual ? 'text-primario' : 'text-tinta'
                         }`}
                       >
                         E{String(ep.numero).padStart(2, '0')} · {ep.titulo}

@@ -68,7 +68,7 @@ export default function AjustesPerfil({
           maxLength={300}
           value={valores.bio}
           onChange={(e) => setValores((v) => ({ ...v, bio: e.target.value }))}
-          className="w-full resize-none rounded-radio border border-borde bg-fondo px-3 py-2.5 text-base text-tinta transition-colors duration-200 ease-sal outline-none placeholder:text-tinta-tenue focus:border-acento"
+          className="w-full resize-none rounded-radio border border-borde bg-fondo px-3 py-2.5 text-base text-tinta transition-colors duration-200 ease-sal outline-none placeholder:text-tinta-tenue focus:border-primario"
         />
         <p className="text-xs text-tinta-tenue cifras">
           {300 - valores.bio.length} caracteres

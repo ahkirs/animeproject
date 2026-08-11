@@ -48,7 +48,7 @@ export default async function Comentarios({
           <FormularioComentario animeId={animeId} episodeId={episodeId} />
         ) : (
           <p className="rounded-radio border border-borde bg-tarjeta px-4 py-3 text-sm text-tinta-apagada">
-            <Link href="/acceder" className="font-semibold text-acento">
+            <Link href="/acceder" className="font-semibold text-primario">
               Entra en tu cuenta
             </Link>{' '}
             para comentar.

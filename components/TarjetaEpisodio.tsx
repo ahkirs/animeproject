@@ -77,7 +77,7 @@ export default function TarjetaEpisodio({ vista }: { vista: VistaEpisodio }) {
         {hayDuracion && (
           <span className="absolute inset-x-0 bottom-0 h-[3px] bg-tinta/20">
             <span
-              className="block h-full bg-acento"
+              className="block h-full bg-primario"
               style={{ width: `${Math.round(fraccion * 100)}%` }}
             />
           </span>

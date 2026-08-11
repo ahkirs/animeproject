@@ -31,7 +31,7 @@ export default function Error({
         <div>
           <span
             aria-hidden="true"
-            className="mx-auto mb-5 grid size-14 place-items-center rounded-full border border-borde bg-tarjeta text-acento"
+            className="mx-auto mb-5 grid size-14 place-items-center rounded-full border border-borde bg-tarjeta text-primario"
           >
             <Icono nombre="info" tam={24} />
           </span>
@@ -48,7 +48,7 @@ export default function Error({
           <button
             type="button"
             onClick={() => retry()}
-            className="mt-6 inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-acento px-5 text-sm font-semibold text-acento-tinta transition-opacity duration-200 ease-sal hover:opacity-85"
+            className="mt-6 inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-primario px-5 text-sm font-semibold text-primario-tinta transition-opacity duration-200 ease-sal hover:opacity-85"
           >
             <Icono nombre="flecha" tam={16} />
             Volver a intentar

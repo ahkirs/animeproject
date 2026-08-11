@@ -74,7 +74,7 @@ async function SeguirViendo() {
           >
             <Cartel arte={c.lamina} ancho>
               <span className="absolute inset-0 grid place-items-center bg-black/30 opacity-0 transition-opacity duration-200 ease-sal group-hover/ficha:opacity-100">
-                <span className="grid size-12 place-items-center rounded-full bg-acento text-acento-tinta">
+                <span className="grid size-12 place-items-center rounded-full bg-primario text-primario-tinta">
                   <Icono nombre="play" tam={20} />
                 </span>
               </span>
@@ -83,7 +83,7 @@ async function SeguirViendo() {
                   debajo: así se lee como parte del fotograma. */}
               <span className="absolute inset-x-0 bottom-0 h-1 bg-black/50">
                 <span
-                  className="block h-full bg-acento"
+                  className="block h-full bg-tinta"
                   style={{ width: `${c.progreso}%` }}
                 />
               </span>

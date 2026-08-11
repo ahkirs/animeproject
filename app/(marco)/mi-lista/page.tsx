@@ -259,13 +259,13 @@ export default async function MiLista({
             <span>desde {alta}</span>
             <Link
               href={`/u/${p.username}`}
-              className="font-semibold text-tinta-apagada no-underline transition-colors duration-150 ease-sal hover:text-acento"
+              className="font-semibold text-tinta-apagada no-underline transition-colors duration-150 ease-sal hover:text-tinta"
             >
               Ver mi perfil público
             </Link>
             <Link
               href="/cuenta"
-              className="font-semibold text-tinta-apagada no-underline transition-colors duration-150 ease-sal hover:text-acento"
+              className="font-semibold text-tinta-apagada no-underline transition-colors duration-150 ease-sal hover:text-tinta"
             >
               Ajustes
             </Link>
@@ -281,13 +281,13 @@ export default async function MiLista({
           acción, así que se dice donde se ve y no escondido en un ajuste. */}
       {!p.isEmailVerified && (
         <p className="mb-6 flex flex-wrap items-center gap-2 rounded-radio border border-borde bg-tarjeta px-4 py-3 text-sm">
-          <Icono nombre="candado" tam={15} className="text-acento" />
+          <Icono nombre="candado" tam={15} className="text-tinta" />
           <span className="text-tinta-apagada">
             Tu correo todavía no está verificado.
           </span>
           <Link
             href="/cuenta"
-            className="font-semibold text-acento no-underline hover:underline"
+            className="font-semibold text-primario no-underline hover:underline"
           >
             Ir a los ajustes
           </Link>
@@ -308,7 +308,7 @@ export default async function MiLista({
               aria-current={activa ? 'page' : undefined}
               className={`-mb-px inline-flex items-baseline gap-2 border-b-2 px-4 py-3 text-sm font-medium no-underline transition-colors duration-200 ease-sal ${
                 activa
-                  ? 'border-acento text-tinta'
+                  ? 'border-primario text-tinta'
                   : 'border-transparent text-tinta-tenue hover:text-tinta'
               }`}
             >

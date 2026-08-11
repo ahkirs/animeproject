@@ -84,7 +84,7 @@ export default async function Notificaciones({
                   className={`mt-0.5 grid size-9 shrink-0 place-items-center rounded-full ${
                     n.leida
                       ? 'bg-apagado text-tinta-tenue'
-                      : 'bg-acento-tenue text-acento'
+                      : 'bg-primario/10 text-primario'
                   }`}
                 >
                   <Icono nombre={iconoDe(n.tipo)} tam={17} />
@@ -111,7 +111,7 @@ export default async function Notificaciones({
                 {!n.leida && (
                   <span
                     aria-label="Sin leer"
-                    className="mt-2 size-2 shrink-0 rounded-full bg-acento"
+                    className="mt-2 size-2 shrink-0 rounded-full bg-primario"
                   />
                 )}
               </>

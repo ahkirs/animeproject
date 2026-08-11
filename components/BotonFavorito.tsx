@@ -62,7 +62,7 @@ export default function BotonFavorito({
         compacto ? 'size-7' : 'size-10'
       } ${
         guardado
-          ? 'border-transparent bg-acento text-acento-tinta'
+          ? 'border-transparent bg-primario text-primario-tinta'
           : error
             ? 'border-error bg-tarjeta text-error'
             : 'border-borde bg-tarjeta text-tinta hover:border-borde-vivo hover:bg-apagado'

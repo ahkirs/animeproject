@@ -115,7 +115,7 @@ export default function BarraSuperior({
             {noLeidas > 0 && (
               <span
                 aria-hidden="true"
-                className="absolute top-1 right-1 size-1.5 rounded-full bg-acento ring-2 ring-fondo"
+                className="absolute top-1 right-1 size-1.5 rounded-full bg-primario ring-2 ring-fondo"
               />
             )}
           </Link>

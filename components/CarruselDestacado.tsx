@@ -18,7 +18,6 @@ import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import Lamina from './Lamina'
 import Icono from './Icono'
-import { colorDeObra } from '@/lib/color'
 import type { Arte, EstadoEmision } from '@/lib/types'
 
 export interface Diapositiva {
@@ -165,11 +164,7 @@ export default function CarruselDestacado({ slides }: { slides: Diapositiva[] })
       {/* --- Texto --- */}
       <div className="relative z-10 px-bleed pb-10 text-white lg:max-w-[62%]">
         <p className="mb-3 flex items-center gap-2 text-sm font-medium">
-          <span
-            aria-hidden="true"
-            className="grid size-5 place-items-center rounded-full"
-            style={{ background: colorDeObra(actual.id) }}
-          />
+          <span aria-hidden="true" className="size-5 rounded-full bg-red-500" />
           {indice + 1}.º en tendencia
         </p>
 

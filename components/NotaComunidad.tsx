@@ -79,7 +79,7 @@ export default function NotaComunidad({
                 {nota != null ? (
                   <>
                     Tu nota:{' '}
-                    <b className="font-semibold text-acento cifras">{nota}</b>{' '}
+                    <b className="font-semibold text-primario cifras">{nota}</b>{' '}
                     <span className="text-xs text-tinta-tenue">
                       (púlsala otra vez para quitarla)
                     </span>
@@ -106,7 +106,7 @@ export default function NotaComunidad({
                     aria-label={`Puntuar con un ${n}`}
                     className={`size-8 cursor-pointer rounded-radio border text-xs font-semibold transition-colors duration-150 cifras disabled:opacity-60 ${
                       n <= resaltado
-                        ? 'border-transparent bg-acento text-acento-tinta'
+                        ? 'border-transparent bg-primario text-primario-tinta'
                         : 'border-borde bg-fondo text-tinta-apagada hover:border-borde-vivo'
                     }`}
                   >

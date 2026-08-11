@@ -67,7 +67,7 @@ function Pastilla({
       aria-current={activa ? 'true' : undefined}
       className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium whitespace-nowrap no-underline transition-colors duration-200 ease-sal ${
         activa
-          ? 'border-transparent bg-acento text-acento-tinta'
+          ? 'border-transparent bg-primario text-primario-tinta'
           : 'border-borde bg-tarjeta text-tinta-apagada hover:border-borde-vivo hover:text-tinta'
       }`}
     >
@@ -186,7 +186,7 @@ export default async function Explorar({
         {hayFiltros && (
           <Link
             href="/explorar"
-            className="text-sm font-semibold text-tinta-apagada no-underline transition-colors duration-150 hover:text-acento"
+            className="text-sm font-semibold text-tinta-apagada no-underline transition-colors duration-150 hover:text-tinta"
           >
             Limpiar filtros
           </Link>

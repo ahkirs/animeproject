@@ -22,7 +22,7 @@ export default function Datos({ children }: { children: ReactNode[] }) {
 
 export function Nota({ valor }: { valor: number }) {
   return (
-    <span className="font-bold text-acento cifras">
+    <span className="font-bold text-primario cifras">
       {valor.toLocaleString('es-ES', { minimumFractionDigits: 1 })}
     </span>
   )

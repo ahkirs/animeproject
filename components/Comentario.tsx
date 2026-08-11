@@ -163,7 +163,7 @@ export default function Comentario({
               aria-pressed={meGusta}
               aria-label={meGusta ? 'Quitar me gusta' : 'Me gusta'}
               className={`${accion} ${
-                meGusta ? 'text-acento' : 'text-tinta-tenue hover:text-tinta'
+                meGusta ? 'text-primario' : 'text-tinta-tenue hover:text-tinta'
               } disabled:pointer-events-none disabled:opacity-50`}
             >
               <Icono nombre={meGusta ? 'estrella-llena' : 'estrella'} tam={14} />

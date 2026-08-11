@@ -24,7 +24,7 @@ export default function Marca({
       aria-label={soloIcono ? 'KUROBA — ir al inicio' : undefined}
       className={`inline-flex shrink-0 items-center gap-[0.5rem] font-titulo text-lg font-extrabold tracking-[-0.03em] no-underline ${className}`}
     >
-      <Icono nombre="cinta" tam={soloIcono ? 22 : 24} className="text-acento" />
+      <Icono nombre="cinta" tam={soloIcono ? 22 : 24} className="text-tinta" />
       {!soloIcono && 'KUROBA'}
     </Link>
   )
